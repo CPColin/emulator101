@@ -5,9 +5,11 @@
  execution belongs in the emulator."
 abstract class Opcode
         of noop // 00
+        | loadPairImmediateB // 01
         | decrementB // 05
         | moveImmediateB // 06
         | rotateAccumulatorLeft // 07
+        | moveImmediateC // 0e
         | loadPairImmediateD // 11
         | incrementPairD // 13
         | rotateAccumulatorRight // 0f
@@ -17,7 +19,9 @@ abstract class Opcode
         | loadPairImmediateH // 21
         | storeHLDirect // 22
         | incrementPairH // 23
+        | moveImmediateH // 26
         | decimalAdjust // 27
+        | doubleAddH // 29
         | loadHLDirect // 2a
         | decrementPairH // 2b
         | loadPairImmediateStackPointer // 31
@@ -115,6 +119,7 @@ abstract class Opcode
         | call // cd
         | popD // d1
         | jumpIfNoCarry // d2
+        | output // d3
         | pushD // d5
         | jumpIfCarry // da
         | input // db
@@ -140,9 +145,11 @@ abstract class Opcode
 }
 
 object noop extends Opcode(#00) {}
+object loadPairImmediateB extends Opcode(#01, 3) {}
 object decrementB extends Opcode(#05) {}
 object moveImmediateB extends Opcode(#06, 2) {}
 object rotateAccumulatorLeft extends Opcode(#07) {}
+object moveImmediateC extends Opcode(#0e, 2) {}
 object loadPairImmediateD extends Opcode(#11, 3) {}
 object incrementPairD extends Opcode(#13) {}
 object rotateAccumulatorRight extends Opcode(#0f) {}
@@ -152,7 +159,9 @@ object loadAccumulatorD extends Opcode(#1a) {}
 object loadPairImmediateH extends Opcode(#21, 3) {}
 object storeHLDirect extends Opcode(#22, 3) {}
 object incrementPairH extends Opcode(#23) {}
+object moveImmediateH extends Opcode(#26, 2) {}
 object decimalAdjust extends Opcode(#27) {}
+object doubleAddH extends Opcode(#29) {}
 object loadHLDirect extends Opcode(#2a, 3) {}
 object decrementPairH extends Opcode(#2b) {}
 object loadPairImmediateStackPointer extends Opcode(#31, 3) {}
@@ -250,6 +259,7 @@ object callIfZero extends Opcode(#cc, 3) {}
 object call extends Opcode(#cd, 3) {}
 object popD extends Opcode(#d1) {}
 object jumpIfNoCarry extends Opcode(#d2, 3) {}
+object output extends Opcode(#d3, 2) {}
 object pushD extends Opcode(#d5) {}
 object jumpIfCarry extends Opcode(#da, 3) {}
 object input extends Opcode(#db, 2) {}

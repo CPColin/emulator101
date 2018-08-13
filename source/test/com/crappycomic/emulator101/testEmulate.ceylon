@@ -9,9 +9,13 @@ import ceylon.test {
 
 import com.crappycomic.emulator101 {
     State,
+    bytes,
     emulate,
     word
 }
+
+// TODO: It would be nice to fuzz the program counter a bit, so we don't run the risk of
+// accidentally relying on an instruction being at $0000.
 
 Integer memorySize = #200;
 
@@ -27,19 +31,19 @@ Array<Byte> testMemory(Byte|Integer* bytes) {
 
 State testState(
     Array<Byte> memory,
-    Byte registerA = 0.byte,
-    Byte registerB = 0.byte,
-    Byte registerC = 0.byte,
-    Byte registerD = 0.byte,
-    Byte registerE = 0.byte,
-    Byte registerH = 0.byte,
-    Byte registerL = 0.byte,
-    Boolean carry = false,
-    Boolean parity = false,
-    Boolean auxiliaryCarry = false,
-    Boolean zero = false,
-    Boolean sign = false,
-    Integer stackPointer = 0,
+    Byte registerA = #f0.byte, // Try a little fuzziness
+    Byte registerB = #f1.byte,
+    Byte registerC = #f2.byte,
+    Byte registerD = #f3.byte,
+    Byte registerE = #f4.byte,
+    Byte registerH = #f5.byte,
+    Byte registerL = #f6.byte,
+    Boolean carry = true,
+    Boolean parity = true,
+    Boolean auxiliaryCarry = true,
+    Boolean zero = true,
+    Boolean sign = true,
+    Integer stackPointer = #0100,
     Integer programCounter = 0) => State {
     registerA = registerA;
     registerB = registerB;
@@ -154,6 +158,38 @@ shared void testEmulateNoop() {
     assertEquals(cycles, 4);
 }
 
+void assertLoadPairImmediate(State startState, Byte high, Byte low,
+        Attribute<State, Byte> highAttribute, Attribute<State, Byte> lowAttribute) {
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        highAttribute, lowAttribute, `State.programCounter`);
+    assertEquals(highAttribute.bind(endState).get(), high);
+    assertEquals(lowAttribute.bind(endState).get(), low);
+    assertEquals(endState.programCounter, startState.programCounter + 3);
+    
+    assertEquals(cycles, 10);
+}
+
+test
+shared void testEmulateLoadPairImmediateB() {
+    value high = #33.byte;
+    value low = #ff.byte;
+    value memory = testMemory(#01, low, high);
+    value startState = testState {
+        memory = memory;
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerB`, `State.registerC`, `State.programCounter`);
+    assertEquals(endState.registerB, high);
+    assertEquals(endState.registerC, low);
+    assertEquals(endState.programCounter, startState.programCounter + 3);
+    
+    assertEquals(cycles, 10);
+}
+
 {[Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateDecrementBParameters = [
     [#01, #00, true, true, false],
     [#10, #0f, false, false, false],
@@ -169,7 +205,6 @@ shared void testEmulateDecrementB(Integer startB, Integer expectedB, Boolean exp
     value startState = testState {
         memory = memory;
         registerB = startB.byte;
-        carry = true;
     };
     value [endState, cycles] = emulate(startState);
     
@@ -188,20 +223,100 @@ shared void testEmulateDecrementB(Integer startB, Integer expectedB, Boolean exp
     assertEquals(cycles, 5);
 }
 
-test
-shared void testEmulateMoveImmediateB() {
+void testEmulateMoveImmediateRegister(Integer opcode, Attribute<State, Byte> registerAttribute) {
     value data = #4f.byte;
-    value memory = testMemory(#06, data);
+    value memory = testMemory(opcode, data);
     value startState = testState {
         memory = memory;
     };
     value [endState, cycles] = emulate(startState);
     
-    assertStatesEqual(startState, endState, `State.registerB`, `State.programCounter`);
-    assertEquals(endState.registerB, data);
+    assertStatesEqual(startState, endState, registerAttribute, `State.programCounter`);
+    assertEquals(registerAttribute.bind(endState).get(), data);
     assertEquals(endState.programCounter, startState.programCounter + 2);
     
     assertEquals(cycles, 5);
+}
+
+test
+shared void testEmulateMoveImmediateB() {
+    testEmulateMoveImmediateRegister(#06, `State.registerB`);
+}
+
+{[Integer, Integer, Integer, Boolean]*} testEmulateDoubleAddDParameters = {
+    [#0000, #0000, #0000, false],
+    [#0123, #4567, #468a, false],
+    [#abcd, #a000, #4bcd, true]
+};
+
+test
+parameters(`value testEmulateDoubleAddDParameters`)
+shared void testEmulateDoubleAddD(Integer hlValue, Integer deValue, Integer expectedValue,
+    Boolean expectedCarry) {
+    value memory = testMemory(#19);
+    value [registerH, registerL] = bytes(hlValue);
+    value [registerD, registerE] = bytes(deValue);
+    value [expectedH, expectedL] = bytes(expectedValue);
+    value startState = testState {
+        memory = memory;
+        registerD = registerD;
+        registerE = registerE;
+        registerH = registerH;
+        registerL = registerL;
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerH`, `State.registerL`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerH, expectedH);
+    assertEquals(endState.registerL, expectedL);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = expectedCarry;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 10);
+}
+
+{[Integer, Integer, Boolean]*} testEmulateDoubleAddHParameters = {
+    [#0000, #0000, false],
+    [#0123, #0246, false],
+    [#abcd, #579a, true]
+};
+
+test
+parameters(`value testEmulateDoubleAddHParameters`)
+shared void testEmulateDoubleAddH(Integer startValue, Integer expectedValue,
+        Boolean expectedCarry) {
+    value memory = testMemory(#29);
+    value [startH, startL] = bytes(startValue);
+    value [expectedH, expectedL] = bytes(expectedValue);
+    value startState = testState {
+        memory = memory;
+        registerH = startH;
+        registerL = startL;
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerH`, `State.registerL`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerH, expectedH);
+    assertEquals(endState.registerL, expectedL);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = expectedCarry;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 10);
+}
+
+test
+shared void testEmulateMoveImmediateC() {
+    testEmulateMoveImmediateRegister(#0e, `State.registerC`);
 }
 
 test
@@ -212,15 +327,8 @@ shared void testEmulateLoadPairImmediateD() {
     value startState = testState {
         memory = memory;
     };
-    value [endState, cycles] = emulate(startState);
     
-    assertStatesEqual(startState, endState,
-        `State.registerD`, `State.registerE`, `State.programCounter`);
-    assertEquals(endState.registerD, high);
-    assertEquals(endState.registerE, low);
-    assertEquals(endState.programCounter, startState.programCounter + 3);
-    
-    assertEquals(cycles, 10);
+    assertLoadPairImmediate(startState, high, low, `State.registerD`, `State.registerE`);
 }
 
 {[Integer, Integer, Integer, Integer]*} testEmulateIncrementPairDParameters = {
@@ -286,15 +394,8 @@ shared void testEmulateLoadPairImmediateH() {
     value startState = testState {
         memory = memory;
     };
-    value [endState, cycles] = emulate(startState);
     
-    assertStatesEqual(startState, endState,
-        `State.registerH`, `State.registerL`, `State.programCounter`);
-    assertEquals(endState.registerH, high);
-    assertEquals(endState.registerL, low);
-    assertEquals(endState.programCounter, startState.programCounter + 3);
-    
-    assertEquals(cycles, 10);
+    assertLoadPairImmediate(startState, high, low, `State.registerH`, `State.registerL`);
 }
 
 {[Integer, Integer, Integer, Integer]*} testEmulateIncrementPairHParameters = {
@@ -387,6 +488,18 @@ shared void testEmulateMoveMemoryA() {
     assertEquals(cycles, 7);
 }
 
+void assertMoveRegisters(State startState, Byte data,
+        Attribute<State, Byte> registerAttribute) {
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, registerAttribute, `State.programCounter`);
+    assertEquals(registerAttribute.bind(endState).get(), data);
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 5);
+
+}
+
 test
 shared void testEmulateMoveAH() {
     value data = #23.byte;
@@ -396,13 +509,21 @@ shared void testEmulateMoveAH() {
         registerA = #ff.byte;
         registerH = data;
     };
-    value [endState, cycles] = emulate(startState);
     
-    assertStatesEqual(startState, endState, `State.registerA`, `State.programCounter`);
-    assertEquals(endState.registerA, data);
-    assertEquals(endState.programCounter, startState.programCounter + 1);
+    assertMoveRegisters(startState, data, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveLA() {
+    value data = #34.byte;
+    value memory = testMemory(#6f);
+    value startState = testState {
+        memory = memory;
+        registerA = data;
+        registerL = #ff.byte;
+    };
     
-    assertEquals(cycles, 5);
+    assertMoveRegisters(startState, data, `State.registerL`);
 }
 
 {Boolean*} testEmulateJumpIfNotZeroParameters = `Boolean`.caseValues;
@@ -442,6 +563,36 @@ shared void testEmulateJump() {
     assertEquals(endState.programCounter, address);
     
     assertEquals(cycles, 10);
+}
+
+void assertPush(State startState, Byte high, Byte low) {
+    value startStackPointer = startState.stackPointer;
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.memory`, `State.stackPointer`, `State.programCounter`);
+    assertMemoriesEqual(startState, endState,
+        startStackPointer - 1->high,
+        startStackPointer - 2->low);
+    assertEquals(endState.stackPointer, startStackPointer - 2);
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 11);
+}
+
+test
+shared void testEmulatePushB() {
+    value high = #98.byte;
+    value low = #76.byte;
+    value memory = testMemory(#c5);
+    value startState = testState {
+        memory = memory;
+        registerB = high;
+        registerC = low;
+        stackPointer = #0100;
+    };
+    
+    assertPush(startState, high, low);
 }
 
 test
@@ -502,6 +653,100 @@ shared void testEmulateCall() {
         endState.stackPointer + 1->startProgramCounterHigh);
     
     assertEquals(cycles, 17);
+}
+
+test
+shared void testOutput() {
+    value memory = testMemory(#d3);
+    value startState = testState {
+        memory = memory;
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, `State.programCounter`);
+    assertEquals(endState.programCounter, startState.programCounter + 2);
+    
+    assertEquals(cycles, 10);
+}
+
+test
+shared void testEmulatePushD() {
+    value high = #12.byte;
+    value low = #34.byte;
+    value memory = testMemory(#d5);
+    value startState = testState {
+        memory = memory;
+        registerD = high;
+        registerE = low;
+        stackPointer = #0100;
+    };
+    
+    assertPush(startState, high, low);
+}
+
+test
+shared void testEmulatePopH() {
+    value high = #aa.byte;
+    value low = #bb.byte;
+    value memory = testMemory(#e1);
+    value startStackPointer = #0100;
+    
+    memory[startStackPointer] = low;
+    memory[startStackPointer + 1] = high;
+    
+    value startState = testState {
+        memory = memory;
+        stackPointer = startStackPointer;
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerH`, `State.registerL`, `State.stackPointer`, `State.programCounter`);
+    assertEquals(endState.registerH, high);
+    assertEquals(endState.registerL, low);
+    assertEquals(endState.stackPointer, startStackPointer + 2);
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 10);
+}
+
+test
+shared void testEmulatePushH() {
+    value high = #23.byte;
+    value low = #45.byte;
+    value memory = testMemory(#e5);
+    value startState = testState {
+        memory = memory;
+        registerH = high;
+        registerL = low;
+        stackPointer = #0100;
+    };
+    
+    assertPush(startState, high, low);
+}
+
+test
+shared void testExchangeRegisters() {
+    value [startH, startL] = bytes(#1234);
+    value [startD, startE] = bytes(#5678);
+    value memory = testMemory(#eb);
+    value startState = testState {
+        memory = memory;
+        registerD = startD;
+        registerE = startE;
+        registerH = startH;
+        registerL = startL;
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, `State.registerD`, `State.registerE`, `State.registerH`,
+        `State.registerL`, `State.programCounter`);
+    assertEquals(endState.registerD, startH);
+    assertEquals(endState.registerE, startL);
+    assertEquals(endState.registerH, startD);
+    assertEquals(endState.registerL, startE);
+    
+    assertEquals(cycles, 5);
 }
 
 {[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateCompareImmediateParameters = {

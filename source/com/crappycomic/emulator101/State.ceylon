@@ -92,7 +92,7 @@ shared class State {
             Boolean sign = this.sign,
             Integer stackPointer = this.stackPointer,
             Integer programCounter = this.programCounter,
-            <Integer->Byte>* pokes) {
+            {<Integer->Byte>*} pokes = empty) {
         return State {
             registerA = registerA;
             registerB = registerB;
