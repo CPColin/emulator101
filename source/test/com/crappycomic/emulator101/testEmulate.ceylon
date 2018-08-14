@@ -3,6 +3,7 @@ import ceylon.language.meta.model {
 }
 import ceylon.test {
     assertEquals,
+    ignore,
     parameters,
     test
 }
@@ -101,48 +102,65 @@ void assertMemoriesEqual(State startState, State endState, <Integer->Byte>* exce
 "Asserts that all fields of the given states are equal, other than the given exceptions."
 void assertStatesEqual(State startState, State endState, Attribute<State>* except) {
     if (!except.contains(`State.registerA`)) {
-        assertEquals(endState.registerA, startState.registerA);
+        assertEquals(endState.registerA, startState.registerA,
+            "Register A should not have changed.");
     }
     
     if (!except.contains(`State.registerB`)) {
-        assertEquals(endState.registerB, startState.registerB);
+        assertEquals(endState.registerB, startState.registerB,
+            "Register B should not have changed.");
     }
     
     if (!except.contains(`State.registerC`)) {
-        assertEquals(endState.registerC, startState.registerC);
+        assertEquals(endState.registerC, startState.registerC,
+            "Register C should not have changed.");
     }
     
     if (!except.contains(`State.registerD`)) {
-        assertEquals(endState.registerD, startState.registerD);
+        assertEquals(endState.registerD, startState.registerD,
+            "Register D should not have changed.");
     }
     
     if (!except.contains(`State.registerE`)) {
-        assertEquals(endState.registerE, startState.registerE);
+        assertEquals(endState.registerE, startState.registerE,
+            "Register E should not have changed.");
     }
     
     if (!except.contains(`State.registerH`)) {
-        assertEquals(endState.registerH, startState.registerH);
+        assertEquals(endState.registerH, startState.registerH,
+            "Register H should not have changed.");
     }
     
     if (!except.contains(`State.registerL`)) {
-        assertEquals(endState.registerL, startState.registerL);
+        assertEquals(endState.registerL, startState.registerL,
+            "Register L should not have changed.");
     }
     
     if (!except.contains(`State.flags`)) {
-        assertEquals(endState.flags, startState.flags);
+        assertEquals(endState.flags, startState.flags,
+            "Processor flags should not have changed.");
     }
     
     if (!except.contains(`State.stackPointer`)) {
-        assertEquals(endState.stackPointer, startState.stackPointer);
+        assertEquals(endState.stackPointer, startState.stackPointer,
+            "Stack pointer should not have changed.");
     }
     
     if (!except.contains(`State.programCounter`)) {
-        assertEquals(endState.programCounter, startState.programCounter);
+        assertEquals(endState.programCounter, startState.programCounter,
+            "Program counter should not have changed. (Really?)");
     }
     
     if (!except.contains(`State.memory`)) {
-        assertEquals(endState.memory, startState.memory);
+        assertEquals(endState.memory, startState.memory,
+            "Memory should not have changed.");
     }
+}
+
+test
+ignore
+shared void testAllOpcodesTested() {
+    // TODO: Switch on Opcode so we can't forget to add at leat one test for each one.
 }
 
 test
@@ -190,27 +208,21 @@ shared void testEmulateLoadPairImmediateB() {
     assertEquals(cycles, 10);
 }
 
-{[Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateDecrementBParameters = [
+{[Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateDecrementRegisterParameters = [
     [#01, #00, true, true, false],
     [#10, #0f, false, false, false],
     [#00, #ff, false, false, true],
     [#f1, #f0, true, false, true]
 ];
 
-test
-parameters(`value testEmulateDecrementBParameters`)
-shared void testEmulateDecrementB(Integer startB, Integer expectedB, Boolean expectedParity,
-        Boolean expectedZero, Boolean expectedSign) {
-    value memory = testMemory(#05);
-    value startState = testState {
-        memory = memory;
-        registerB = startB.byte;
-    };
+void assertDecrementRegister(State startState, Attribute<State, Byte> registerAttribute,
+        Integer expectedRegister, Boolean expectedParity, Boolean expectedZero,
+        Boolean expectedSign) {
     value [endState, cycles] = emulate(startState);
     
     assertStatesEqual(startState, endState,
-        `State.registerB`, `State.flags`, `State.programCounter`);
-    assertEquals(endState.registerB, expectedB.byte);
+        registerAttribute, `State.flags`, `State.programCounter`);
+    assertEquals(registerAttribute.bind(endState).get(), expectedRegister.byte);
     assertFlags {
         startState = startState;
         endState = endState;
@@ -221,6 +233,26 @@ shared void testEmulateDecrementB(Integer startB, Integer expectedB, Boolean exp
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 5);
+}
+
+test
+parameters(`value testEmulateDecrementRegisterParameters`)
+shared void testEmulateDecrementB(Integer startB, Integer expectedB, Boolean expectedParity,
+        Boolean expectedZero, Boolean expectedSign) {
+    value memory = testMemory(#05);
+    value startState = testState {
+        memory = memory;
+        registerB = startB.byte;
+    };
+    
+    assertDecrementRegister {
+        startState = startState;
+        registerAttribute = `State.registerB`;
+        expectedRegister = expectedB;
+        expectedParity = expectedParity;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
 }
 
 void testEmulateMoveImmediateRegister(Integer opcode, Attribute<State, Byte> registerAttribute) {
@@ -241,6 +273,43 @@ void testEmulateMoveImmediateRegister(Integer opcode, Attribute<State, Byte> reg
 test
 shared void testEmulateMoveImmediateB() {
     testEmulateMoveImmediateRegister(#06, `State.registerB`);
+}
+
+{[Integer, Integer, Integer, Boolean]*} testEmulateDoubleAddBParameters = {
+    [#0000, #0000, #0000, false],
+    [#0123, #4567, #468a, false],
+    [#abcd, #a000, #4bcd, true]
+};
+
+test
+parameters(`value testEmulateDoubleAddBParameters`)
+shared void testEmulateDoubleAddB(Integer hlValue, Integer bcValue, Integer expectedValue,
+    Boolean expectedCarry) {
+    value memory = testMemory(#09);
+    value [registerH, registerL] = bytes(hlValue);
+    value [registerB, registerC] = bytes(bcValue);
+    value [expectedH, expectedL] = bytes(expectedValue);
+    value startState = testState {
+        memory = memory;
+        registerB = registerB;
+        registerC = registerC;
+        registerH = registerH;
+        registerL = registerL;
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerH`, `State.registerL`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerH, expectedH);
+    assertEquals(endState.registerL, expectedL);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = expectedCarry;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 10);
 }
 
 {[Integer, Integer, Integer, Boolean]*} testEmulateDoubleAddDParameters = {
@@ -312,6 +381,26 @@ shared void testEmulateDoubleAddH(Integer startValue, Integer expectedValue,
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 10);
+}
+
+test
+parameters(`value testEmulateDecrementRegisterParameters`)
+shared void testEmulateDecrementC(Integer startC, Integer expectedC, Boolean expectedParity,
+        Boolean expectedZero, Boolean expectedSign) {
+    value memory = testMemory(#0d);
+    value startState = testState {
+        memory = memory;
+        registerC = startC.byte;
+    };
+    
+    assertDecrementRegister {
+        startState = startState;
+        registerAttribute = `State.registerC`;
+        expectedRegister = expectedC;
+        expectedParity = expectedParity;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
 }
 
 test
@@ -526,6 +615,37 @@ shared void testEmulateMoveLA() {
     assertMoveRegisters(startState, data, `State.registerL`);
 }
 
+void testEmulatePop(Integer opcode, Attribute<State, Byte> registerHigh,
+        Attribute<State, Byte> registerLow) {
+    value high = #aa.byte;
+    value low = #bb.byte;
+    value memory = testMemory(opcode);
+    value startStackPointer = #0100;
+    
+    memory[startStackPointer] = low;
+    memory[startStackPointer + 1] = high;
+    
+    value startState = testState {
+        memory = memory;
+        stackPointer = startStackPointer;
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        registerHigh, registerLow, `State.stackPointer`, `State.programCounter`);
+    assertEquals(registerHigh.bind(endState).get(), high);
+    assertEquals(registerLow.bind(endState).get(), low);
+    assertEquals(endState.stackPointer, startStackPointer + 2);
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 10);
+}
+
+test
+shared void testEmulatePopB() {
+    testEmulatePop(#c1, `State.registerB`, `State.registerC`);
+}
+
 {Boolean*} testEmulateJumpIfNotZeroParameters = `Boolean`.caseValues;
 
 test
@@ -656,6 +776,11 @@ shared void testEmulateCall() {
 }
 
 test
+shared void testEmulatePopD() {
+    testEmulatePop(#d1, `State.registerD`, `State.registerE`);
+}
+
+test
 shared void testOutput() {
     value memory = testMemory(#d3);
     value startState = testState {
@@ -686,28 +811,7 @@ shared void testEmulatePushD() {
 
 test
 shared void testEmulatePopH() {
-    value high = #aa.byte;
-    value low = #bb.byte;
-    value memory = testMemory(#e1);
-    value startStackPointer = #0100;
-    
-    memory[startStackPointer] = low;
-    memory[startStackPointer + 1] = high;
-    
-    value startState = testState {
-        memory = memory;
-        stackPointer = startStackPointer;
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState,
-        `State.registerH`, `State.registerL`, `State.stackPointer`, `State.programCounter`);
-    assertEquals(endState.registerH, high);
-    assertEquals(endState.registerL, low);
-    assertEquals(endState.stackPointer, startStackPointer + 2);
-    assertEquals(endState.programCounter, startState.programCounter + 1);
-    
-    assertEquals(cycles, 10);
+    testEmulatePop(#e1, `State.registerH`, `State.registerL`);
 }
 
 test

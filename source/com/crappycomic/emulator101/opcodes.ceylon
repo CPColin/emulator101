@@ -6,32 +6,69 @@
 abstract class Opcode
         of noop // 00
         | loadPairImmediateB // 01
+        // 02
+        // 03
+        // 04
         | decrementB // 05
         | moveImmediateB // 06
         | rotateAccumulatorLeft // 07
+        // 08
+        | doubleAddB // 09
+        // 0a
+        // 0b
+        // 0c
+        | decrementC // 0d
         | moveImmediateC // 0e
-        | loadPairImmediateD // 11
-        | incrementPairD // 13
         | rotateAccumulatorRight // 0f
+        // 0f
+        // 10
+        | loadPairImmediateD // 11
+        // 12
+        | incrementPairD // 13
+        // 14
+        // 15
         | moveImmediateD // 16
+        // 17
+        // 18
         | doubleAddD // 19
         | loadAccumulatorD // 1a
+        // 1b
+        // 1c
+        // 1d
+        // 1e
+        // 1f
+        // 20
         | loadPairImmediateH // 21
         | storeHLDirect // 22
         | incrementPairH // 23
+        // 24
+        // 25
         | moveImmediateH // 26
         | decimalAdjust // 27
+        // 28
         | doubleAddH // 29
         | loadHLDirect // 2a
         | decrementPairH // 2b
+        // 2c
+        // 2d
+        // 2e
+        // 2f
+        // 30
         | loadPairImmediateStackPointer // 31
         | storeA // 32
+        // 33
+        // 34
         | decrementMemory // 35
         | moveImmediateMemory // 36
+        // 37
+        // 38
+        // 39
         | loadAccumulatorDirect // 3a
+        // 3b
         | incrementA // 3c
         | decrementA // 3d
         | moveImmediateA // 3e
+        // 3f
         | moveBB // 40
         | moveBC // 41
         | moveBD // 42
@@ -96,6 +133,38 @@ abstract class Opcode
         | moveAL // 7d
         | moveAMemory // 7e
         | moveAA // 7f
+        // 80
+        // 81
+        // 82
+        // 83
+        // 84
+        // 85
+        // 86
+        // 87
+        // 88
+        // 89
+        // 8a
+        // 8b
+        // 8c
+        // 8d
+        // 8e
+        // 8f
+        // 90
+        // 91
+        // 92
+        // 93
+        // 94
+        // 95
+        // 96
+        // 97
+        // 98
+        // 99
+        // 9a
+        // 9b
+        // 9c
+        // 9d
+        // 9e
+        // 9f
         | andB // a0
         | andC // a1
         | andD // a2
@@ -104,7 +173,30 @@ abstract class Opcode
         | andL // a5
         | andMemory // a6
         | andA // a7
+        // a8
+        // a9
+        // aa
+        // ab
+        // ac
+        // ad
+        // ae
         | xorA // af
+        // b0
+        // b1
+        // b2
+        // b3
+        // b4
+        // b5
+        // b6
+        // b7
+        // b8
+        // b9
+        // ba
+        // bb
+        // bc
+        // bd
+        // be
+        // bf
         | returnIfNotZero // c0
         | popB // c1
         | jumpIfNotZero // c2
@@ -112,27 +204,63 @@ abstract class Opcode
         | callIfNotZero // c4
         | pushB // c5
         | addImmediate // c6
+        // c7
         | returnIfZero // c8
         | \ireturn // c9
         | jumpIfZero // ca
+        // cb
         | callIfZero // cc
         | call // cd
+        // ce
+        // cf
+        // d0
         | popD // d1
         | jumpIfNoCarry // d2
         | output // d3
+        // d4
         | pushD // d5
+        // d6
+        // d7
+        // d8
+        // d9
         | jumpIfCarry // da
         | input // db
+        // dc
+        // dd
+        // de
+        // df
+        // e0
         | popH // e1
+        // e2
+        // e3
+        // e4
         | pushH // e5
         | andImmediate // e6
+        // e7
+        // e8
+        // e9
+        // ea
         | exchangeRegisters // eb
+        // ec
+        // ed
+        // ee
+        // ef
+        // f0
         | popStatus // f1
+        // f2
         | disableInterrupts // f3
+        // f4
         | pushStatus // f5
+        // f6
+        // f7
+        // f8
+        // f9
         | jumpIfMinus // fa
         | enableInterrupts // fb
+        // fc
+        // fd
         | compareImmediate // fe
+        // ff
         {
     shared Byte byte;
     
@@ -149,10 +277,12 @@ object loadPairImmediateB extends Opcode(#01, 3) {}
 object decrementB extends Opcode(#05) {}
 object moveImmediateB extends Opcode(#06, 2) {}
 object rotateAccumulatorLeft extends Opcode(#07) {}
+object doubleAddB extends Opcode(#09) {}
+object decrementC extends Opcode(#0d) {}
 object moveImmediateC extends Opcode(#0e, 2) {}
+object rotateAccumulatorRight extends Opcode(#0f) {}
 object loadPairImmediateD extends Opcode(#11, 3) {}
 object incrementPairD extends Opcode(#13) {}
-object rotateAccumulatorRight extends Opcode(#0f) {}
 object moveImmediateD extends Opcode(#16, 2) {}
 object doubleAddD extends Opcode(#19) {}
 object loadAccumulatorD extends Opcode(#1a) {}

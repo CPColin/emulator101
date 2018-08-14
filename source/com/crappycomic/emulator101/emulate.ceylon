@@ -21,10 +21,12 @@ shared [State, Integer] emulate(State state) {
         case (decrementB) emulateDecrementB
         case (moveImmediateB) emulateMoveImmediateB
         case (rotateAccumulatorLeft) nothing
+        case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
+        case (decrementC) emulateDecrementC
         case (moveImmediateC) emulateMoveImmediateC
+        case (rotateAccumulatorRight) nothing
         case (loadPairImmediateD) emulateLoadPairImmediateD
         case (incrementPairD) emulateIncrementPairD
-        case (rotateAccumulatorRight) nothing
         case (moveImmediateD) nothing
         case (doubleAddD) emulateDoubleAdd(`State.registerD`, `State.registerE`)
         case (loadAccumulatorD) emulateLoadAccumulatorD
@@ -118,7 +120,7 @@ shared [State, Integer] emulate(State state) {
         case (andA) nothing
         case (xorA) nothing
         case (returnIfNotZero) nothing
-        case (popB) nothing
+        case (popB) emulatePopB
         case (jumpIfNotZero) emulateJumpIfNotZero
         case (jump) emulateJump
         case (callIfNotZero) nothing
@@ -129,7 +131,7 @@ shared [State, Integer] emulate(State state) {
         case (jumpIfZero) nothing
         case (callIfZero) nothing
         case (call) emulateCall
-        case (popD) nothing
+        case (popD) emulatePopD
         case (jumpIfNoCarry) nothing
         case (output) emulateOutput
         case (pushD) emulatePush(`State.registerD`, `State.registerE`)
@@ -267,6 +269,22 @@ shared Boolean flagZero(Byte val) => val.zero;
             programCounter = state.programCounter + opcode.size;
         },
         10
+    ];
+}
+
+[State, Integer] emulateDecrementC(State state) {
+    value val = state.registerC.predecessor;
+    
+    return [
+        state.with {
+            registerC = val;
+            parity = flagParity(val);
+            auxiliaryCarry = flagAuxiliaryCarry(state.registerC, 1.byte, val);
+            zero = flagZero(val);
+            sign = flagSign(val);
+            programCounter = state.programCounter + decrementB.size;
+        },
+        5
     ];
 }
 
@@ -413,6 +431,23 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulatePopB(State state) {
+    value high = state.memory[state.stackPointer + 1];
+    value low = state.memory[state.stackPointer];
+    
+    assert (exists high, exists low);
+    
+    return [
+        state.with {
+            registerB = high;
+            registerC = low;
+            stackPointer = state.stackPointer + 2;
+            programCounter = state.programCounter + popB.size;
+        },
+        10
+    ];
+}
+
 [State, Integer] emulateJumpIfNotZero(State state) {
     value address = state.zero then state.programCounter + jumpIfNotZero.size else dataWord(state);
     
@@ -467,6 +502,23 @@ shared Boolean flagZero(Byte val) => val.zero;
             state.stackPointer - 2->low
         },
         17
+    ];
+}
+
+[State, Integer] emulatePopD(State state) {
+    value high = state.memory[state.stackPointer + 1];
+    value low = state.memory[state.stackPointer];
+    
+    assert (exists high, exists low);
+    
+    return [
+        state.with {
+            registerD = high;
+            registerE = low;
+            stackPointer = state.stackPointer + 2;
+            programCounter = state.programCounter + popD.size;
+        },
+        10
     ];
 }
 
