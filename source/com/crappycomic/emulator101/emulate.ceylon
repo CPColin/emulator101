@@ -1,9 +1,3 @@
-import ceylon.language.meta.model {
-    Attribute
-}
-
-alias RegisterGet => Attribute<State, Byte>;
-
 "Emulates execution of the next instruction, given the current [[state]] of the CPU and memory.
  Returns the new state and the number of cycles the instruction took."
 shared [State, Integer] emulate(State state) {
@@ -206,7 +200,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateNoop(State state) {
     return [
         state.with {
-            programCounter = state.programCounter + noop.size;
+            `State.programCounter`->state.programCounter + noop.size
         },
         4
     ];
@@ -217,9 +211,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerB = high;
-            registerC = low;
-            programCounter = state.programCounter + loadPairImmediateB.size;
+            `State.registerB`->high,
+            `State.registerC`->low,
+            `State.programCounter`->state.programCounter + loadPairImmediateB.size
         },
         10
     ];
@@ -230,12 +224,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerB = val;
-            parity = flagParity(val);
-            auxiliaryCarry = flagAuxiliaryCarry(state.registerB, 1.byte, val);
-            zero = flagZero(val);
-            sign = flagSign(val);
-            programCounter = state.programCounter + decrementB.size;
+            `State.registerB`->val,
+            `State.parity`->flagParity(val),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(state.registerB, 1.byte, val),
+            `State.zero`->flagZero(val),
+            `State.sign`->flagSign(val),
+            `State.programCounter`->state.programCounter + decrementB.size
         },
         5
     ];
@@ -244,14 +238,14 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateMoveImmediateB(State state) {
     return [
         state.with {
-            registerB = dataByte(state);
-            programCounter = state.programCounter + moveImmediateB.size;
+            `State.registerB`->dataByte(state),
+            `State.programCounter`->state.programCounter + moveImmediateB.size
         },
         5
     ];
 }
 
-[State, Integer] emulateDoubleAdd(RegisterGet highAttribute, RegisterGet lowAttribute)
+[State, Integer] emulateDoubleAdd(ByteRegister highAttribute, ByteRegister lowAttribute)
         (Opcode opcode, State state) {
     value registerHL = word(state.registerH, state.registerL);
     value addend = word {
@@ -263,10 +257,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerH = resultHigh;
-            registerL = resultLow;
-            carry = result.get(16);
-            programCounter = state.programCounter + opcode.size;
+            `State.registerH`->resultHigh,
+            `State.registerL`->resultLow,
+            `State.carry`->result.get(16),
+            `State.programCounter`->state.programCounter + opcode.size
         },
         10
     ];
@@ -277,12 +271,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerC = val;
-            parity = flagParity(val);
-            auxiliaryCarry = flagAuxiliaryCarry(state.registerC, 1.byte, val);
-            zero = flagZero(val);
-            sign = flagSign(val);
-            programCounter = state.programCounter + decrementB.size;
+            `State.registerC`->val,
+            `State.parity`->flagParity(val),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(state.registerC, 1.byte, val),
+            `State.zero`->flagZero(val),
+            `State.sign`->flagSign(val),
+            `State.programCounter`->state.programCounter + decrementB.size
         },
         5
     ];
@@ -291,8 +285,8 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateMoveImmediateC(State state) {
     return [
         state.with {
-            registerC = dataByte(state);
-            programCounter = state.programCounter + moveImmediateC.size;
+            `State.registerC`->dataByte(state),
+            `State.programCounter`->state.programCounter + moveImmediateC.size
         },
         5
     ];
@@ -303,9 +297,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerD = high;
-            registerE = low;
-            programCounter = state.programCounter + loadPairImmediateD.size;
+            `State.registerD`->high,
+            `State.registerE`->low,
+            `State.programCounter`->state.programCounter + loadPairImmediateD.size
         },
         10
     ];
@@ -317,9 +311,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerD = high;
-            registerE = low;
-            programCounter = state.programCounter + incrementPairD.size;
+            `State.registerD`->high,
+            `State.registerE`->low,
+            `State.programCounter`->state.programCounter + incrementPairD.size
         },
         5
     ];
@@ -330,8 +324,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerA = state.memory[address] else 0.byte;
-            programCounter = state.programCounter + loadAccumulatorD.size;
+            `State.registerA`->(state.memory[address] else 0.byte),
+            `State.programCounter`->state.programCounter + loadAccumulatorD.size
         },
         7
     ];
@@ -342,9 +336,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerH = high;
-            registerL = low;
-            programCounter = state.programCounter + loadPairImmediateD.size;
+            `State.registerH`->high,
+            `State.registerL`->low,
+            `State.programCounter`->state.programCounter + loadPairImmediateD.size
         },
         10
     ];
@@ -356,9 +350,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerH = high;
-            registerL = low;
-            programCounter = state.programCounter + incrementPairH.size;
+            `State.registerH`->high,
+            `State.registerL`->low,
+            `State.programCounter`->state.programCounter + incrementPairH.size
         },
         5
     ];
@@ -367,8 +361,8 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateMoveImmediateH(State state) {
     return [
         state.with {
-            registerH = dataByte(state);
-            programCounter = state.programCounter + moveImmediateH.size;
+            `State.registerH`->dataByte(state),
+            `State.programCounter`->state.programCounter + moveImmediateH.size
         },
         5
     ];
@@ -377,8 +371,8 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateLoadPairImmediateStackPointer(State state) {
     return [
         state.with {
-            stackPointer = dataWord(state);
-            programCounter = state.programCounter + loadPairImmediateStackPointer.size;
+            `State.stackPointer`->dataWord(state),
+            `State.programCounter`->state.programCounter + loadPairImmediateStackPointer.size
         },
         10
     ];
@@ -391,19 +385,19 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            programCounter = state.programCounter + moveImmediateMemory.size;
+            `State.programCounter`->state.programCounter + moveImmediateMemory.size,
             address->dataByte(state)
         },
         10
     ];
 }
 
-[State, Integer] emulateMoveLRegister(RegisterGet registerAttribute)
+[State, Integer] emulateMoveLRegister(ByteRegister registerAttribute)
         (Opcode opcode, State state) {
     return [
         state.with {
-            registerL = registerAttribute.bind(state).get();
-            programCounter = state.programCounter + opcode.size;
+            `State.registerL`->registerAttribute.bind(state).get(),
+            `State.programCounter`->state.programCounter + opcode.size
         },
         5
     ];
@@ -414,7 +408,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            programCounter = state.programCounter + moveMemoryA.size;
+            `State.programCounter`->state.programCounter + moveMemoryA.size,
             address->state.registerA
         },
         7
@@ -424,8 +418,8 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateMoveAH(State state) {
     return [
         state.with {
-            registerA = state.registerH;
-            programCounter = state.programCounter + moveAH.size;
+            `State.registerA`->state.registerH,
+            `State.programCounter`->state.programCounter + moveAH.size
         },
         5
     ];
@@ -439,10 +433,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerB = high;
-            registerC = low;
-            stackPointer = state.stackPointer + 2;
-            programCounter = state.programCounter + popB.size;
+            `State.registerB`->high,
+            `State.registerC`->low,
+            `State.stackPointer`->state.stackPointer + 2,
+            `State.programCounter`->state.programCounter + popB.size
         },
         10
     ];
@@ -453,7 +447,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            programCounter = address;
+            `State.programCounter`->address
         },
         10
     ];
@@ -462,7 +456,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateJump(State state) {
     return [
         state.with {
-            programCounter = dataWord(state);
+            `State.programCounter`->dataWord(state)
         },
         10
     ];
@@ -483,8 +477,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            stackPointer = state.stackPointer + 2;
-            programCounter = address + opcode.size;
+            `State.stackPointer`->state.stackPointer + 2,
+            `State.programCounter`->address + opcode.size
         },
         10
     ];
@@ -496,8 +490,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            programCounter = address;
-            stackPointer = state.stackPointer - 2;
+            `State.programCounter`->address,
+            `State.stackPointer`->state.stackPointer - 2,
             state.stackPointer - 1->high,
             state.stackPointer - 2->low
         },
@@ -513,10 +507,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerD = high;
-            registerE = low;
-            stackPointer = state.stackPointer + 2;
-            programCounter = state.programCounter + popD.size;
+            `State.registerD`->high,
+            `State.registerE`->low,
+            `State.stackPointer`->state.stackPointer + 2,
+            `State.programCounter`->state.programCounter + popD.size
         },
         10
     ];
@@ -526,21 +520,21 @@ shared Boolean flagZero(Byte val) => val.zero;
     // TODO: Hook into system hardware.
     return [
         state.with {
-            programCounter = state.programCounter + output.size;
+            `State.programCounter`->state.programCounter + output.size
         },
         10
     ];
 }
 
-[State, Integer] emulatePush(RegisterGet highAttribute, RegisterGet lowAttribute)
+[State, Integer] emulatePush(ByteRegister highAttribute, ByteRegister lowAttribute)
         (Opcode opcode, State state) {
     value high = highAttribute.bind(state).get();
     value low = lowAttribute.bind(state).get();
     
     return [
         state.with {
-            stackPointer = state.stackPointer - 2;
-            programCounter = state.programCounter + opcode.size;
+            `State.stackPointer`->state.stackPointer - 2,
+            `State.programCounter`->state.programCounter + opcode.size,
             state.stackPointer - 1->high,
             state.stackPointer - 2->low
         },
@@ -556,10 +550,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            registerH = high;
-            registerL = low;
-            stackPointer = state.stackPointer + 2;
-            programCounter = state.programCounter + popH.size;
+            `State.registerH`->high,
+            `State.registerL`->low,
+            `State.stackPointer`->state.stackPointer + 2,
+            `State.programCounter`->state.programCounter + popH.size
         },
         10
     ];
@@ -568,11 +562,11 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateExchangeRegisters(State state) {
     return [
         state.with {
-            registerD = state.registerH;
-            registerE = state.registerL;
-            registerH = state.registerD;
-            registerL = state.registerE;
-            programCounter = state.programCounter + exchangeRegisters.size;
+            `State.registerD`->state.registerH,
+            `State.registerE`->state.registerL,
+            `State.registerH`->state.registerD,
+            `State.registerL`->state.registerE,
+            `State.programCounter`->state.programCounter + exchangeRegisters.size
         },
         5
     ];
@@ -586,12 +580,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            carry = flagCarry(result);
-            parity = flagParity(resultByte);
-            auxiliaryCarry = flagAuxiliaryCarry(left, right, result.byte);
-            zero = flagZero(resultByte);
-            sign = flagSign(resultByte);
-            programCounter = state.programCounter + compareImmediate.size;
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, result.byte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + compareImmediate.size
         },
         7
     ];

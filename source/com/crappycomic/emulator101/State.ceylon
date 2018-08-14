@@ -15,17 +15,17 @@ shared class State {
             Boolean zero,
             Boolean sign) {
         return (carry then 1 else 0).byte.leftLogicalShift(flagBitCarry)
-                .or(1.byte.leftLogicalShift(flagBitUnusedHigh))
-                .or((parity then 1 else 0).byte.leftLogicalShift(flagBitParity))
-                .or((auxiliaryCarry then 1 else 0).byte.leftLogicalShift(flagBitAuxiliaryCarry))
-                .or((zero then 1 else 0).byte.leftLogicalShift(flagBitZero))
-                .or((sign then 1 else 0).byte.leftLogicalShift(flagBitSign));
+            .or(1.byte.leftLogicalShift(flagBitUnusedHigh))
+            .or((parity then 1 else 0).byte.leftLogicalShift(flagBitParity))
+            .or((auxiliaryCarry then 1 else 0).byte.leftLogicalShift(flagBitAuxiliaryCarry))
+            .or((zero then 1 else 0).byte.leftLogicalShift(flagBitZero))
+            .or((sign then 1 else 0).byte.leftLogicalShift(flagBitSign));
     }
     
-    static shared Array<Byte> pokeMemory(Array<Byte> memory, <Integer->Byte>* pokes) {
+    static shared Memory updateMemory(Memory memory, MemoryUpdate* memoryUpdates) {
         value newMemory = Array<Byte>(memory);
         
-        for (address->val in pokes) {
+        for (address->val in memoryUpdates) {
             // TODO: Handle attempts to write to ROM.
             newMemory[address] = val;
         }
@@ -43,7 +43,7 @@ shared class State {
     shared Byte flags;
     shared Integer stackPointer;
     shared Integer programCounter;
-    shared Array<Byte> memory;
+    shared Memory memory;
     
     shared new (
             Byte registerA,
@@ -56,7 +56,7 @@ shared class State {
             Byte flags,
             Integer stackPointer,
             Integer programCounter,
-            Array<Byte> memory) {
+            Memory memory) {
         this.registerA = registerA;
         this.registerB = registerB;
         this.registerC = registerC;
@@ -76,41 +76,34 @@ shared class State {
     shared Boolean zero => flags.get(flagBitZero);
     shared Boolean sign => flags.get(flagBitSign);
     
-    "Returns a copy of this object with the given fields set to new values."
+    "Returns a copy of this object with the given updates applied."
     shared State with(
-            Byte registerA = this.registerA,
-            Byte registerB = this.registerB,
-            Byte registerC = this.registerC,
-            Byte registerD = this.registerD,
-            Byte registerE = this.registerE,
-            Byte registerH = this.registerH,
-            Byte registerL = this.registerL,
-            Boolean carry = this.carry,
-            Boolean parity = this.parity,
-            Boolean auxiliaryCarry = this.auxiliaryCarry,
-            Boolean zero = this.zero,
-            Boolean sign = this.sign,
-            Integer stackPointer = this.stackPointer,
-            Integer programCounter = this.programCounter,
-            {<Integer->Byte>*} pokes = empty) {
+            {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates) {
+        value bitFlagUpdates = map(updates.narrow<BitFlagUpdate>());
+        value byteRegisterUpdates = map(updates.narrow<ByteRegisterUpdate>());
+        value integerRegisterUpdates = map(updates.narrow<IntegerRegisterUpdate>());
+        value memoryUpdates = updates.narrow<MemoryUpdate>();
+        
         return State {
-            registerA = registerA;
-            registerB = registerB;
-            registerC = registerC;
-            registerD = registerD;
-            registerE = registerE;
-            registerH = registerH;
-            registerL = registerL;
+            registerA = byteRegisterUpdates[`State.registerA`] else registerA;
+            registerB = byteRegisterUpdates[`State.registerB`] else registerB;
+            registerC = byteRegisterUpdates[`State.registerC`] else registerC;
+            registerD = byteRegisterUpdates[`State.registerD`] else registerD;
+            registerE = byteRegisterUpdates[`State.registerE`] else registerE;
+            registerH = byteRegisterUpdates[`State.registerH`] else registerH;
+            registerL = byteRegisterUpdates[`State.registerL`] else registerL;
             flags = packFlags {
-                carry = carry;
-                parity = parity;
-                auxiliaryCarry = auxiliaryCarry;
-                zero = zero;
-                sign = sign;
+                carry = bitFlagUpdates[`State.carry`] else carry;
+                parity = bitFlagUpdates[`State.parity`] else parity;
+                auxiliaryCarry = bitFlagUpdates[`State.auxiliaryCarry`] else auxiliaryCarry;
+                zero = bitFlagUpdates[`State.zero`] else zero;
+                sign = bitFlagUpdates[`State.sign`] else sign;
             };
-            stackPointer = stackPointer;
-            programCounter = programCounter;
-            memory = if (!pokes.empty) then pokeMemory(memory, *pokes) else memory;
+            stackPointer = integerRegisterUpdates[`State.stackPointer`] else stackPointer;
+            programCounter = integerRegisterUpdates[`State.programCounter`] else programCounter;
+            memory = if (!memoryUpdates.empty)
+                    then updateMemory(memory, *memoryUpdates)
+                    else memory;
         };
     }
 }

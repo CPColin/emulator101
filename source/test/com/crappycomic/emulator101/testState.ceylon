@@ -57,12 +57,12 @@ shared void testPackFlags(Boolean sign, Boolean zero, Boolean auxiliaryCarry, Bo
 }
 
 test
-shared void testPokeMemorySingle() {
+shared void testUpdateMemorySingle() {
     value size = 8;
     value fill = #ff.byte;
     value poke = 3;
     value val = #ad.byte;
-    value memory = State.pokeMemory(Array<Byte>.ofSize(size, fill), poke->val);
+    value memory = State.updateMemory(Array<Byte>.ofSize(size, fill), poke->val);
     
     for (address in 0:size) {
         if (address == poke) {
@@ -74,14 +74,14 @@ shared void testPokeMemorySingle() {
 }
 
 test
-shared void testPokeMemoryMultiple() {
+shared void testUpdateMemoryMultiple() {
     value size = 8;
     value fill = #ff.byte;
     value poke1 = 3;
     value val1 = #ad.byte;
     value poke2 = 7;
     value val2 = #99.byte;
-    value memory = State.pokeMemory(Array<Byte>.ofSize(size, fill), poke1->val1, poke2->val2);
+    value memory = State.updateMemory(Array<Byte>.ofSize(size, fill), poke1->val1, poke2->val2);
     
     for (address in 0:size) {
         if (address == poke1) {

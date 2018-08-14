@@ -31,21 +31,21 @@ Array<Byte> testMemory(Byte|Integer* bytes) {
 }
 
 State testState(
-    Array<Byte> memory,
-    Byte registerA = #f0.byte, // Try a little fuzziness
-    Byte registerB = #f1.byte,
-    Byte registerC = #f2.byte,
-    Byte registerD = #f3.byte,
-    Byte registerE = #f4.byte,
-    Byte registerH = #f5.byte,
-    Byte registerL = #f6.byte,
-    Boolean carry = true,
-    Boolean parity = true,
-    Boolean auxiliaryCarry = true,
-    Boolean zero = true,
-    Boolean sign = true,
-    Integer stackPointer = #0100,
-    Integer programCounter = 0) => State {
+        Array<Byte> memory,
+        Byte registerA = #f0.byte, // Try a little fuzziness
+        Byte registerB = #f1.byte,
+        Byte registerC = #f2.byte,
+        Byte registerD = #f3.byte,
+        Byte registerE = #f4.byte,
+        Byte registerH = #f5.byte,
+        Byte registerL = #f6.byte,
+        Boolean carry = true,
+        Boolean parity = true,
+        Boolean auxiliaryCarry = true,
+        Boolean zero = true,
+        Boolean sign = true,
+        Integer stackPointer = #0100,
+        Integer programCounter = 0) => State {
     registerA = registerA;
     registerB = registerB;
     registerC = registerC;
