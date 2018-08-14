@@ -881,3 +881,5 @@ shared void testEmulateCompareImmediate(Integer registerA, Integer data, Boolean
     
     assertEquals(cycles, 7);
 }
+
+// TODO: Alphabetize as we refactor

@@ -10,36 +10,64 @@ shared [State, Integer] emulate(State state) {
     assert (exists opcode);
     
     value emulator = switch (opcode)
-        case (noop) emulateNoop
-        case (loadPairImmediateB) emulateLoadPairImmediateB
-        case (decrementB) emulateDecrementB
-        case (moveImmediateB) emulateMoveImmediateB
-        case (rotateAccumulatorLeft) nothing
-        case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
-        case (decrementC) emulateDecrementC
-        case (moveImmediateC) emulateMoveImmediateC
-        case (rotateAccumulatorRight) nothing
-        case (loadPairImmediateD) emulateLoadPairImmediateD
-        case (incrementPairD) emulateIncrementPairD
-        case (moveImmediateD) nothing
-        case (doubleAddD) emulateDoubleAdd(`State.registerD`, `State.registerE`)
-        case (loadAccumulatorD) emulateLoadAccumulatorD
-        case (loadPairImmediateH) emulateLoadPairImmediateH
-        case (storeHLDirect) nothing
-        case (incrementPairH) emulateIncrementPairH
-        case (moveImmediateH) emulateMoveImmediateH
+        case (addImmediate) nothing
+        case (andA) nothing
+        case (andB) nothing
+        case (andC) nothing
+        case (andD) nothing
+        case (andE) nothing
+        case (andH) nothing
+        case (andL) nothing
+        case (andImmediate) nothing
+        case (andMemory) nothing
+        case (call) emulateCallIf((state) => true)
+        case (callIfNotZero) nothing
+        case (callIfZero) nothing
+        case (compareImmediate) emulateCompareImmediate
         case (decimalAdjust) nothing
-        case (doubleAddH) emulateDoubleAdd(`State.registerH`, `State.registerL`)
-        case (loadHLDirect) nothing
-        case (decrementPairH) nothing
-        case (loadPairImmediateStackPointer) emulateLoadPairImmediateStackPointer
-        case (storeA) nothing
-        case (decrementMemory) nothing
-        case (moveImmediateMemory) emulateMoveImmediateMemory
-        case (loadAccumulatorDirect) nothing
-        case (incrementA) nothing
         case (decrementA) nothing
-        case (moveImmediateA) nothing
+        case (decrementB) emulateDecrement(`State.registerB`)
+        case (decrementC) emulateDecrement(`State.registerC`)
+        case (decrementMemory) nothing
+        case (decrementPairH) nothing
+        case (disableInterrupts) nothing
+        case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
+        case (doubleAddD) emulateDoubleAdd(`State.registerD`, `State.registerE`)
+        case (doubleAddH) emulateDoubleAdd(`State.registerH`, `State.registerL`)
+        case (enableInterrupts) nothing
+        case (exchangeRegisters) emulateExchangeRegisters
+        case (halt) nothing
+        case (incrementA) nothing
+        case (incrementPairD) emulateIncrementPair(`State.registerD`, `State.registerE`)
+        case (incrementPairH) emulateIncrementPair(`State.registerH`, `State.registerL`)
+        case (input) nothing
+        case (jump) emulateJumpIf((state) => true)
+        case (jumpIfCarry) nothing
+        case (jumpIfMinus) nothing
+        case (jumpIfNoCarry) nothing
+        case (jumpIfNotZero) emulateJumpIf((state) => !state.zero)
+        case (jumpIfZero) nothing
+        case (loadAccumulatorD) emulateLoadAccumulator(`State.registerD`, `State.registerE`)
+        case (loadAccumulatorDirect) nothing
+        case (loadHLDirect) nothing
+        case (loadPairImmediateB) emulateLoadPairImmediate(`State.registerB`, `State.registerC`)
+        case (loadPairImmediateD) emulateLoadPairImmediate(`State.registerD`, `State.registerE`)
+        case (loadPairImmediateH) emulateLoadPairImmediate(`State.registerH`, `State.registerL`)
+        case (loadPairImmediateStackPointer) emulateLoadPairImmediateStackPointer
+        case (moveImmediateB) emulateMoveImmediate(`State.registerB`)
+        case (moveImmediateC) emulateMoveImmediate(`State.registerC`)
+        case (moveImmediateD) nothing
+        case (moveImmediateH) emulateMoveImmediate(`State.registerH`)
+        case (moveImmediateMemory) emulateMoveImmediateMemory
+        case (moveAA) nothing
+        case (moveAB) nothing
+        case (moveAC) nothing
+        case (moveAD) nothing
+        case (moveAE) nothing
+        case (moveAH) emulateMoveRegisters(`State.registerA`, `State.registerH`)
+        case (moveAL) nothing
+        case (moveAMemory) nothing
+        case (moveBA) nothing
         case (moveBB) nothing
         case (moveBC) nothing
         case (moveBD) nothing
@@ -47,7 +75,7 @@ shared [State, Integer] emulate(State state) {
         case (moveBH) nothing
         case (moveBL) nothing
         case (moveBMemory) nothing
-        case (moveBA) nothing
+        case (moveCA) nothing
         case (moveCB) nothing
         case (moveCC) nothing
         case (moveCD) nothing
@@ -55,7 +83,7 @@ shared [State, Integer] emulate(State state) {
         case (moveCH) nothing
         case (moveCL) nothing
         case (moveCMemory) nothing
-        case (moveCA) nothing
+        case (moveDA) nothing
         case (moveDB) nothing
         case (moveDC) nothing
         case (moveDD) nothing
@@ -63,7 +91,7 @@ shared [State, Integer] emulate(State state) {
         case (moveDH) nothing
         case (moveDL) nothing
         case (moveDMemory) nothing
-        case (moveDA) nothing
+        case (moveEA) nothing
         case (moveEB) nothing
         case (moveEC) nothing
         case (moveED) nothing
@@ -71,7 +99,7 @@ shared [State, Integer] emulate(State state) {
         case (moveEH) nothing
         case (moveEL) nothing
         case (moveEMemory) nothing
-        case (moveEA) nothing
+        case (moveHA) nothing
         case (moveHB) nothing
         case (moveHC) nothing
         case (moveHD) nothing
@@ -79,7 +107,7 @@ shared [State, Integer] emulate(State state) {
         case (moveHH) nothing
         case (moveHL) nothing
         case (moveHMemory) nothing
-        case (moveHA) nothing
+        case (moveLA) emulateMoveRegisters(`State.registerL`, `State.registerA`)
         case (moveLB) nothing
         case (moveLC) nothing
         case (moveLD) nothing
@@ -87,60 +115,33 @@ shared [State, Integer] emulate(State state) {
         case (moveLH) nothing
         case (moveLL) nothing
         case (moveLMemory) nothing
-        case (moveLA) emulateMoveLRegister(`State.registerA`)
+        case (moveImmediateA) nothing
+        case (moveMemoryA) emulateMoveMemoryRegister(`State.registerA`)
         case (moveMemoryB) nothing
         case (moveMemoryC) nothing
         case (moveMemoryD) nothing
         case (moveMemoryE) nothing
         case (moveMemoryH) nothing
         case (moveMemoryL) nothing
-        case (halt) nothing
-        case (moveMemoryA) emulateMoveMemoryA
-        case (moveAB) nothing
-        case (moveAC) nothing
-        case (moveAD) nothing
-        case (moveAE) nothing
-        case (moveAH) emulateMoveAH
-        case (moveAL) nothing
-        case (moveAMemory) nothing
-        case (moveAA) nothing
-        case (andB) nothing
-        case (andC) nothing
-        case (andD) nothing
-        case (andE) nothing
-        case (andH) nothing
-        case (andL) nothing
-        case (andMemory) nothing
-        case (andA) nothing
-        case (xorA) nothing
-        case (returnIfNotZero) nothing
-        case (popB) emulatePopB
-        case (jumpIfNotZero) emulateJumpIfNotZero
-        case (jump) emulateJump
-        case (callIfNotZero) nothing
-        case (pushB) emulatePush(`State.registerB`, `State.registerC`)
-        case (addImmediate) nothing
-        case (returnIfZero) nothing
-        case (\ireturn) emulateReturn
-        case (jumpIfZero) nothing
-        case (callIfZero) nothing
-        case (call) emulateCall
-        case (popD) emulatePopD
-        case (jumpIfNoCarry) nothing
+        case (noop) emulateNoop
         case (output) emulateOutput
-        case (pushD) emulatePush(`State.registerD`, `State.registerE`)
-        case (jumpIfCarry) nothing
-        case (input) nothing
-        case (popH) emulatePopH
-        case (pushH) emulatePush(`State.registerH`, `State.registerL`)
-        case (andImmediate) nothing
-        case (exchangeRegisters) emulateExchangeRegisters
+        case (popB) emulatePop(`State.registerB`, `State.registerC`)
+        case (popD) emulatePop(`State.registerD`, `State.registerE`)
+        case (popH) emulatePop(`State.registerH`, `State.registerL`)
         case (popStatus) nothing
-        case (disableInterrupts) nothing
+        case (pushB) emulatePush(`State.registerB`, `State.registerC`)
+        case (pushD) emulatePush(`State.registerD`, `State.registerE`)
+        case (pushH) emulatePush(`State.registerH`, `State.registerL`)
         case (pushStatus) nothing
-        case (jumpIfMinus) nothing
-        case (enableInterrupts) nothing
-        case (compareImmediate) emulateCompareImmediate;
+        case (\ireturn) emulateReturnIf((_) => true, 10)
+        case (returnIfNotZero) nothing
+        case (returnIfZero) nothing
+        case (rotateAccumulatorLeft) nothing
+        case (rotateAccumulatorRight) nothing
+        case (storeA) nothing
+        case (storeHLDirect) nothing
+        case (xorA) nothing
+        ;
     
     if (is Anything(Opcode, State) emulator) {
         return emulator(opcode, state);
@@ -197,379 +198,26 @@ shared Boolean flagSign(Byte val) => val.get(7);
 
 shared Boolean flagZero(Byte val) => val.zero;
 
-[State, Integer] emulateNoop(State state) {
-    return [
-        state.with {
-            `State.programCounter`->state.programCounter + noop.size
-        },
-        4
-    ];
-}
+// TODO: Tests for the above functions
 
-[State, Integer] emulateLoadPairImmediateB(State state) {
-    value [high, low] = dataBytes(state);
-    
-    return [
-        state.with {
-            `State.registerB`->high,
-            `State.registerC`->low,
-            `State.programCounter`->state.programCounter + loadPairImmediateB.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateDecrementB(State state) {
-    value val = state.registerB.predecessor;
-    
-    return [
-        state.with {
-            `State.registerB`->val,
-            `State.parity`->flagParity(val),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(state.registerB, 1.byte, val),
-            `State.zero`->flagZero(val),
-            `State.sign`->flagSign(val),
-            `State.programCounter`->state.programCounter + decrementB.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulateMoveImmediateB(State state) {
-    return [
-        state.with {
-            `State.registerB`->dataByte(state),
-            `State.programCounter`->state.programCounter + moveImmediateB.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulateDoubleAdd(ByteRegister highAttribute, ByteRegister lowAttribute)
+[State, Integer] emulateCallIf(Boolean(State) condition)
         (Opcode opcode, State state) {
-    value registerHL = word(state.registerH, state.registerL);
-    value addend = word {
-        high = highAttribute.bind(state).get();
-        low = lowAttribute.bind(state).get();
-    };
-    value result = registerHL + addend;
-    value [resultHigh, resultLow] = bytes(result);
-    
-    return [
-        state.with {
-            `State.registerH`->resultHigh,
-            `State.registerL`->resultLow,
-            `State.carry`->result.get(16),
-            `State.programCounter`->state.programCounter + opcode.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateDecrementC(State state) {
-    value val = state.registerC.predecessor;
-    
-    return [
-        state.with {
-            `State.registerC`->val,
-            `State.parity`->flagParity(val),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(state.registerC, 1.byte, val),
-            `State.zero`->flagZero(val),
-            `State.sign`->flagSign(val),
-            `State.programCounter`->state.programCounter + decrementB.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulateMoveImmediateC(State state) {
-    return [
-        state.with {
-            `State.registerC`->dataByte(state),
-            `State.programCounter`->state.programCounter + moveImmediateC.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulateLoadPairImmediateD(State state) {
-    value [high, low] = dataBytes(state);
-    
-    return [
-        state.with {
-            `State.registerD`->high,
-            `State.registerE`->low,
-            `State.programCounter`->state.programCounter + loadPairImmediateD.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateIncrementPairD(State state) {
-    value pairD = word(state.registerD, state.registerE);
-    value [high, low] = bytes(pairD + 1);
-    
-    return [
-        state.with {
-            `State.registerD`->high,
-            `State.registerE`->low,
-            `State.programCounter`->state.programCounter + incrementPairD.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulateLoadAccumulatorD(State state) {
-    value address = word(state.registerD, state.registerE);
-    
-    return [
-        state.with {
-            `State.registerA`->(state.memory[address] else 0.byte),
-            `State.programCounter`->state.programCounter + loadAccumulatorD.size
-        },
-        7
-    ];
-}
-
-[State, Integer] emulateLoadPairImmediateH(State state) {
-    value [high, low] = dataBytes(state);
-    
-    return [
-        state.with {
-            `State.registerH`->high,
-            `State.registerL`->low,
-            `State.programCounter`->state.programCounter + loadPairImmediateD.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateIncrementPairH(State state) {
-    value pairH = word(state.registerH, state.registerL);
-    value [high, low] = bytes(pairH + 1);
-    
-    return [
-        state.with {
-            `State.registerH`->high,
-            `State.registerL`->low,
-            `State.programCounter`->state.programCounter + incrementPairH.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulateMoveImmediateH(State state) {
-    return [
-        state.with {
-            `State.registerH`->dataByte(state),
-            `State.programCounter`->state.programCounter + moveImmediateH.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulateLoadPairImmediateStackPointer(State state) {
-    return [
-        state.with {
-            `State.stackPointer`->dataWord(state),
-            `State.programCounter`->state.programCounter + loadPairImmediateStackPointer.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateMoveImmediateMemory(State state) {
-    value high = state.registerH;
-    value low = state.registerL;
-    value address = word(high, low);
-    
-    return [
-        state.with {
-            `State.programCounter`->state.programCounter + moveImmediateMemory.size,
-            address->dataByte(state)
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateMoveLRegister(ByteRegister registerAttribute)
-        (Opcode opcode, State state) {
-    return [
-        state.with {
-            `State.registerL`->registerAttribute.bind(state).get(),
-            `State.programCounter`->state.programCounter + opcode.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulateMoveMemoryA(State state) {
-    value address = word(state.registerH, state.registerL);
-    
-    return [
-        state.with {
-            `State.programCounter`->state.programCounter + moveMemoryA.size,
-            address->state.registerA
-        },
-        7
-    ];
-}
-
-[State, Integer] emulateMoveAH(State state) {
-    return [
-        state.with {
-            `State.registerA`->state.registerH,
-            `State.programCounter`->state.programCounter + moveAH.size
-        },
-        5
-    ];
-}
-
-[State, Integer] emulatePopB(State state) {
-    value high = state.memory[state.stackPointer + 1];
-    value low = state.memory[state.stackPointer];
-    
-    assert (exists high, exists low);
-    
-    return [
-        state.with {
-            `State.registerB`->high,
-            `State.registerC`->low,
-            `State.stackPointer`->state.stackPointer + 2,
-            `State.programCounter`->state.programCounter + popB.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateJumpIfNotZero(State state) {
-    value address = state.zero then state.programCounter + jumpIfNotZero.size else dataWord(state);
-    
-    return [
-        state.with {
-            `State.programCounter`->address
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateJump(State state) {
-    return [
-        state.with {
-            `State.programCounter`->dataWord(state)
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateReturn(State state) {
-    value address = word {
-        high = state.memory[state.stackPointer + 1];
-        low = state.memory[state.stackPointer];
-    };
-    value val = state.memory[address];
-    
-    assert (exists val);
-    
-    value opcode = opcodes[val];
-    
-    assert (exists opcode);
-    
-    return [
-        state.with {
-            `State.stackPointer`->state.stackPointer + 2,
-            `State.programCounter`->address + opcode.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateCall(State state) {
-    value [high, low] = bytes(state.programCounter);
-    value address = dataWord(state);
-    
-    return [
-        state.with {
-            `State.programCounter`->address,
-            `State.stackPointer`->state.stackPointer - 2,
-            state.stackPointer - 1->high,
-            state.stackPointer - 2->low
-        },
-        17
-    ];
-}
-
-[State, Integer] emulatePopD(State state) {
-    value high = state.memory[state.stackPointer + 1];
-    value low = state.memory[state.stackPointer];
-    
-    assert (exists high, exists low);
-    
-    return [
-        state.with {
-            `State.registerD`->high,
-            `State.registerE`->low,
-            `State.stackPointer`->state.stackPointer + 2,
-            `State.programCounter`->state.programCounter + popD.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateOutput(State state) {
-    // TODO: Hook into system hardware.
-    return [
-        state.with {
-            `State.programCounter`->state.programCounter + output.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulatePush(ByteRegister highAttribute, ByteRegister lowAttribute)
-        (Opcode opcode, State state) {
-    value high = highAttribute.bind(state).get();
-    value low = lowAttribute.bind(state).get();
-    
-    return [
-        state.with {
-            `State.stackPointer`->state.stackPointer - 2,
-            `State.programCounter`->state.programCounter + opcode.size,
-            state.stackPointer - 1->high,
-            state.stackPointer - 2->low
-        },
-        11
-    ];
-}
-
-[State, Integer] emulatePopH(State state) {
-    value high = state.memory[state.stackPointer + 1];
-    value low = state.memory[state.stackPointer];
-    
-    assert (exists high, exists low);
-    
-    return [
-        state.with {
-            `State.registerH`->high,
-            `State.registerL`->low,
-            `State.stackPointer`->state.stackPointer + 2,
-            `State.programCounter`->state.programCounter + popH.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateExchangeRegisters(State state) {
-    return [
-        state.with {
-            `State.registerD`->state.registerH,
-            `State.registerE`->state.registerL,
-            `State.registerH`->state.registerD,
-            `State.registerL`->state.registerE,
-            `State.programCounter`->state.programCounter + exchangeRegisters.size
-        },
-        5
-    ];
+    if (condition(state)) {
+        value [high, low] = bytes(state.programCounter);
+        value address = dataWord(state);
+        
+        return [
+            state.with {
+                `State.programCounter`->address,
+                `State.stackPointer`->state.stackPointer - 2,
+                state.stackPointer - 1->high,
+                state.stackPointer - 2->low
+            },
+            17
+        ];
+    } else {
+        return nothing; // no test yet, 11 cycles
+    }
 }
 
 [State, Integer] emulateCompareImmediate(State state) {
@@ -589,4 +237,250 @@ shared Boolean flagZero(Byte val) => val.zero;
         },
         7
     ];
+}
+
+[State, Integer] emulateDecrement(ByteRegister register)
+        (Opcode opcode, State state) {
+    value val = register.bind(state).get().predecessor;
+    
+    return [
+        state.with {
+            register->val,
+            `State.parity`->flagParity(val),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(state.registerB, 1.byte, val),
+            `State.zero`->flagZero(val),
+            `State.sign`->flagSign(val),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateDoubleAdd(ByteRegister highRegister, ByteRegister lowRegister)
+        (Opcode opcode, State state) {
+    value registerHL = word(state.registerH, state.registerL);
+    value addend = word {
+        high = highRegister.bind(state).get();
+        low = lowRegister.bind(state).get();
+    };
+    value result = registerHL + addend;
+    value [resultHigh, resultLow] = bytes(result);
+    
+    return [
+        state.with {
+            `State.registerH`->resultHigh,
+            `State.registerL`->resultLow,
+            `State.carry`->result.get(16),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        10
+    ];
+}
+
+[State, Integer] emulateExchangeRegisters(State state) {
+    return [
+        state.with {
+            `State.registerD`->state.registerH,
+            `State.registerE`->state.registerL,
+            `State.registerH`->state.registerD,
+            `State.registerL`->state.registerE,
+            `State.programCounter`->state.programCounter + exchangeRegisters.size
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateIncrementPair(ByteRegister highRegister, ByteRegister lowRegister)
+        (Opcode opcode, State state) {
+    value pair = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
+    value [high, low] = bytes(pair + 1);
+    
+    return [
+        state.with {
+            highRegister->high,
+            lowRegister->low,
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateJumpIf(Boolean(State) condition)
+        (Opcode opcode, State state) {
+    value programCounter = condition(state)
+            then dataWord(state)
+            else state.programCounter + opcode.size;
+    
+    return [
+        state.with {
+            `State.programCounter`->programCounter
+        },
+        10
+    ];
+}
+
+[State, Integer] emulateLoadAccumulator(ByteRegister highRegister, ByteRegister lowRegister)
+        (Opcode opcode, State state) {
+    value address = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
+    
+    return [
+        state.with {
+            `State.registerA`->(state.memory[address] else 0.byte),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateLoadPairImmediate(ByteRegister highRegister, ByteRegister lowRegister)
+        (Opcode opcode, State state) {
+    value [high, low] = dataBytes(state);
+    
+    return [
+        state.with {
+            highRegister->high,
+            lowRegister->low,
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        10
+    ];
+}
+
+[State, Integer] emulateLoadPairImmediateStackPointer(State state) {
+    return [
+        state.with {
+            `State.stackPointer`->dataWord(state),
+            `State.programCounter`->state.programCounter + loadPairImmediateStackPointer.size
+        },
+        10
+    ];
+}
+
+[State, Integer] emulateMoveImmediate(ByteRegister register)
+        (Opcode opcode, State state) {
+    return [
+        state.with {
+            register->dataByte(state),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateMoveImmediateMemory(State state) {
+    value high = state.registerH;
+    value low = state.registerL;
+    value address = word(high, low);
+    
+    return [
+        state.with {
+            `State.programCounter`->state.programCounter + moveImmediateMemory.size,
+            address->dataByte(state)
+        },
+        10
+    ];
+}
+
+[State, Integer] emulateMoveMemoryRegister(ByteRegister register)
+        (Opcode opcode, State state) {
+    value address = word(state.registerH, state.registerL);
+    
+    return [
+        state.with {
+            `State.programCounter`->state.programCounter + opcode.size,
+            address->register.bind(state).get()
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateMoveRegisters(ByteRegister destinationRegister, ByteRegister sourceRegister)
+        (Opcode opcode, State state) {
+    return [
+        state.with {
+            destinationRegister->sourceRegister.bind(state).get(),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateNoop(State state) {
+    return [
+        state.with {
+            `State.programCounter`->state.programCounter + noop.size
+        },
+        4
+    ];
+}
+
+[State, Integer] emulateOutput(State state) {
+    // TODO: Hook into system hardware.
+    return [
+        state.with {
+            `State.programCounter`->state.programCounter + output.size
+        },
+        10
+    ];
+}
+
+[State, Integer] emulatePop(ByteRegister highRegister, ByteRegister lowRegister)
+        (Opcode opcode, State state) {
+    value high = state.memory[state.stackPointer + 1];
+    value low = state.memory[state.stackPointer];
+    
+    assert (exists high, exists low);
+    
+    return [
+        state.with {
+            highRegister->high,
+            lowRegister->low,
+            `State.stackPointer`->state.stackPointer + 2,
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        10
+    ];
+}
+
+[State, Integer] emulatePush(ByteRegister highAttribute, ByteRegister lowAttribute)
+(Opcode opcode, State state) {
+    value high = highAttribute.bind(state).get();
+    value low = lowAttribute.bind(state).get();
+    
+    return [
+        state.with {
+            `State.stackPointer`->state.stackPointer - 2,
+            `State.programCounter`->state.programCounter + opcode.size,
+            state.stackPointer - 1->high,
+            state.stackPointer - 2->low
+        },
+        11
+    ];
+}
+
+[State, Integer] emulateReturnIf(Boolean(State) condition, Integer returnCycles)
+(Opcode opcode, State state) {
+    if (condition(state)) {
+        value address = word {
+            high = state.memory[state.stackPointer + 1];
+            low = state.memory[state.stackPointer];
+        };
+        value val = state.memory[address];
+        
+        assert (exists val);
+        
+        value returnOpcode = opcodes[val];
+        
+        assert (exists returnOpcode);
+        
+        return [
+            state.with {
+                `State.stackPointer`->state.stackPointer + 2,
+                `State.programCounter`->address + returnOpcode.size
+            },
+            returnCycles // RET is 10, others are 11
+        ];
+    } else {
+        return nothing; // no test yet, 5 cycles
+    }
 }

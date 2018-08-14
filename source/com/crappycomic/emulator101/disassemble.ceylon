@@ -17,6 +17,7 @@ String format(Byte|Integer val, Integer width) {
 
 [String, String?] mnemonicAndArguments(Opcode opcode)
         => switch (opcode)
+            // TODO: Alphabetize
             case (noop) ["NOP", null]
             case (loadPairImmediateB) ["LXI", "B,#"]
             case (decrementB) ["DCR", "B"]
