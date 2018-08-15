@@ -1,9 +1,13 @@
+import ceylon.language.meta {
+    classDeclaration
+}
+
 "An opcode that the Intel 8080 understands.
  
  The only data that belongs in this class is what's necessary for turning a stream of bytes into a
  stream of opcodes. Data relating to disassembly belongs in the disassembler and data relating to
  execution belongs in the emulator."
-abstract class Opcode
+shared abstract class Opcode
         of noop // 00
         | loadPairImmediateB // 01
         // 02
@@ -270,6 +274,8 @@ abstract class Opcode
         this.byte = byte.byte;
         this.size = size;
     }
+    
+    shared actual String string => classDeclaration(this).name;
 }
 
 object noop extends Opcode(#00) {}

@@ -225,7 +225,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     value right = dataByte(state);
     value result = left.unsigned - right.unsigned;
     value resultByte = result.byte;
-    
+print("left: ``left``, right: ``right``, result: ``result``, carry: ``flagCarry(result)``"); // TODO    
     return [
         state.with {
             `State.carry`->flagCarry(result),
