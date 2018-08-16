@@ -61,7 +61,7 @@ String format(Byte|Integer val, Integer width) {
             case (loadPairImmediateStackPointer) ["LXI", "SP,#"]
             case (storeA) ["STA", "$"]
             case (decrementMemory) ["DCR", "M"]
-            case (moveImmediateMemory) ["MVI", "M"]
+            case (moveImmediateMemory) ["MVI", "M,#"]
             case (loadAccumulatorDirect) ["LDA", "$"]
             case (incrementA) ["INR", "A"]
             case (moveBB) ["MOV", "B,B"]

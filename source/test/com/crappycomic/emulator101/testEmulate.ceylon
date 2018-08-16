@@ -44,7 +44,7 @@ Array<Byte> testMemory(Byte|Integer* bytes) {
     return memory;
 }
 
-deprecated
+deprecated // TODO: remove, rename testState2
 State testState(
         Array<Byte> memory,
         Byte registerA = #f0.byte, // Try a little fuzziness
@@ -816,7 +816,6 @@ void testEmulateMoveRegisters(Integer opcode, ByteRegister destinationRegister,
     value data = #23.byte;
     value startState = testState2 {
         opcode = opcode;
-        destinationRegister->#ee.byte,
         sourceRegister->data
     };
     value [endState, cycles] = emulate(startState);
@@ -829,13 +828,143 @@ void testEmulateMoveRegisters(Integer opcode, ByteRegister destinationRegister,
 }
 
 test
+shared void testEmulateMoveAA() {
+    testEmulateMoveRegisters(#7f, `State.registerA`, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveAB() {
+    testEmulateMoveRegisters(#78, `State.registerA`, `State.registerB`);
+}
+
+test
+shared void testEmulateMoveAC() {
+    testEmulateMoveRegisters(#79, `State.registerA`, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveAD() {
+    testEmulateMoveRegisters(#7a, `State.registerA`, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveAE() {
+    testEmulateMoveRegisters(#7b, `State.registerA`, `State.registerE`);
+}
+
+test
 shared void testEmulateMoveAH() {
     testEmulateMoveRegisters(#7c, `State.registerA`, `State.registerH`);
 }
 
 test
+shared void testEmulateMoveAL() {
+    testEmulateMoveRegisters(#7d, `State.registerA`, `State.registerL`);
+}
+
+test
+shared void testEmulateMoveCA() {
+    testEmulateMoveRegisters(#4f, `State.registerC`, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveCB() {
+    testEmulateMoveRegisters(#48, `State.registerC`, `State.registerB`);
+}
+
+test
+shared void testEmulateMoveCC() {
+    testEmulateMoveRegisters(#49, `State.registerC`, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveCD() {
+    testEmulateMoveRegisters(#4a, `State.registerC`, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveCE() {
+    testEmulateMoveRegisters(#4b, `State.registerC`, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveCH() {
+    testEmulateMoveRegisters(#4c, `State.registerC`, `State.registerH`);
+}
+
+test
+shared void testEmulateMoveCL() {
+    testEmulateMoveRegisters(#4d, `State.registerC`, `State.registerL`);
+}
+
+test
+shared void testEmulateMoveEA() {
+    testEmulateMoveRegisters(#5f, `State.registerE`, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveEB() {
+    testEmulateMoveRegisters(#58, `State.registerE`, `State.registerB`);
+}
+
+test
+shared void testEmulateMoveEC() {
+    testEmulateMoveRegisters(#59, `State.registerE`, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveED() {
+    testEmulateMoveRegisters(#5a, `State.registerE`, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveEE() {
+    testEmulateMoveRegisters(#5b, `State.registerE`, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveEH() {
+    testEmulateMoveRegisters(#5c, `State.registerE`, `State.registerH`);
+}
+
+test
+shared void testEmulateMoveEL() {
+    testEmulateMoveRegisters(#5d, `State.registerE`, `State.registerL`);
+}
+
+test
 shared void testEmulateMoveLA() {
     testEmulateMoveRegisters(#6f, `State.registerL`, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveLB() {
+    testEmulateMoveRegisters(#68, `State.registerL`, `State.registerB`);
+}
+
+test
+shared void testEmulateMoveLC() {
+    testEmulateMoveRegisters(#69, `State.registerL`, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveLD() {
+    testEmulateMoveRegisters(#6a, `State.registerL`, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveLE() {
+    testEmulateMoveRegisters(#6b, `State.registerL`, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveLH() {
+    testEmulateMoveRegisters(#6c, `State.registerL`, `State.registerH`);
+}
+
+test
+shared void testEmulateMoveLL() {
+    testEmulateMoveRegisters(#6d, `State.registerL`, `State.registerL`);
 }
 
 test
