@@ -122,13 +122,14 @@ void assertFlags(
         Boolean|DoNotCheck expectedAuxiliaryCarry = doNotCheck,
         Boolean expectedZero = startState.zero,
         Boolean expectedSign = startState.sign) {
-    assertEquals(endState.carry, expectedCarry);
-    assertEquals(endState.parity, expectedParity);
-    assertEquals(endState.zero, expectedZero);
-    assertEquals(endState.sign, expectedSign);
+    assertEquals(endState.carry, expectedCarry, "Unexpected carry flag");
+    assertEquals(endState.parity, expectedParity, "Unexpected parity flag");
+    assertEquals(endState.zero, expectedZero, "Unexpected zero flag");
+    assertEquals(endState.sign, expectedSign, "Unexpected sign flag");
     
     if (is Boolean expectedAuxiliaryCarry) {
-        assertEquals(endState.auxiliaryCarry, expectedAuxiliaryCarry);
+        assertEquals(endState.auxiliaryCarry, expectedAuxiliaryCarry,
+            "Unexpected auxiliary carry flag");
     }
 }
 
@@ -137,7 +138,7 @@ void assertMemoriesEqual(State startState, State endState, <Integer->Byte>* exce
     
     for (address in 0:startState.memory.size) {
         if (exists exceptVal = exceptMap[address]) {
-            assertEquals(endState.memory[address], exceptVal);
+            assertEquals(endState.memory[address], exceptVal); // TODO: add messages
         } else {
             assertEquals(endState.memory[address], startState.memory[address]);
         }
@@ -251,8 +252,13 @@ shared void testEmulateCall() {
 }
 
 {[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateCompareImmediateParameters = {
-    [#00, #00, false, true, true, false]
-    // TODO: more cases
+    [#00, #00, false, true, true, false],
+    [#01, #00, false, false, false, false],
+    [#00, #01, true, false, false, true],
+    [#00, #02, true, true, false, true],
+    [#a0, #a0, false, true, true, false],
+    [#ff, #fe, false, false, false, false],
+    [#ff, #01, false, true, false, true]
 };
 
 test

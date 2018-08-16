@@ -225,7 +225,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     value right = dataByte(state);
     value result = left.unsigned - right.unsigned;
     value resultByte = result.byte;
-print("left: ``left``, right: ``right``, result: ``result``, carry: ``flagCarry(result)``"); // TODO    
+    
     return [
         state.with {
             `State.carry`->flagCarry(result),
@@ -443,7 +443,7 @@ print("left: ``left``, right: ``right``, result: ``result``, carry: ``flagCarry(
 }
 
 [State, Integer] emulatePush(ByteRegister highAttribute, ByteRegister lowAttribute)
-(Opcode opcode, State state) {
+        (Opcode opcode, State state) {
     value high = highAttribute.bind(state).get();
     value low = lowAttribute.bind(state).get();
     
@@ -459,7 +459,7 @@ print("left: ``left``, right: ``right``, result: ``result``, carry: ``flagCarry(
 }
 
 [State, Integer] emulateReturnIf(Boolean(State) condition, Integer returnCycles)
-(Opcode opcode, State state) {
+        (Opcode opcode, State state) {
     if (condition(state)) {
         value address = word {
             high = state.memory[state.stackPointer + 1];
