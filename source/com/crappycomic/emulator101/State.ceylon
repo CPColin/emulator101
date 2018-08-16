@@ -92,7 +92,7 @@ shared class State {
             registerE = byteRegisterUpdates[`State.registerE`] else registerE;
             registerH = byteRegisterUpdates[`State.registerH`] else registerH;
             registerL = byteRegisterUpdates[`State.registerL`] else registerL;
-            flags = packFlags {
+            flags = byteRegisterUpdates[`State.flags`] else packFlags {
                 carry = bitFlagUpdates[`State.carry`] else carry;
                 parity = bitFlagUpdates[`State.parity`] else parity;
                 auxiliaryCarry = bitFlagUpdates[`State.auxiliaryCarry`] else auxiliaryCarry;

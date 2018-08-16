@@ -6,7 +6,6 @@ import ceylon.test {
     assertFalse,
     assertTrue,
     assumeTrue,
-    ignore,
     parameters,
     test
 }
@@ -317,7 +316,6 @@ void testEmulateDecrementRegister(Integer opcode, ByteRegister register, Integer
 }
 
 test
-ignore
 parameters(`value testEmulateDecrementRegisterParameters`)
 shared void testEmulateDecrementA(Integer startRegister, Integer expectedRegister,
         Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
@@ -363,12 +361,11 @@ shared void testEmulateDecrementC(Integer startRegister, Integer expectedRegiste
 }
 
 test
-ignore
 parameters(`value testEmulateDecrementRegisterParameters`)
 shared void testEmulateDecrementD(Integer startRegister, Integer expectedRegister,
         Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
     testEmulateDecrementRegister {
-        opcode = #14;
+        opcode = #15;
         register = `State.registerD`;
         startRegister = startRegister;
         expectedRegister = expectedRegister;
@@ -379,7 +376,6 @@ shared void testEmulateDecrementD(Integer startRegister, Integer expectedRegiste
 }
 
 test
-ignore
 parameters(`value testEmulateDecrementRegisterParameters`)
 shared void testEmulateDecrementE(Integer startRegister, Integer expectedRegister,
         Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
@@ -395,7 +391,6 @@ shared void testEmulateDecrementE(Integer startRegister, Integer expectedRegiste
 }
 
 test
-ignore
 parameters(`value testEmulateDecrementRegisterParameters`)
 shared void testEmulateDecrementH(Integer startRegister, Integer expectedRegister,
         Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
@@ -411,7 +406,6 @@ shared void testEmulateDecrementH(Integer startRegister, Integer expectedRegiste
 }
 
 test
-ignore
 parameters(`value testEmulateDecrementRegisterParameters`)
 shared void testEmulateDecrementL(Integer startRegister, Integer expectedRegister,
         Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
@@ -561,7 +555,6 @@ void testEmulateIncrementPair(Integer opcode, ByteRegister register1, ByteRegist
 }
 
 test
-ignore
 parameters(`value testEmulateIncrementPairParameters`)
 shared void testEmulateIncrementPairB(Integer start1, Integer start2,
         Integer expected1, Integer expected2) {
@@ -742,6 +735,11 @@ void testEmulateMoveImmediateRegister(Integer opcode, ByteRegister register) {
 }
 
 test
+shared void testEmulateMoveImmediateA() {
+    testEmulateMoveImmediateRegister(#3e, `State.registerA`);
+}
+
+test
 shared void testEmulateMoveImmediateB() {
     testEmulateMoveImmediateRegister(#06, `State.registerB`);
 }
@@ -749,6 +747,26 @@ shared void testEmulateMoveImmediateB() {
 test
 shared void testEmulateMoveImmediateC() {
     testEmulateMoveImmediateRegister(#0e, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveImmediateD() {
+    testEmulateMoveImmediateRegister(#16, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveImmediateE() {
+    testEmulateMoveImmediateRegister(#1e, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveImmediateH() {
+    testEmulateMoveImmediateRegister(#26, `State.registerH`);
+}
+
+test
+shared void testEmulateMoveImmediateL() {
+    testEmulateMoveImmediateRegister(#2e, `State.registerL`);
 }
 
 test
@@ -881,9 +899,15 @@ shared void testEmulatePopH() {
     testEmulatePop(#e1, `State.registerH`, `State.registerL`);
 }
 
+test
+shared void testEmulatePopStatus() {
+    testEmulatePop(#f1, `State.registerA`, `State.flags`);
+}
+
 void testEmulatePush(Integer opcode, ByteRegister registerHigh, ByteRegister registerLow) {
     value high = #98.byte;
-    value low = #76.byte;
+    // This value can be put into the flags register, so we have to use something that fits.
+    value low = #83.byte;
     value startState = testState2 {
         opcode = opcode;
         registerHigh->high,
@@ -931,7 +955,6 @@ shared void testEmulatePushH() {
 }
 
 test
-ignore
 shared void testEmulatePushStatus() {
     testEmulatePush {
         opcode = #f5;
