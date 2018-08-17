@@ -150,7 +150,7 @@ shared [State, Integer] emulate(State state) {
         case (rotateAccumulatorRight) emulateRotateAccumulatorRight
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) nothing
-        case (xorA) nothing
+        case (xorA) emulateXorRegister(`State.registerA`)
         ;
     
     if (is Anything(Opcode, State) emulator) {
@@ -584,5 +584,22 @@ shared Boolean flagZero(Byte val) => val.zero;
             address->state.registerA
         },
         13
+    ];
+}
+
+[State, Integer] emulateXorRegister(ByteRegister register)(Opcode opcode, State state) {
+    value result = state.registerA.xor(register.bind(state).get());
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.auxiliaryCarry`->false,
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        4
     ];
 }

@@ -1413,3 +1413,28 @@ shared void testEmulateStoreAccumulatorDirect() {
     
     assertEquals(cycles, 13);
 }
+
+test
+shared void testEmulateXorA() {
+    value startState = testState {
+        opcode = #af;
+        `State.registerA`->#c7.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, 0.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = false;
+        expectedParity = true;
+        expectedAuxiliaryCarry = false;
+        expectedZero = true;
+        expectedSign = false;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 4);
+}
