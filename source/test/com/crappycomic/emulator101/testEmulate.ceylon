@@ -203,6 +203,81 @@ shared void testEmulateCall() {
     assertEquals(cycles, 17);
 }
 
+{[Integer, Integer, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
+testEmulateAddImmediateParameters = {
+    [#00, #00, #00, false, true, false, true, false],
+    [#00, #01, #01, false, false, false, false, false],
+    [#01, #00, #01, false, false, false, false, false],
+    [#11, #22, #33, false, false, false, false, false],
+    [#0f, #01, #10, false, true, true, false, false],
+    [#7f, #01, #80, false, true, true, false, true],
+    [#ff, #02, #01, true, false, true, false, false]
+};
+
+test
+parameters(`value testEmulateAddImmediateParameters`)
+shared void testEmulateAddImmediate(Integer registerA, Integer data, Integer result,
+        Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
+        Boolean expectedZero, Boolean expectedSign) {
+    value startState = testState {
+        opcode = #c6;
+        `State.registerA`->registerA.byte,
+        testStateProgramCounter + 1->data.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, result.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = expectedCarry;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 2);
+    
+    assertEquals(cycles, 7);
+}
+
+{[Integer, Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateAndImmediateParameters = {
+    [#00, #00, #00, true, true, false],
+    [#01, #01, #01, false, false, false],
+    [#01, #00, #00, true, true, false],
+    [#77, #0f, #07, false, false, false],
+    [#8f, #f0, #80, true, false, true]
+};
+
+test
+parameters(`value testEmulateAndImmediateParameters`)
+shared void testEmulateAndImmediate(Integer registerA, Integer data, Integer result,
+        Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
+    value startState = testState {
+        opcode = #e6;
+        `State.registerA`->registerA.byte,
+        testStateProgramCounter + 1->data.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, result.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = false;
+        expectedParity = expectedParity;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 2);
+    
+    assertEquals(cycles, 7);
+}
+
 {[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateCompareImmediateParameters = {
     [#00, #00, false, true, true, false],
     [#01, #00, false, false, false, false],
@@ -216,7 +291,7 @@ shared void testEmulateCall() {
 test
 parameters(`value testEmulateCompareImmediateParameters`)
 shared void testEmulateCompareImmediate(Integer registerA, Integer data, Boolean expectedCarry,
-    Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
+        Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
     value startState = testState {
         opcode = #fe;
         `State.registerA`->registerA.byte,
@@ -616,6 +691,29 @@ shared void testEmulateLoadAccumulatorD() {
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 7);
+}
+
+test
+shared void testEmulateLoadAccumulatorDirect() {
+    value high = #01.byte;
+    value low = #34.byte;
+    value address = word(high, low);
+    value val = #5f.byte;
+    value startState = testState {
+        opcode = #3a;
+        `State.registerA`->#78.byte,
+        testStateProgramCounter + 1->low,
+        testStateProgramCounter + 2->high,
+        address->val
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.programCounter`);
+    assertEquals(endState.registerA, val);
+    assertEquals(endState.programCounter, startState.programCounter + 3);
+    
+    assertEquals(cycles, 13);
 }
 
 void testEmulateLoadPairImmediate(Integer opcode, ByteRegister registerHigh,
@@ -1274,7 +1372,7 @@ shared void testEmulateReturn() {
 
 test
 parameters(`value testRotateAccumulatorRightParameters`)
-shared void testRotateAccumulatorRight(Integer initialValue, Integer expectedValue,
+shared void testEmulateRotateAccumulatorRight(Integer initialValue, Integer expectedValue,
         Boolean expectedCarry) {
     value startState = testState {
         opcode = #0f;
@@ -1293,4 +1391,25 @@ shared void testRotateAccumulatorRight(Integer initialValue, Integer expectedVal
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 4);
+}
+
+test
+shared void testEmulateStoreAccumulatorDirect() {
+    value high = #01.byte;
+    value low = #ee.byte;
+    value address = word(high, low);
+    value data = #75.byte;
+    value startState = testState {
+        opcode = #32;
+        `State.registerA`->data,
+        testStateProgramCounter + 1->low,
+        testStateProgramCounter + 2->high
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, `State.memory`, `State.programCounter`);
+    assertMemoriesEqual(startState, endState, address->data);
+    assertEquals(endState.programCounter, startState.programCounter + 3);
+    
+    assertEquals(cycles, 13);
 }

@@ -10,7 +10,7 @@ shared [State, Integer] emulate(State state) {
     assert (exists opcode);
     
     value emulator = switch (opcode)
-        case (addImmediate) nothing
+        case (addImmediate) emulateAddImmediate
         case (andA) nothing
         case (andB) nothing
         case (andC) nothing
@@ -18,7 +18,7 @@ shared [State, Integer] emulate(State state) {
         case (andE) nothing
         case (andH) nothing
         case (andL) nothing
-        case (andImmediate) nothing
+        case (andImmediate) emulateAndImmediate
         case (andMemory) nothing
         case (call) emulateCallIf((state) => true)
         case (callIfNotZero) nothing
@@ -56,7 +56,7 @@ shared [State, Integer] emulate(State state) {
         case (jumpIfPlus) nothing
         case (jumpIfZero) nothing
         case (loadAccumulatorD) emulateLoadAccumulator(`State.registerD`, `State.registerE`)
-        case (loadAccumulatorDirect) nothing
+        case (loadAccumulatorDirect) emulateLoadAccumulatorDirect
         case (loadHLDirect) nothing
         case (loadPairImmediateB) emulateLoadPairImmediate(`State.registerB`, `State.registerC`)
         case (loadPairImmediateD) emulateLoadPairImmediate(`State.registerD`, `State.registerE`)
@@ -148,7 +148,7 @@ shared [State, Integer] emulate(State state) {
         case (returnIfZero) nothing
         case (rotateAccumulatorLeft) nothing
         case (rotateAccumulatorRight) emulateRotateAccumulatorRight
-        case (storeA) nothing
+        case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) nothing
         case (xorA) nothing
         ;
@@ -209,6 +209,42 @@ shared Boolean flagSign(Byte val) => val.get(7);
 shared Boolean flagZero(Byte val) => val.zero;
 
 // TODO: Tests for the above functions
+
+[State, Integer] emulateAddImmediate(State state) {
+    value left = state.registerA;
+    value right = dataByte(state);
+    value result = left.unsigned + right.unsigned;
+    value resultByte = result.byte;
+    
+    return [
+    state.with {
+            `State.registerA`->result.byte,
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + addImmediate.size
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateAndImmediate(State state) {
+    value result = state.registerA.and(dataByte(state));
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + andImmediate.size
+        },
+        7
+    ];
+}
 
 [State, Integer] emulateCallIf(Boolean(State) condition)
         (Opcode opcode, State state) {
@@ -339,6 +375,18 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + opcode.size
         },
         7
+    ];
+}
+
+[State, Integer] emulateLoadAccumulatorDirect(State state) {
+    value address = dataWord(state);
+    
+    return [
+        state.with {
+            `State.registerA`->(state.memory[address] else 0.byte),
+            `State.programCounter`->state.programCounter + loadAccumulatorDirect.size
+        },
+        13
     ];
 }
 
@@ -524,5 +572,17 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + rotateAccumulatorRight.size
         },
         4
+    ];
+}
+
+[State, Integer] emulateStoreAccumulatorDirect(State state) {
+    value address = dataWord(state);
+    
+    return [
+        state.with {
+            `State.programCounter`->state.programCounter + storeAccumulatorDirect.size,
+            address->state.registerA
+        },
+        13
     ];
 }
