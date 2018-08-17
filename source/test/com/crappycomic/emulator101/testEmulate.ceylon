@@ -31,60 +31,11 @@ import ceylon.language.meta.declaration {
     FunctionDeclaration
 }
 
-Integer memorySize = #200;
-
-deprecated
-Array<Byte> testMemory(Byte|Integer* bytes) {
-    value memory = Array<Byte>.ofSize(memorySize, #ff.byte);
-    
-    for (address->val in bytes.indexed) {
-        memory[address] = if (is Integer val) then val.byte else val;
-    }
-    
-    return memory;
-}
-
-deprecated // TODO: remove, rename testState2
-State testState(
-        Array<Byte> memory,
-        Byte registerA = #f0.byte, // Try a little fuzziness
-        Byte registerB = #f1.byte,
-        Byte registerC = #f2.byte,
-        Byte registerD = #f3.byte,
-        Byte registerE = #f4.byte,
-        Byte registerH = #f5.byte,
-        Byte registerL = #f6.byte,
-        Boolean carry = true,
-        Boolean parity = true,
-        Boolean auxiliaryCarry = true,
-        Boolean zero = true,
-        Boolean sign = true,
-        Integer stackPointer = #0100,
-        Integer programCounter = 0) => State {
-    registerA = registerA;
-    registerB = registerB;
-    registerC = registerC;
-    registerD = registerD;
-    registerE = registerE;
-    registerH = registerH;
-    registerL = registerL;
-    flags = State.packFlags {
-        carry = carry;
-        parity = parity;
-        auxiliaryCarry = auxiliaryCarry;
-        zero = zero;
-        sign = sign;
-    };
-    stackPointer = stackPointer;
-    programCounter = programCounter;
-    memory = memory;
-};
-
 Integer testStateProgramCounter = #120;
 
 Integer testStateStackPointer = #100;
 
-State testState2(Integer opcode,
+State testState(Integer opcode,
         {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates)
     => State {
         registerA = #f0.byte;
@@ -137,9 +88,11 @@ void assertMemoriesEqual(State startState, State endState, <Integer->Byte>* exce
     
     for (address in 0:startState.memory.size) {
         if (exists exceptVal = exceptMap[address]) {
-            assertEquals(endState.memory[address], exceptVal); // TODO: add messages
+            assertEquals(endState.memory[address], exceptVal,
+                "Memory should have changed");
         } else {
-            assertEquals(endState.memory[address], startState.memory[address]);
+            assertEquals(endState.memory[address], startState.memory[address],
+                "Memory should not have changed");
         }
     }
 }
@@ -232,7 +185,7 @@ shared void testEmulateCall() {
     value addressLow = #44.byte;
     value address = word(addressHigh, addressLow);
     value [startProgramCounterHigh, startProgramCounterLow] = bytes(testStateProgramCounter);
-    value startState = testState2 {
+    value startState = testState {
         opcode = #cd;
         testStateProgramCounter + 1->addressLow,
         testStateProgramCounter + 2->addressHigh
@@ -264,7 +217,7 @@ test
 parameters(`value testEmulateCompareImmediateParameters`)
 shared void testEmulateCompareImmediate(Integer registerA, Integer data, Boolean expectedCarry,
     Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
-    value startState = testState2 {
+    value startState = testState {
         opcode = #fe;
         `State.registerA`->registerA.byte,
         testStateProgramCounter + 1->data.byte
@@ -295,7 +248,7 @@ shared void testEmulateCompareImmediate(Integer registerA, Integer data, Boolean
 void testEmulateDecrementRegister(Integer opcode, ByteRegister register, Integer startRegister,
         Integer expectedRegister, Boolean expectedParity, Boolean expectedZero,
         Boolean expectedSign) {
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         register->startRegister.byte
     };
@@ -431,7 +384,7 @@ void testEmulateDoubleAdd(Integer opcode, ByteRegister registerHigh, ByteRegiste
     value [registerH, registerL] = bytes(hlValue);
     value [registerValueHigh, registerValueLow] = bytes(registerValue);
     value [expectedHigh, expectedLow] = bytes(expectedValue);
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         `State.registerH`->registerH,
         `State.registerL`->registerL,
@@ -509,7 +462,7 @@ test
 shared void testEmulateExchangeRegisters() {
     value [startH, startL] = bytes(#1234);
     value [startD, startE] = bytes(#5678);
-    value startState = testState2 {
+    value startState = testState {
         opcode = #eb;
         `State.registerD`->startD,
         `State.registerE`->startE,
@@ -538,7 +491,7 @@ shared void testEmulateExchangeRegisters() {
 
 void testEmulateIncrementPair(Integer opcode, ByteRegister register1, ByteRegister register2,
         Integer start1, Integer start2, Integer expected1, Integer expected2) {
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         register1->start1.byte,
         register2->start2.byte
@@ -604,7 +557,7 @@ shared void testEmulateJump() {
     value high = #43.byte;
     value low = #21.byte;
     value address = word(high, low);
-    value startState = testState2 {
+    value startState = testState {
         opcode = #c3;
         testStateProgramCounter + 1->low,
         testStateProgramCounter + 2->high
@@ -621,7 +574,7 @@ void testEmulateJumpIfNot(Integer opcode, BitFlag flag, Boolean flagValue) {
     value high = #43.byte;
     value low = #21.byte;
     value address = word(high, low);
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         flag->flagValue,
         testStateProgramCounter + 1->low,
@@ -648,7 +601,7 @@ shared void testEmulateLoadAccumulatorD() {
     value low = #23.byte;
     value address = word(high, low);
     value val = #56.byte;
-    value startState = testState2 {
+    value startState = testState {
         opcode = #1a;
         `State.registerA`->#78.byte,
         `State.registerD`->high,
@@ -669,7 +622,7 @@ void testEmulateLoadPairImmediate(Integer opcode, ByteRegister registerHigh,
         ByteRegister registerLow) {
     value high = #33.byte;
     value low = #ff.byte;
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         testStateProgramCounter + 1->low,
         testStateProgramCounter + 2->high
@@ -705,7 +658,7 @@ shared void testEmulateLoadPairImmediateStackPointer() {
     value high = #a6.byte;
     value low = #b7.byte;
     value data = word(high, low);
-    value startState = testState2 {
+    value startState = testState {
         opcode = #31;
         testStateProgramCounter + 1-> low,
         testStateProgramCounter + 2-> high
@@ -721,7 +674,7 @@ shared void testEmulateLoadPairImmediateStackPointer() {
 
 void testEmulateMoveImmediateRegister(Integer opcode, ByteRegister register) {
     value data = #4f.byte;
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         testStateProgramCounter + 1->data
     };
@@ -775,7 +728,7 @@ shared void testEmulateMoveImmediateMemory() {
     value low = #45.byte;
     value address = word(high, low);
     value data = #77.byte;
-    value startState = testState2 {
+    value startState = testState {
         opcode = #36;
         `State.registerH`->high,
         `State.registerL`->low,
@@ -793,7 +746,7 @@ shared void testEmulateMoveImmediateMemory() {
 void testEmulateMoveRegisters(Integer opcode, ByteRegister destinationRegister,
         ByteRegister sourceRegister) {
     value data = #23.byte;
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         sourceRegister->data
     };
@@ -810,7 +763,7 @@ void testEmulateMoveRegisterMemory(Integer opcode, ByteRegister register) {
     value data = #9b.byte;
     value address = #0123;
     value [high, low] = bytes(address);
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         `State.registerH`->high,
         `State.registerL`->low,
@@ -1111,7 +1064,7 @@ void testEmulateMoveMemoryRegister(Integer opcode, ByteRegister register) {
     value val = if (register == `State.registerH`) then high
         else if (register == `State.registerL`) then low
         else #33.byte;
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         register->val,
         `State.registerH`->high,
@@ -1163,7 +1116,7 @@ shared void testEmulateMoveMemoryL() {
 
 test
 shared void testEmulateNoop() {
-    value startState = testState2 {
+    value startState = testState {
         opcode = #00;
     };
     value [endState, cycles] = emulate(startState);
@@ -1176,7 +1129,7 @@ shared void testEmulateNoop() {
 
 test
 shared void testOutput() {
-    value startState = testState2 {
+    value startState = testState {
         opcode = #d3;
     };
     value [endState, cycles] = emulate(startState);
@@ -1190,7 +1143,7 @@ shared void testOutput() {
 void testEmulatePop(Integer opcode, ByteRegister registerHigh, ByteRegister registerLow) {
     value high = #aa.byte;
     value low = #bb.byte;
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         testStateStackPointer->low,
         testStateStackPointer + 1->high
@@ -1231,7 +1184,7 @@ void testEmulatePush(Integer opcode, ByteRegister registerHigh, ByteRegister reg
     value high = #98.byte;
     // This value can be put into the flags register, so we have to use something that fits.
     value low = #83.byte;
-    value startState = testState2 {
+    value startState = testState {
         opcode = opcode;
         registerHigh->high,
         registerLow->low
@@ -1293,7 +1246,7 @@ shared void testEmulateReturn() {
     value address = word(high, low);
     value [testStateProgramCounterHigh, testStateProgramCounterLow]
             = bytes(testStateProgramCounter);
-    value startState = testState2 {
+    value startState = testState {
         opcode = #c9;
         testStateStackPointer->low,
         testStateStackPointer + 1->high,
@@ -1323,7 +1276,7 @@ test
 parameters(`value testRotateAccumulatorRightParameters`)
 shared void testRotateAccumulatorRight(Integer initialValue, Integer expectedValue,
         Boolean expectedCarry) {
-    value startState = testState2 {
+    value startState = testState {
         opcode = #0f;
         `State.registerA`->initialValue.byte
     };
