@@ -790,29 +790,8 @@ shared void testEmulateMoveImmediateMemory() {
     assertEquals(cycles, 10);
 }
 
-test
-shared void testEmulateMoveMemoryA() {
-    value high = #01.byte;
-    value low = #23.byte;
-    value address = word(high, low);
-    value val = #33.byte;
-    value startState = testState2 {
-        opcode = #77;
-        `State.registerA`->val,
-        `State.registerH`->high,
-        `State.registerL`->low
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState, `State.programCounter`, `State.memory`);
-    assertEquals(endState.programCounter, startState.programCounter + 1);
-    assertMemoriesEqual(startState, endState, address->val);
-    
-    assertEquals(cycles, 7);
-}
-
 void testEmulateMoveRegisters(Integer opcode, ByteRegister destinationRegister,
-    ByteRegister sourceRegister) {
+        ByteRegister sourceRegister) {
     value data = #23.byte;
     value startState = testState2 {
         opcode = opcode;
@@ -825,6 +804,24 @@ void testEmulateMoveRegisters(Integer opcode, ByteRegister destinationRegister,
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 5);
+}
+
+void testEmulateMoveRegisterMemory(Integer opcode, ByteRegister register) {
+    value data = #9b.byte;
+    value address = #0123;
+    value [high, low] = bytes(address);
+    value startState = testState2 {
+        opcode = opcode;
+        `State.registerH`->high,
+        `State.registerL`->low,
+        address->data
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, register, `State.programCounter`);
+    assertEquals(register.bind(endState).get(), data);
+    
+    assertEquals(cycles, 7);
 }
 
 test
@@ -863,6 +860,51 @@ shared void testEmulateMoveAL() {
 }
 
 test
+shared void testEmulateMoveAMemory() {
+    testEmulateMoveRegisterMemory(#7e, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveBA() {
+    testEmulateMoveRegisters(#47, `State.registerB`, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveBB() {
+    testEmulateMoveRegisters(#40, `State.registerB`, `State.registerB`);
+}
+
+test
+shared void testEmulateMoveBC() {
+    testEmulateMoveRegisters(#41, `State.registerB`, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveBD() {
+    testEmulateMoveRegisters(#42, `State.registerB`, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveBE() {
+    testEmulateMoveRegisters(#43, `State.registerB`, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveBH() {
+    testEmulateMoveRegisters(#44, `State.registerB`, `State.registerH`);
+}
+
+test
+shared void testEmulateMoveBL() {
+    testEmulateMoveRegisters(#45, `State.registerB`, `State.registerL`);
+}
+
+test
+shared void testEmulateMoveBMemory() {
+    testEmulateMoveRegisterMemory(#46, `State.registerB`);
+}
+
+test
 shared void testEmulateMoveCA() {
     testEmulateMoveRegisters(#4f, `State.registerC`, `State.registerA`);
 }
@@ -895,6 +937,51 @@ shared void testEmulateMoveCH() {
 test
 shared void testEmulateMoveCL() {
     testEmulateMoveRegisters(#4d, `State.registerC`, `State.registerL`);
+}
+
+test
+shared void testEmulateMoveCMemory() {
+    testEmulateMoveRegisterMemory(#4e, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveDA() {
+    testEmulateMoveRegisters(#57, `State.registerD`, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveDB() {
+    testEmulateMoveRegisters(#50, `State.registerD`, `State.registerB`);
+}
+
+test
+shared void testEmulateMoveDC() {
+    testEmulateMoveRegisters(#51, `State.registerD`, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveDD() {
+    testEmulateMoveRegisters(#52, `State.registerD`, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveDE() {
+    testEmulateMoveRegisters(#53, `State.registerD`, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveDH() {
+    testEmulateMoveRegisters(#54, `State.registerD`, `State.registerH`);
+}
+
+test
+shared void testEmulateMoveDL() {
+    testEmulateMoveRegisters(#55, `State.registerD`, `State.registerL`);
+}
+
+test
+shared void testEmulateMoveDMemory() {
+    testEmulateMoveRegisterMemory(#56, `State.registerD`);
 }
 
 test
@@ -933,6 +1020,51 @@ shared void testEmulateMoveEL() {
 }
 
 test
+shared void testEmulateMoveEMemory() {
+    testEmulateMoveRegisterMemory(#5e, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveHA() {
+    testEmulateMoveRegisters(#67, `State.registerH`, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveHB() {
+    testEmulateMoveRegisters(#60, `State.registerH`, `State.registerB`);
+}
+
+test
+shared void testEmulateMoveHC() {
+    testEmulateMoveRegisters(#61, `State.registerH`, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveHD() {
+    testEmulateMoveRegisters(#62, `State.registerH`, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveHE() {
+    testEmulateMoveRegisters(#63, `State.registerH`, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveHH() {
+    testEmulateMoveRegisters(#64, `State.registerH`, `State.registerH`);
+}
+
+test
+shared void testEmulateMoveHL() {
+    testEmulateMoveRegisters(#65, `State.registerH`, `State.registerL`);
+}
+
+test
+shared void testEmulateMoveHMemory() {
+    testEmulateMoveRegisterMemory(#66, `State.registerH`);
+}
+
+test
 shared void testEmulateMoveLA() {
     testEmulateMoveRegisters(#6f, `State.registerL`, `State.registerA`);
 }
@@ -965,6 +1097,68 @@ shared void testEmulateMoveLH() {
 test
 shared void testEmulateMoveLL() {
     testEmulateMoveRegisters(#6d, `State.registerL`, `State.registerL`);
+}
+
+test
+shared void testEmulateMoveLMemory() {
+    testEmulateMoveRegisterMemory(#6e, `State.registerL`);
+}
+
+void testEmulateMoveMemoryRegister(Integer opcode, ByteRegister register) {
+    value high = #01.byte;
+    value low = #23.byte;
+    value address = word(high, low);
+    value val = if (register == `State.registerH`) then high
+        else if (register == `State.registerL`) then low
+        else #33.byte;
+    value startState = testState2 {
+        opcode = opcode;
+        register->val,
+        `State.registerH`->high,
+        `State.registerL`->low
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, `State.programCounter`, `State.memory`);
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    assertMemoriesEqual(startState, endState, address->val);
+    
+    assertEquals(cycles, 7);
+}
+
+test
+shared void testEmulateMoveMemoryA() {
+    testEmulateMoveMemoryRegister(#77, `State.registerA`);
+}
+
+test
+shared void testEmulateMoveMemoryB() {
+    testEmulateMoveMemoryRegister(#70, `State.registerB`);
+}
+
+test
+shared void testEmulateMoveMemoryC() {
+    testEmulateMoveMemoryRegister(#71, `State.registerC`);
+}
+
+test
+shared void testEmulateMoveMemoryD() {
+    testEmulateMoveMemoryRegister(#72, `State.registerD`);
+}
+
+test
+shared void testEmulateMoveMemoryE() {
+    testEmulateMoveMemoryRegister(#73, `State.registerE`);
+}
+
+test
+shared void testEmulateMoveMemoryH() {
+    testEmulateMoveMemoryRegister(#74, `State.registerH`);
+}
+
+test
+shared void testEmulateMoveMemoryL() {
+    testEmulateMoveMemoryRegister(#75, `State.registerL`);
 }
 
 test
@@ -1115,4 +1309,35 @@ shared void testEmulateReturn() {
     assertEquals(endState.programCounter, address + 3);
     
     assertEquals(cycles, 10);
+}
+
+{[Integer, Integer, Boolean]*} testRotateAccumulatorRightParameters = {
+    [#00, #00, false],
+    [#01, #80, true],
+    [#02, #01, false],
+    [#fe, #7f, false],
+    [#ff, #ff, true]
+};
+
+test
+parameters(`value testRotateAccumulatorRightParameters`)
+shared void testRotateAccumulatorRight(Integer initialValue, Integer expectedValue,
+        Boolean expectedCarry) {
+    value startState = testState2 {
+        opcode = #0f;
+        `State.registerA`->initialValue.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, expectedValue.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = expectedCarry;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 4);
 }

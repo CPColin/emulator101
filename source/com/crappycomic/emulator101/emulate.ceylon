@@ -77,15 +77,15 @@ shared [State, Integer] emulate(State state) {
         case (moveAE) emulateMoveRegisters(`State.registerA`, `State.registerE`)
         case (moveAH) emulateMoveRegisters(`State.registerA`, `State.registerH`)
         case (moveAL) emulateMoveRegisters(`State.registerA`, `State.registerL`)
-        case (moveAMemory) nothing
-        case (moveBA) nothing
-        case (moveBB) nothing
-        case (moveBC) nothing
-        case (moveBD) nothing
-        case (moveBE) nothing
-        case (moveBH) nothing
-        case (moveBL) nothing
-        case (moveBMemory) nothing
+        case (moveAMemory) emulateMoveRegisterMemory(`State.registerA`)
+        case (moveBA) emulateMoveRegisters(`State.registerB`, `State.registerA`)
+        case (moveBB) emulateMoveRegisters(`State.registerB`, `State.registerB`)
+        case (moveBC) emulateMoveRegisters(`State.registerB`, `State.registerC`)
+        case (moveBD) emulateMoveRegisters(`State.registerB`, `State.registerD`)
+        case (moveBE) emulateMoveRegisters(`State.registerB`, `State.registerE`)
+        case (moveBH) emulateMoveRegisters(`State.registerB`, `State.registerH`)
+        case (moveBL) emulateMoveRegisters(`State.registerB`, `State.registerL`)
+        case (moveBMemory) emulateMoveRegisterMemory(`State.registerB`)
         case (moveCA) emulateMoveRegisters(`State.registerC`, `State.registerA`)
         case (moveCB) emulateMoveRegisters(`State.registerC`, `State.registerB`)
         case (moveCC) emulateMoveRegisters(`State.registerC`, `State.registerC`)
@@ -93,15 +93,15 @@ shared [State, Integer] emulate(State state) {
         case (moveCE) emulateMoveRegisters(`State.registerC`, `State.registerE`)
         case (moveCH) emulateMoveRegisters(`State.registerC`, `State.registerH`)
         case (moveCL) emulateMoveRegisters(`State.registerC`, `State.registerL`)
-        case (moveCMemory) nothing
-        case (moveDA) nothing
-        case (moveDB) nothing
-        case (moveDC) nothing
-        case (moveDD) nothing
-        case (moveDE) nothing
-        case (moveDH) nothing
-        case (moveDL) nothing
-        case (moveDMemory) nothing
+        case (moveCMemory) emulateMoveRegisterMemory(`State.registerC`)
+        case (moveDA) emulateMoveRegisters(`State.registerD`, `State.registerA`)
+        case (moveDB) emulateMoveRegisters(`State.registerD`, `State.registerB`)
+        case (moveDC) emulateMoveRegisters(`State.registerD`, `State.registerC`)
+        case (moveDD) emulateMoveRegisters(`State.registerD`, `State.registerD`)
+        case (moveDE) emulateMoveRegisters(`State.registerD`, `State.registerE`)
+        case (moveDH) emulateMoveRegisters(`State.registerD`, `State.registerH`)
+        case (moveDL) emulateMoveRegisters(`State.registerD`, `State.registerL`)
+        case (moveDMemory) emulateMoveRegisterMemory(`State.registerD`)
         case (moveEA) emulateMoveRegisters(`State.registerE`, `State.registerA`)
         case (moveEB) emulateMoveRegisters(`State.registerE`, `State.registerB`)
         case (moveEC) emulateMoveRegisters(`State.registerE`, `State.registerC`)
@@ -109,15 +109,15 @@ shared [State, Integer] emulate(State state) {
         case (moveEE) emulateMoveRegisters(`State.registerE`, `State.registerE`)
         case (moveEH) emulateMoveRegisters(`State.registerE`, `State.registerH`)
         case (moveEL) emulateMoveRegisters(`State.registerE`, `State.registerL`)
-        case (moveEMemory) nothing
-        case (moveHA) nothing
-        case (moveHB) nothing
-        case (moveHC) nothing
-        case (moveHD) nothing
-        case (moveHE) nothing
-        case (moveHH) nothing
-        case (moveHL) nothing
-        case (moveHMemory) nothing
+        case (moveEMemory) emulateMoveRegisterMemory(`State.registerE`)
+        case (moveHA) emulateMoveRegisters(`State.registerH`, `State.registerA`)
+        case (moveHB) emulateMoveRegisters(`State.registerH`, `State.registerB`)
+        case (moveHC) emulateMoveRegisters(`State.registerH`, `State.registerC`)
+        case (moveHD) emulateMoveRegisters(`State.registerH`, `State.registerD`)
+        case (moveHE) emulateMoveRegisters(`State.registerH`, `State.registerE`)
+        case (moveHH) emulateMoveRegisters(`State.registerH`, `State.registerH`)
+        case (moveHL) emulateMoveRegisters(`State.registerH`, `State.registerL`)
+        case (moveHMemory) emulateMoveRegisterMemory(`State.registerH`)
         case (moveLA) emulateMoveRegisters(`State.registerL`, `State.registerA`)
         case (moveLB) emulateMoveRegisters(`State.registerL`, `State.registerB`)
         case (moveLC) emulateMoveRegisters(`State.registerL`, `State.registerC`)
@@ -125,14 +125,14 @@ shared [State, Integer] emulate(State state) {
         case (moveLE) emulateMoveRegisters(`State.registerL`, `State.registerE`)
         case (moveLH) emulateMoveRegisters(`State.registerL`, `State.registerH`)
         case (moveLL) emulateMoveRegisters(`State.registerL`, `State.registerL`)
-        case (moveLMemory) nothing
+        case (moveLMemory) emulateMoveRegisterMemory(`State.registerL`)
         case (moveMemoryA) emulateMoveMemoryRegister(`State.registerA`)
-        case (moveMemoryB) nothing
-        case (moveMemoryC) nothing
-        case (moveMemoryD) nothing
-        case (moveMemoryE) nothing
-        case (moveMemoryH) nothing
-        case (moveMemoryL) nothing
+        case (moveMemoryB) emulateMoveMemoryRegister(`State.registerB`)
+        case (moveMemoryC) emulateMoveMemoryRegister(`State.registerC`)
+        case (moveMemoryD) emulateMoveMemoryRegister(`State.registerD`)
+        case (moveMemoryE) emulateMoveMemoryRegister(`State.registerE`)
+        case (moveMemoryH) emulateMoveMemoryRegister(`State.registerH`)
+        case (moveMemoryL) emulateMoveMemoryRegister(`State.registerL`)
         case (noop) emulateNoop
         case (output) emulateOutput
         case (popB) emulatePop(`State.registerB`, `State.registerC`)
@@ -147,7 +147,7 @@ shared [State, Integer] emulate(State state) {
         case (returnIfNotZero) nothing
         case (returnIfZero) nothing
         case (rotateAccumulatorLeft) nothing
-        case (rotateAccumulatorRight) nothing
+        case (rotateAccumulatorRight) emulateRotateAccumulatorRight
         case (storeA) nothing
         case (storeHLDirect) nothing
         case (xorA) nothing
@@ -415,6 +415,24 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateMoveRegisterMemory(ByteRegister register)
+        (Opcode opcode, State state) {
+    value high = state.registerH;
+    value low = state.registerL;
+    value address = word(high, low);
+    value val = state.memory[address];
+    
+    assert (exists val);
+    
+    return [
+        state.with {
+            register->val,
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        7
+    ];
+}
+
 [State, Integer] emulateNoop(State state) {
     return [
         state.with {
@@ -493,4 +511,18 @@ shared Boolean flagZero(Byte val) => val.zero;
     } else {
         return nothing; // no test yet, 5 cycles
     }
+}
+
+[State, Integer] emulateRotateAccumulatorRight(State state) {
+    value carry = state.registerA.get(0);
+    value val = state.registerA.rightLogicalShift(1).set(7, carry);
+    
+    return [
+        state.with {
+            `State.registerA`->val,
+            `State.carry`->carry,
+            `State.programCounter`->state.programCounter + rotateAccumulatorRight.size
+        },
+        4
+    ];
 }
