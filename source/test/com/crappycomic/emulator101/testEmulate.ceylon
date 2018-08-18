@@ -187,30 +187,6 @@ shared void verifyAllOpcodesTested(Opcode opcode) {
     assertFalse(testFunction.annotated<IgnoreAnnotation>(), "Function is ignored");
 }
 
-test
-shared void testEmulateCall() {
-    value addressHigh = #33.byte;
-    value addressLow = #44.byte;
-    value address = word(addressHigh, addressLow);
-    value [startProgramCounterHigh, startProgramCounterLow] = bytes(testStateProgramCounter);
-    value startState = testState {
-        opcode = #cd;
-        testStateProgramCounter + 1->addressLow,
-        testStateProgramCounter + 2->addressHigh
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState,
-        `State.stackPointer`, `State.programCounter`, `State.memory`);
-    assertEquals(endState.stackPointer, startState.stackPointer - 2);
-    assertEquals(endState.programCounter, address);
-    assertMemoriesEqual(startState, endState,
-        endState.stackPointer->startProgramCounterLow,
-        endState.stackPointer + 1->startProgramCounterHigh);
-    
-    assertEquals(cycles, 17);
-}
-
 {[Integer, Integer, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
 testEmulateAddImmediateParameters = {
     [#00, #00, #00, false, true, false, true, false],
@@ -230,6 +206,55 @@ shared void testEmulateAddImmediate(Integer registerA, Integer data, Integer res
     value startState = testState {
         opcode = #c6;
         `State.registerA`->registerA.byte,
+        `State.carry`->true, // Make sure carry flag doesn't get included
+        testStateProgramCounter + 1->data.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, result.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = expectedCarry;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 2);
+    
+    assertEquals(cycles, 7);
+}
+
+{[Integer, Integer, Boolean, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
+testEmulateAddImmediateWithCarryParameters = {
+    [#00, #00, false, #00, false, true, false, true, false],
+    [#00, #00, true, #01, false, false, false, false, false],
+    [#00, #01, false, #01, false, false, false, false, false],
+    [#00, #01, true, #02, false, false, false, false, false],
+    [#01, #00, false, #01, false, false, false, false, false],
+    [#01, #00, true, #02, false, false, false, false, false],
+    [#11, #22, false, #33, false, true, false, false, false],
+    [#11, #22, true, #34, false, false, false, false, false],
+    [#0f, #01, false, #10, false, false, true, false, false],
+    [#0f, #01, true, #11, false, true, true, false, false],
+    [#7f, #01, false, #80, false, false, true, false, true],
+    [#7f, #01, true, #81, false, true, true, false, true],
+    [#ff, #02, false, #01, true, false, true, false, false],
+    [#ff, #02, true, #02, true, false, true, false, false]
+};
+
+test
+parameters(`value testEmulateAddImmediateWithCarryParameters`)
+shared void testEmulateAddImmediateWithCarry(Integer registerA, Integer data, Boolean carry,
+        Integer result, Boolean expectedCarry, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    value startState = testState {
+        opcode = #ce;
+        `State.registerA`->registerA.byte,
+        `State.carry`->carry,
         testStateProgramCounter + 1->data.byte
     };
     value [endState, cycles] = emulate(startState);
@@ -284,6 +309,30 @@ shared void testEmulateAndImmediate(Integer registerA, Integer data, Integer res
     assertEquals(endState.programCounter, startState.programCounter + 2);
     
     assertEquals(cycles, 7);
+}
+
+test
+shared void testEmulateCall() {
+    value addressHigh = #33.byte;
+    value addressLow = #44.byte;
+    value address = word(addressHigh, addressLow);
+    value [startProgramCounterHigh, startProgramCounterLow] = bytes(testStateProgramCounter);
+    value startState = testState {
+        opcode = #cd;
+        testStateProgramCounter + 1->addressLow,
+        testStateProgramCounter + 2->addressHigh
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.stackPointer`, `State.programCounter`, `State.memory`);
+    assertEquals(endState.stackPointer, startState.stackPointer - 2);
+    assertEquals(endState.programCounter, address);
+    assertMemoriesEqual(startState, endState,
+        endState.stackPointer->startProgramCounterLow,
+        endState.stackPointer + 1->startProgramCounterHigh);
+    
+    assertEquals(cycles, 17);
 }
 
 {[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateCompareImmediateParameters = {
@@ -1482,6 +1531,86 @@ shared void testEmulateStoreAccumulatorDirect() {
     assertEquals(endState.programCounter, startState.programCounter + 3);
     
     assertEquals(cycles, 13);
+}
+
+{[Integer, Integer, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
+testEmulateSubtractImmediateParameters = {
+    [#00, #00, #00, false, true, false, true, false],
+    [#03, #02, #01, false, false, false, false, false],
+    [#ff, #80, #7f, false, false, false, false, false],
+    [#ff, #7e, #81, false, true, false, false, true],
+    [#01, #02, #ff, true, true, true, false, true]
+};
+
+test
+parameters(`value testEmulateSubtractImmediateParameters`)
+shared void testEmulateSubtractImmediate(Integer registerA, Integer data, Integer result,
+        Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
+        Boolean expectedZero, Boolean expectedSign) {
+    value startState = testState {
+        opcode = #d6;
+        `State.registerA`->registerA.byte,
+        `State.carry`->true, // Make sure carry bit doesn't interfere.
+        testStateProgramCounter + 1->data.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, result.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = expectedCarry;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 2);
+    
+    assertEquals(cycles, 7);
+}
+
+{[Integer, Integer, Boolean, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
+testEmulateSubtractImmediateWithBorrowParameters = {
+    [#00, #00, false, #00, false, true, false, true, false],
+    [#00, #00, true, #ff, true, true, true, false, true],
+    [#03, #02, false, #01, false, false, false, false, false],
+    [#03, #02, true, #00, false, true, false, true, false],
+    [#ff, #80, false, #7f, false, false, false, false, false],
+    [#03, #02, false, #01, false, false, false, false, false],
+    [#ff, #7e, false, #81, false, true, false, false, true]
+};
+
+test
+parameters(`value testEmulateSubtractImmediateWithBorrowParameters`)
+shared void testEmulateSubtractImmediateWithBorrow(Integer registerA, Integer data, Boolean carry,
+        Integer result, Boolean expectedCarry, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    value startState = testState {
+        opcode = #de;
+        `State.registerA`->registerA.byte,
+        `State.carry`->carry,
+        testStateProgramCounter + 1->data.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, result.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = expectedCarry;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 2);
+    
+    assertEquals(cycles, 7);
 }
 
 test

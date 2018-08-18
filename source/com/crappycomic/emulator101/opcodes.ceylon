@@ -215,7 +215,7 @@ shared abstract class Opcode
         // cb
         | callIfZero // cc
         | call // cd
-        // ce
+        | addImmediateWithCarry // ce
         // cf
         // d0
         | popD // d1
@@ -223,7 +223,7 @@ shared abstract class Opcode
         | output // d3
         // d4
         | pushD // d5
-        // d6
+        | subtractImmediate // d6
         // d7
         // d8
         // d9
@@ -231,7 +231,7 @@ shared abstract class Opcode
         | input // db
         // dc
         // dd
-        // de
+        | subtractImmediateWithBorrow // de
         // df
         // e0
         | popH // e1
@@ -400,12 +400,15 @@ object \ireturn extends Opcode(#c9) {}
 object jumpIfZero extends Opcode(#ca, 3) {}
 object callIfZero extends Opcode(#cc, 3) {}
 object call extends Opcode(#cd, 3) {}
+object addImmediateWithCarry extends Opcode(#ce, 2) {}
 object popD extends Opcode(#d1) {}
 object jumpIfNoCarry extends Opcode(#d2, 3) {}
 object output extends Opcode(#d3, 2) {}
 object pushD extends Opcode(#d5) {}
+object subtractImmediate extends Opcode(#d6, 2) {}
 object jumpIfCarry extends Opcode(#da, 3) {}
 object input extends Opcode(#db, 2) {}
+object subtractImmediateWithBorrow extends Opcode(#de, 2) {}
 object popH extends Opcode(#e1) {}
 object jumpIfParityOdd extends Opcode(#e2, 3) {}
 object pushH extends Opcode(#e5) {}

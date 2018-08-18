@@ -10,7 +10,8 @@ shared [State, Integer] emulate(State state) {
     assert (exists opcode);
     
     value emulator = switch (opcode)
-        case (addImmediate) emulateAddImmediate
+        case (addImmediate) emulateAddImmediate(false)
+        case (addImmediateWithCarry) emulateAddImmediate(true)
         case (andA) nothing
         case (andB) nothing
         case (andC) nothing
@@ -150,6 +151,8 @@ shared [State, Integer] emulate(State state) {
         case (rotateAccumulatorRight) emulateRotateAccumulatorRight
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) nothing
+        case (subtractImmediate) emulateSubtractImmediate(false)
+        case (subtractImmediateWithBorrow) emulateSubtractImmediate(true)
         case (xorA) emulateXorRegister(`State.registerA`)
         ;
     
@@ -211,10 +214,10 @@ shared Boolean flagSign(Byte val) => val.get(7);
 
 shared Boolean flagZero(Byte val) => val.zero;
 
-[State, Integer] emulateAddImmediate(State state) {
+[State, Integer] emulateAddImmediate(Boolean withCarry)(State state) {
     value left = state.registerA;
     value right = dataByte(state);
-    value result = left.unsigned + right.unsigned;
+    value result = left.unsigned + right.unsigned + (withCarry && state.carry then 1 else 0);
     value resultByte = result.byte;
     
     return [
@@ -585,6 +588,26 @@ shared Boolean flagZero(Byte val) => val.zero;
             address->state.registerA
         },
         13
+    ];
+}
+
+[State, Integer] emulateSubtractImmediate(Boolean withBorrow)(State state) {
+    value left = state.registerA;
+    value right = dataByte(state);
+    value result = left.unsigned - right.unsigned - (withBorrow && state.carry then 1 else 0);
+    value resultByte = result.byte;
+    
+    return [
+        state.with {
+            `State.registerA`->result.byte,
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + addImmediate.size
+        },
+        7
     ];
 }
 

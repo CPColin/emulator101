@@ -17,6 +17,8 @@ String format(Byte|Integer val, Integer width) {
 
 [String, String?] mnemonicAndArguments(Opcode opcode)
         => switch (opcode)
+            case (addImmediate) ["ADI", "#"]
+            case (addImmediateWithCarry) ["ACI", "#"]
             case (andA) ["ANA", "A"]
             case (andB) ["ANA", "B"]
             case (andC) ["ANA", "C"]
@@ -120,6 +122,8 @@ String format(Byte|Integer val, Integer width) {
             case (noop) ["NOP", null]
             case (storeAccumulatorDirect) ["STA", "$"]
             case (storeHLDirect) ["SHLD", "$"]
+            case (subtractImmediate) ["SUI", "#"]
+            case (subtractImmediateWithBorrow) ["SBI", "#"]
             // TODO: Alphabetize
             case (rotateAccumulatorLeft) ["RLC", null]
             case (doubleAddB) ["DAD", "B"]
@@ -141,7 +145,6 @@ String format(Byte|Integer val, Integer width) {
             case (popB) ["POP", "B"]
             case (callIfNotZero) ["CNZ", "$"]
             case (pushB) ["PUSH", "B"]
-            case (addImmediate) ["ADI", "#"]
             case (returnIfZero) ["RZ", null]
             case (\ireturn) ["RET", null]
             case (callIfZero) ["CZ", "$"]
