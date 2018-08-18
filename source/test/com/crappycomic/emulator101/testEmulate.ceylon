@@ -25,6 +25,11 @@ import com.crappycomic.emulator101 {
     State,
     bytes,
     emulate,
+    flagAuxiliaryCarry,
+    flagCarry,
+    flagParity,
+    flagSign,
+    flagZero,
     word
 }
 import ceylon.language.meta.declaration {
@@ -55,6 +60,7 @@ State testState(Integer opcode,
         stackPointer = testStateStackPointer;
         programCounter = testStateProgramCounter;
         memory = Array<Byte>.ofSize(#0200, #ff.byte);
+        interruptsEnabled = false;
     }.with {
         testStateProgramCounter->opcode.byte,
         *updates
@@ -155,6 +161,10 @@ void assertStatesEqual(State startState, State endState, Attribute<State>* excep
     }
 }
 
+{Boolean*} testBooleanParameters = `Boolean`.caseValues;
+
+{Byte*} testByteParameters = 0.byte..255.byte;
+
 {Opcode*} verifyAllOpcodesTestedParameters = `Opcode`.caseValues;
 
 Map<String, FunctionDeclaration> testFunctions = map {
@@ -176,8 +186,6 @@ shared void verifyAllOpcodesTested(Opcode opcode) {
     assertTrue(testFunction.annotated<SharedAnnotation>(), "Function is not shared");
     assertFalse(testFunction.annotated<IgnoreAnnotation>(), "Function is ignored");
 }
-
-{Boolean*} testBooleanParameters = `Boolean`.caseValues;
 
 test
 shared void testEmulateCall() {
@@ -208,9 +216,9 @@ testEmulateAddImmediateParameters = {
     [#00, #00, #00, false, true, false, true, false],
     [#00, #01, #01, false, false, false, false, false],
     [#01, #00, #01, false, false, false, false, false],
-    [#11, #22, #33, false, false, false, false, false],
-    [#0f, #01, #10, false, true, true, false, false],
-    [#7f, #01, #80, false, true, true, false, true],
+    [#11, #22, #33, false, true, false, false, false],
+    [#0f, #01, #10, false, false, true, false, false],
+    [#7f, #01, #80, false, false, true, false, true],
     [#ff, #02, #01, true, false, true, false, false]
 };
 
@@ -248,7 +256,7 @@ shared void testEmulateAddImmediate(Integer registerA, Integer data, Integer res
     [#01, #01, #01, false, false, false],
     [#01, #00, #00, true, true, false],
     [#77, #0f, #07, false, false, false],
-    [#8f, #f0, #80, true, false, true]
+    [#8f, #f0, #80, false, false, true]
 };
 
 test
@@ -281,11 +289,11 @@ shared void testEmulateAndImmediate(Integer registerA, Integer data, Integer res
 {[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateCompareImmediateParameters = {
     [#00, #00, false, true, true, false],
     [#01, #00, false, false, false, false],
-    [#00, #01, true, false, false, true],
-    [#00, #02, true, true, false, true],
+    [#00, #01, true, true, false, true],
+    [#00, #02, true, false, false, true],
     [#a0, #a0, false, true, true, false],
     [#ff, #fe, false, false, false, false],
-    [#ff, #01, false, true, false, true]
+    [#ff, #01, false, false, false, true]
 };
 
 test
@@ -315,8 +323,9 @@ shared void testEmulateCompareImmediate(Integer registerA, Integer data, Boolean
 
 {[Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateDecrementRegisterParameters = [
     [#01, #00, true, true, false],
-    [#10, #0f, false, false, false],
-    [#00, #ff, false, false, true],
+    [#10, #0f, true, false, false],
+    [#0f, #0e, false, false, false],
+    [#00, #ff, true, false, true],
     [#f1, #f0, true, false, true]
 ];
 
@@ -645,6 +654,25 @@ shared void testEmulateJump() {
     assertEquals(cycles, 10);
 }
 
+void testEmulateJumpIf(Integer opcode, BitFlag flag, Boolean flagValue) {
+    value high = #43.byte;
+    value low = #21.byte;
+    value address = word(high, low);
+    value startState = testState {
+        opcode = opcode;
+        flag->flagValue,
+        testStateProgramCounter + 1->low,
+        testStateProgramCounter + 2->high
+    };
+    value [endState, cycles] = emulate(startState);
+    value expectedProgramCounter = flagValue then address else startState.programCounter + 3;
+    
+    assertStatesEqual(startState, endState, `State.programCounter`);
+    assertEquals(endState.programCounter, expectedProgramCounter);
+    
+    assertEquals(cycles, 10);
+}
+
 void testEmulateJumpIfNot(Integer opcode, BitFlag flag, Boolean flagValue) {
     value high = #43.byte;
     value low = #21.byte;
@@ -668,6 +696,48 @@ test
 parameters(`value testBooleanParameters`)
 shared void testEmulateJumpIfNotZero(Boolean zero) {
     testEmulateJumpIfNot(#c2, `State.zero`, zero);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateJumpIfZero(Boolean zero) {
+    testEmulateJumpIf(#ca, `State.zero`, zero);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateJumpIfNotCarry(Boolean carry) {
+    testEmulateJumpIfNot(#d2, `State.carry`, carry);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateJumpIfCarry(Boolean carry) {
+    testEmulateJumpIf(#da, `State.carry`, carry);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateJumpIfParityOdd(Boolean odd) {
+    testEmulateJumpIfNot(#e2, `State.parity`, odd);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateJumpIfParityEven(Boolean even) {
+    testEmulateJumpIf(#ea, `State.parity`, even);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateJumpIfPlus(Boolean plus) {
+    testEmulateJumpIfNot(#f2, `State.sign`, plus);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateJumpIfMinus(Boolean minus) {
+    testEmulateJumpIf(#fa, `State.sign`, minus);
 }
 
 test
@@ -1437,4 +1507,57 @@ shared void testEmulateXorA() {
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 4);
+}
+
+{[Boolean, Boolean, Boolean, Boolean]*} testFlagAuxiliaryCarryParameters = {
+    [false, false, false, false],
+    [false, false, true, true],
+    [false, true, false, true],
+    [false, true, true, false],
+    [true, false, false, true],
+    [true, false, true, false],
+    [true, true, false, false],
+    [true, true, true, true]
+};
+
+test
+parameters(`value testFlagAuxiliaryCarryParameters`)
+shared void testFlagAuxiliaryCarry(Boolean leftBit, Boolean rightBit, Boolean resultBit,
+        Boolean expected) {
+    value left = 0.byte.set(4, leftBit);
+    value right = 0.byte.set(4, rightBit);
+    value result = 0.byte.set(4, resultBit);
+    
+    assertEquals(flagAuxiliaryCarry(left, right, result), expected);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testFlagCarry(Boolean bit) {
+    value val = bit then #100 else #0ff;
+    
+    assertEquals(flagCarry(val), bit);
+}
+
+test
+parameters(`value testByteParameters`)
+shared void testFlagParity(Byte byte) {
+    value bitCount = {
+        for (bit in 0:8)
+            byte.get(bit)
+    }.count(identity);
+    
+    assertEquals(flagParity(byte), bitCount % 2 == 0);
+}
+
+test
+parameters(`value testByteParameters`)
+shared void testFlagSign(Byte byte) {
+    assertEquals(flagSign(byte), byte.signed < 0);
+}
+
+test
+parameters(`value testByteParameters`)
+shared void testFlagZero(Byte byte) {
+    assertEquals(flagZero(byte), byte.zero);
 }

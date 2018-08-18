@@ -47,14 +47,14 @@ shared [State, Integer] emulate(State state) {
         case (incrementPairH) emulateIncrementPair(`State.registerH`, `State.registerL`)
         case (input) nothing
         case (jump) emulateJumpIf((state) => true)
-        case (jumpIfCarry) nothing
-        case (jumpIfMinus) nothing
-        case (jumpIfNoCarry) nothing
+        case (jumpIfCarry) emulateJumpIf(State.carry)
+        case (jumpIfMinus) emulateJumpIf(State.sign)
+        case (jumpIfNoCarry) emulateJumpIf((state) => !state.carry)
         case (jumpIfNotZero) emulateJumpIf((state) => !state.zero)
-        case (jumpIfParityEven) nothing
-        case (jumpIfParityOdd) nothing
-        case (jumpIfPlus) nothing
-        case (jumpIfZero) nothing
+        case (jumpIfParityEven) emulateJumpIf(State.parity)
+        case (jumpIfParityOdd) emulateJumpIf((state) => !state.parity)
+        case (jumpIfPlus) emulateJumpIf((state) => !state.sign)
+        case (jumpIfZero) emulateJumpIf(State.zero)
         case (loadAccumulatorD) emulateLoadAccumulator(`State.registerD`, `State.registerE`)
         case (loadAccumulatorDirect) emulateLoadAccumulatorDirect
         case (loadHLDirect) nothing
@@ -202,13 +202,14 @@ shared Boolean flagAuxiliaryCarry(Byte left, Byte right, Byte result)
 
 shared Boolean flagCarry(Integer val) => val.get(8);
 
-shared Boolean flagParity(Byte val) => !val.get(0);
+shared Boolean flagParity(Byte val) => {
+    for (bit in 0:8)
+        val.get(bit)
+}.count(identity) % 2 == 0;
 
 shared Boolean flagSign(Byte val) => val.get(7);
 
 shared Boolean flagZero(Byte val) => val.zero;
-
-// TODO: Tests for the above functions
 
 [State, Integer] emulateAddImmediate(State state) {
     value left = state.registerA;

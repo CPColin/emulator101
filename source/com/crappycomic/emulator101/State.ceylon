@@ -44,6 +44,7 @@ shared class State {
     shared Integer stackPointer;
     shared Integer programCounter;
     shared Memory memory;
+    shared Boolean interruptsEnabled;
     
     shared new (
             Byte registerA,
@@ -56,7 +57,8 @@ shared class State {
             Byte flags,
             Integer stackPointer,
             Integer programCounter,
-            Memory memory) {
+            Memory memory,
+            Boolean interruptsEnabled) {
         this.registerA = registerA;
         this.registerB = registerB;
         this.registerC = registerC;
@@ -68,6 +70,7 @@ shared class State {
         this.stackPointer = stackPointer;
         this.programCounter = programCounter;
         this.memory = memory;
+        this.interruptsEnabled = interruptsEnabled;
     }
     
     shared Boolean carry => flags.get(flagBitCarry);
@@ -104,6 +107,7 @@ shared class State {
             memory = if (!memoryUpdates.empty)
                     then updateMemory(memory, *memoryUpdates)
                     else memory;
+            interruptsEnabled = bitFlagUpdates[`State.interruptsEnabled`] else interruptsEnabled;
         };
     }
 }

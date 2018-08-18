@@ -407,13 +407,13 @@ object pushD extends Opcode(#d5) {}
 object jumpIfCarry extends Opcode(#da, 3) {}
 object input extends Opcode(#db, 2) {}
 object popH extends Opcode(#e1) {}
-object jumpIfParityOdd extends Opcode(#e2) {}
+object jumpIfParityOdd extends Opcode(#e2, 3) {}
 object pushH extends Opcode(#e5) {}
 object andImmediate extends Opcode(#e6, 2) {}
-object jumpIfParityEven extends Opcode(#ea) {}
+object jumpIfParityEven extends Opcode(#ea, 3) {}
 object exchangeRegisters extends Opcode(#eb) {}
 object popStatus extends Opcode(#f1) {}
-object jumpIfPlus extends Opcode(#f2) {}
+object jumpIfPlus extends Opcode(#f2, 3) {}
 object disableInterrupts extends Opcode(#f3) {}
 object pushStatus extends Opcode(#f5) {}
 object jumpIfMinus extends Opcode(#fa, 3) {}
