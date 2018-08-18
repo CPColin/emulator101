@@ -335,6 +335,116 @@ shared void testEmulateCall() {
     assertEquals(cycles, 17);
 }
 
+void testEmulateCallIf(Integer opcode, BitFlag flag, Boolean flagValue) {
+    value addressHigh = #33.byte;
+    value addressLow = #44.byte;
+    value address = word(addressHigh, addressLow);
+    value [startProgramCounterHigh, startProgramCounterLow] = bytes(testStateProgramCounter);
+    value startState = testState {
+        opcode = opcode;
+        flag->flagValue,
+        testStateProgramCounter + 1->addressLow,
+        testStateProgramCounter + 2->addressHigh
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    if (flagValue) {
+        assertStatesEqual(startState, endState,
+            `State.stackPointer`, `State.programCounter`, `State.memory`);
+        assertEquals(endState.stackPointer, startState.stackPointer - 2);
+        assertEquals(endState.programCounter, address);
+        assertMemoriesEqual(startState, endState,
+            endState.stackPointer->startProgramCounterLow,
+            endState.stackPointer + 1->startProgramCounterHigh);
+        
+        assertEquals(cycles, 17);
+    } else {
+        assertStatesEqual(startState, endState, `State.programCounter`);
+        assertEquals(endState.programCounter, startState.programCounter + 3);
+        
+        assertEquals(cycles, 11);
+    }
+}
+
+void testEmulateCallIfNot(Integer opcode, BitFlag flag, Boolean flagValue) {
+    value addressHigh = #33.byte;
+    value addressLow = #44.byte;
+    value address = word(addressHigh, addressLow);
+    value [startProgramCounterHigh, startProgramCounterLow] = bytes(testStateProgramCounter);
+    value startState = testState {
+        opcode = opcode;
+        flag->flagValue,
+        testStateProgramCounter + 1->addressLow,
+        testStateProgramCounter + 2->addressHigh
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    if (flagValue) {
+        assertStatesEqual(startState, endState, `State.programCounter`);
+        assertEquals(endState.programCounter, startState.programCounter + 3);
+        
+        assertEquals(cycles, 11);
+    } else {
+        assertStatesEqual(startState, endState,
+            `State.stackPointer`, `State.programCounter`, `State.memory`);
+        assertEquals(endState.stackPointer, startState.stackPointer - 2);
+        assertEquals(endState.programCounter, address);
+        assertMemoriesEqual(startState, endState,
+            endState.stackPointer->startProgramCounterLow,
+            endState.stackPointer + 1->startProgramCounterHigh);
+        
+        assertEquals(cycles, 17);
+    }
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateCallIfNotZero(Boolean zero) {
+    testEmulateCallIfNot(#c4, `State.zero`, zero);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateCallIfZero(Boolean zero) {
+    testEmulateCallIf(#cc, `State.zero`, zero);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateCallIfNotCarry(Boolean carry) {
+    testEmulateCallIfNot(#d4, `State.carry`, carry);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateCallIfCarry(Boolean carry) {
+    testEmulateCallIf(#dc, `State.carry`, carry);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateCallIfParityOdd(Boolean odd) {
+    testEmulateCallIfNot(#e4, `State.parity`, odd);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateCallIfParityEven(Boolean even) {
+    testEmulateCallIf(#ec, `State.parity`, even);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateCallIfPlus(Boolean plus) {
+    testEmulateCallIfNot(#f4, `State.sign`, plus);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateCallIfMinus(Boolean minus) {
+    testEmulateCallIf(#fc, `State.sign`, minus);
+}
+
 {[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateCompareImmediateParameters = {
     [#00, #00, false, true, true, false],
     [#01, #00, false, false, false, false],
@@ -755,7 +865,7 @@ shared void testEmulateJumpIfZero(Boolean zero) {
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfNotCarry(Boolean carry) {
+shared void testEmulateJumpIfNoCarry(Boolean carry) {
     testEmulateJumpIfNot(#d2, `State.carry`, carry);
 }
 
@@ -1344,6 +1454,42 @@ shared void testEmulateNoop() {
     assertEquals(cycles, 4);
 }
 
+{[Integer, Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateOrImmediateParameters = {
+    [#00, #00, #00, true, true, false],
+    [#00, #01, #01, false, false, false],
+    [#01, #01, #01, false, false, false],
+    [#01, #00, #01, false, false, false],
+    [#07, #70, #77, true, false, false],
+    [#8f, #f0, #ff, true, false, true]
+};
+
+test
+parameters(`value testEmulateOrImmediateParameters`)
+shared void testEmulateOrImmediate(Integer registerA, Integer data, Integer result,
+    Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
+    value startState = testState {
+        opcode = #f6;
+        `State.registerA`->registerA.byte,
+        testStateProgramCounter + 1->data.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, result.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = false;
+        expectedParity = expectedParity;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 2);
+    
+    assertEquals(cycles, 7);
+}
+
 test
 shared void testOutput() {
     value startState = testState {
@@ -1636,6 +1782,43 @@ shared void testEmulateXorA() {
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 4);
+}
+
+{[Integer, Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateXorImmediateParameters = {
+    [#00, #00, #00, true, true, false],
+    [#00, #01, #01, false, false, false],
+    [#01, #01, #00, true, true, false],
+    [#01, #00, #01, false, false, false],
+    [#07, #70, #77, true, false, false],
+    [#8f, #f0, #7f, false, false, false],
+    [#33, #ff, #cc, true, false, true]
+};
+
+test
+parameters(`value testEmulateXorImmediateParameters`)
+shared void testEmulateXorImmediate(Integer registerA, Integer data, Integer result,
+    Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
+    value startState = testState {
+        opcode = #ee;
+        `State.registerA`->registerA.byte,
+        testStateProgramCounter + 1->data.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, result.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = false;
+        expectedParity = expectedParity;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 2);
+    
+    assertEquals(cycles, 7);
 }
 
 {[Boolean, Boolean, Boolean, Boolean]*} testFlagAuxiliaryCarryParameters = {

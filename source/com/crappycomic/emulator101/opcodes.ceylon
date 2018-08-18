@@ -221,7 +221,7 @@ shared abstract class Opcode
         | popD // d1
         | jumpIfNoCarry // d2
         | output // d3
-        // d4
+        | callIfNoCarry // d4
         | pushD // d5
         | subtractImmediate // d6
         // d7
@@ -229,7 +229,7 @@ shared abstract class Opcode
         // d9
         | jumpIfCarry // da
         | input // db
-        // dc
+        | callIfCarry // dc
         // dd
         | subtractImmediateWithBorrow // de
         // df
@@ -237,7 +237,7 @@ shared abstract class Opcode
         | popH // e1
         | jumpIfParityOdd // e2
         // e3
-        // e4
+        | callIfParityOdd // e4
         | pushH // e5
         | andImmediate // e6
         // e7
@@ -245,23 +245,23 @@ shared abstract class Opcode
         // e9
         | jumpIfParityEven // ea
         | exchangeRegisters // eb
-        // ec
+        | callIfParityEven // ec
         // ed
-        // ee
+        | xorImmediate // ee
         // ef
         // f0
         | popStatus // f1
         | jumpIfPlus // f2
         | disableInterrupts // f3
-        // f4
+        | callIfPlus // f4
         | pushStatus // f5
-        // f6
+        | orImmediate // f6
         // f7
         // f8
         // f9
         | jumpIfMinus // fa
         | enableInterrupts // fb
-        // fc
+        | callIfMinus // fc
         // fd
         | compareImmediate // fe
         // ff
@@ -404,23 +404,31 @@ object addImmediateWithCarry extends Opcode(#ce, 2) {}
 object popD extends Opcode(#d1) {}
 object jumpIfNoCarry extends Opcode(#d2, 3) {}
 object output extends Opcode(#d3, 2) {}
+object callIfNoCarry extends Opcode(#d4, 3) {}
 object pushD extends Opcode(#d5) {}
 object subtractImmediate extends Opcode(#d6, 2) {}
 object jumpIfCarry extends Opcode(#da, 3) {}
 object input extends Opcode(#db, 2) {}
+object callIfCarry extends Opcode(#dc, 3) {}
 object subtractImmediateWithBorrow extends Opcode(#de, 2) {}
 object popH extends Opcode(#e1) {}
 object jumpIfParityOdd extends Opcode(#e2, 3) {}
+object callIfParityOdd extends Opcode(#e4, 3) {}
 object pushH extends Opcode(#e5) {}
 object andImmediate extends Opcode(#e6, 2) {}
 object jumpIfParityEven extends Opcode(#ea, 3) {}
 object exchangeRegisters extends Opcode(#eb) {}
+object callIfParityEven extends Opcode(#ec, 3) {}
+object xorImmediate extends Opcode(#ee, 2) {}
 object popStatus extends Opcode(#f1) {}
 object jumpIfPlus extends Opcode(#f2, 3) {}
 object disableInterrupts extends Opcode(#f3) {}
+object callIfPlus extends Opcode(#f4, 3) {}
 object pushStatus extends Opcode(#f5) {}
+object orImmediate extends Opcode(#f6, 2) {}
 object jumpIfMinus extends Opcode(#fa, 3) {}
 object enableInterrupts extends Opcode(#fb) {}
+object callIfMinus extends Opcode(#fc, 3) {}
 object compareImmediate extends Opcode(#fe, 2) {}
 
 Map<Byte,Opcode> opcodes = map(`Opcode`.caseValues.collect((opcode) => opcode.byte->opcode));

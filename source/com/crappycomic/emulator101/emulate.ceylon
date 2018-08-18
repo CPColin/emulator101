@@ -22,8 +22,14 @@ shared [State, Integer] emulate(State state) {
         case (andImmediate) emulateAndImmediate
         case (andMemory) nothing
         case (call) emulateCallIf((state) => true)
-        case (callIfNotZero) nothing
-        case (callIfZero) nothing
+        case (callIfCarry) emulateCallIf(State.carry)
+        case (callIfMinus) emulateCallIf(State.sign)
+        case (callIfNoCarry) emulateCallIf(not(State.carry))
+        case (callIfNotZero) emulateCallIf(not(State.zero))
+        case (callIfParityEven) emulateCallIf(State.parity)
+        case (callIfParityOdd) emulateCallIf(not(State.parity))
+        case (callIfPlus) emulateCallIf(not(State.sign))
+        case (callIfZero) emulateCallIf(State.zero)
         case (compareImmediate) emulateCompareImmediate
         case (decimalAdjust) nothing
         case (decrementA) emulateDecrement(`State.registerA`)
@@ -50,11 +56,11 @@ shared [State, Integer] emulate(State state) {
         case (jump) emulateJumpIf((state) => true)
         case (jumpIfCarry) emulateJumpIf(State.carry)
         case (jumpIfMinus) emulateJumpIf(State.sign)
-        case (jumpIfNoCarry) emulateJumpIf((state) => !state.carry)
-        case (jumpIfNotZero) emulateJumpIf((state) => !state.zero)
+        case (jumpIfNoCarry) emulateJumpIf(not(State.carry))
+        case (jumpIfNotZero) emulateJumpIf(not(State.zero))
         case (jumpIfParityEven) emulateJumpIf(State.parity)
-        case (jumpIfParityOdd) emulateJumpIf((state) => !state.parity)
-        case (jumpIfPlus) emulateJumpIf((state) => !state.sign)
+        case (jumpIfParityOdd) emulateJumpIf(not(State.parity))
+        case (jumpIfPlus) emulateJumpIf(not(State.sign))
         case (jumpIfZero) emulateJumpIf(State.zero)
         case (loadAccumulatorD) emulateLoadAccumulator(`State.registerD`, `State.registerE`)
         case (loadAccumulatorDirect) emulateLoadAccumulatorDirect
@@ -135,6 +141,7 @@ shared [State, Integer] emulate(State state) {
         case (moveMemoryH) emulateMoveMemoryRegister(`State.registerH`)
         case (moveMemoryL) emulateMoveMemoryRegister(`State.registerL`)
         case (noop) emulateNoop
+        case (orImmediate) emulateOrImmediate
         case (output) emulateOutput
         case (popB) emulatePop(`State.registerB`, `State.registerC`)
         case (popD) emulatePop(`State.registerD`, `State.registerE`)
@@ -154,6 +161,7 @@ shared [State, Integer] emulate(State state) {
         case (subtractImmediate) emulateSubtractImmediate(false)
         case (subtractImmediateWithBorrow) emulateSubtractImmediate(true)
         case (xorA) emulateXorRegister(`State.registerA`)
+        case (xorImmediate) emulateXorImmediate
         ;
     
     if (is Anything(Opcode, State) emulator) {
@@ -266,7 +274,12 @@ shared Boolean flagZero(Byte val) => val.zero;
             17
         ];
     } else {
-        return nothing; // no test yet, 11 cycles
+        return [
+            state.with {
+                `State.programCounter`->state.programCounter + opcode.size
+            },
+            11
+        ];
     }
 }
 
@@ -494,6 +507,22 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateOrImmediate(State state) {
+    value result = state.registerA.or(dataByte(state));
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + orImmediate.size
+        },
+        7
+    ];
+}
+
 [State, Integer] emulateOutput(State state) {
     // TODO: Hook into system hardware.
     return [
@@ -606,6 +635,22 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.zero`->flagZero(resultByte),
             `State.sign`->flagSign(resultByte),
             `State.programCounter`->state.programCounter + addImmediate.size
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateXorImmediate(State state) {
+    value result = state.registerA.xor(dataByte(state));
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + xorImmediate.size
         },
         7
     ];
