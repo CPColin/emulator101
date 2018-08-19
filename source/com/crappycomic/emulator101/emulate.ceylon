@@ -10,7 +10,23 @@ shared [State, Integer] emulate(State state) {
     assert (exists opcode);
     
     value emulator = switch (opcode)
+        case (addA) nothing
+        case (addB) nothing
+        case (addC) nothing
+        case (addD) nothing
+        case (addE) nothing
+        case (addH) nothing
+        case (addL) nothing
+        case (addMemory) nothing
         case (addImmediate) emulateAddImmediate(false)
+        case (addAWithCarry) nothing
+        case (addBWithCarry) nothing
+        case (addCWithCarry) nothing
+        case (addDWithCarry) nothing
+        case (addEWithCarry) nothing
+        case (addHWithCarry) nothing
+        case (addLWithCarry) nothing
+        case (addMemoryWithCarry) nothing
         case (addImmediateWithCarry) emulateAddImmediate(true)
         case (andA) nothing
         case (andB) nothing
@@ -30,6 +46,14 @@ shared [State, Integer] emulate(State state) {
         case (callIfParityOdd) emulateCallIf(not(State.parity))
         case (callIfPlus) emulateCallIf(not(State.sign))
         case (callIfZero) emulateCallIf(State.zero)
+        case (compareA) nothing
+        case (compareB) nothing
+        case (compareC) nothing
+        case (compareD) nothing
+        case (compareE) nothing
+        case (compareH) nothing
+        case (compareL) nothing
+        case (compareMemory) nothing
         case (compareImmediate) emulateCompareImmediate
         case (decimalAdjust) nothing
         case (decrementA) emulateDecrementRegister(`State.registerA`)
@@ -147,6 +171,14 @@ shared [State, Integer] emulate(State state) {
         case (moveMemoryH) emulateMoveMemoryRegister(`State.registerH`)
         case (moveMemoryL) emulateMoveMemoryRegister(`State.registerL`)
         case (noop) emulateNoop
+        case (orA) nothing
+        case (orB) nothing
+        case (orC) nothing
+        case (orD) nothing
+        case (orE) nothing
+        case (orH) nothing
+        case (orL) nothing
+        case (orMemory) nothing
         case (orImmediate) emulateOrImmediate
         case (output) emulateOutput
         case (popB) emulatePop(`State.registerB`, `State.registerC`)
@@ -170,9 +202,32 @@ shared [State, Integer] emulate(State state) {
         case (rotateAccumulatorRight) emulateRotateAccumulatorRight
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) nothing
+        case (subtractA) nothing
+        case (subtractB) nothing
+        case (subtractC) nothing
+        case (subtractD) nothing
+        case (subtractE) nothing
+        case (subtractH) nothing
+        case (subtractL) nothing
+        case (subtractMemory) nothing
         case (subtractImmediate) emulateSubtractImmediate(false)
+        case (subtractAWithBorrow) nothing
+        case (subtractBWithBorrow) nothing
+        case (subtractCWithBorrow) nothing
+        case (subtractDWithBorrow) nothing
+        case (subtractEWithBorrow) nothing
+        case (subtractHWithBorrow) nothing
+        case (subtractLWithBorrow) nothing
+        case (subtractMemoryWithBorrow) nothing
         case (subtractImmediateWithBorrow) emulateSubtractImmediate(true)
         case (xorA) emulateXorRegister(`State.registerA`)
+        case (xorB) nothing
+        case (xorC) nothing
+        case (xorD) nothing
+        case (xorE) nothing
+        case (xorH) nothing
+        case (xorL) nothing
+        case (xorMemory) nothing
         case (xorImmediate) emulateXorImmediate
         ;
     

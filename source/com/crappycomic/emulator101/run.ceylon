@@ -52,7 +52,7 @@ shared void runDisassembler() {
     }
 }
 
-"Runs the CPU diagnostic code."
+"Runs the CPU diagnostic code." // TODO: Move to test module, once everything passes?
 shared void runCpuDiagnostic() {
     value code = Array<Byte>(FileIterable("resource/com/crappycomic/emulator101/cpudiag.bin"));
     value memory = Array<Byte>.ofSize(#1000, 0.byte);

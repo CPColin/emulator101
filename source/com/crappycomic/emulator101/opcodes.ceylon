@@ -137,38 +137,38 @@ shared abstract class Opcode
         | moveAL // 7d
         | moveAMemory // 7e
         | moveAA // 7f
-        // 80
-        // 81
-        // 82
-        // 83
-        // 84
-        // 85
-        // 86
-        // 87
-        // 88
-        // 89
-        // 8a
-        // 8b
-        // 8c
-        // 8d
-        // 8e
-        // 8f
-        // 90
-        // 91
-        // 92
-        // 93
-        // 94
-        // 95
-        // 96
-        // 97
-        // 98
-        // 99
-        // 9a
-        // 9b
-        // 9c
-        // 9d
-        // 9e
-        // 9f
+        | addB // 80
+        | addC // 81
+        | addD // 82
+        | addE // 83
+        | addH // 84
+        | addL // 85
+        | addMemory // 86
+        | addA // 87
+        | addBWithCarry // 88
+        | addCWithCarry // 89
+        | addDWithCarry // 8a
+        | addEWithCarry // 8b
+        | addHWithCarry // 8c
+        | addLWithCarry // 8d
+        | addMemoryWithCarry // 8e
+        | addAWithCarry // 8f
+        | subtractB // 90
+        | subtractC // 91
+        | subtractD // 92
+        | subtractE // 93
+        | subtractH // 94
+        | subtractL // 95
+        | subtractMemory // 96
+        | subtractA // 97
+        | subtractBWithBorrow // 98
+        | subtractCWithBorrow // 99
+        | subtractDWithBorrow // 9a
+        | subtractEWithBorrow // 9b
+        | subtractHWithBorrow // 9c
+        | subtractLWithBorrow // 9d
+        | subtractMemoryWithBorrow // 9e
+        | subtractAWithBorrow // 9f
         | andB // a0
         | andC // a1
         | andD // a2
@@ -177,30 +177,30 @@ shared abstract class Opcode
         | andL // a5
         | andMemory // a6
         | andA // a7
-        // a8
-        // a9
-        // aa
-        // ab
-        // ac
-        // ad
-        // ae
+        | xorB // a8
+        | xorC // a9
+        | xorD // aa
+        | xorE // ab
+        | xorH // ac
+        | xorL // ad
+        | xorMemory // ae
         | xorA // af
-        // b0
-        // b1
-        // b2
-        // b3
-        // b4
-        // b5
-        // b6
-        // b7
-        // b8
-        // b9
-        // ba
-        // bb
-        // bc
-        // bd
-        // be
-        // bf
+        | orB // b0
+        | orC // b1
+        | orD // b2
+        | orE // b3
+        | orH // b4
+        | orL // b5
+        | orMemory // b6
+        | orA // b7
+        | compareB // b8
+        | compareC // b9
+        | compareD // ba
+        | compareE // bb
+        | compareH // bc
+        | compareL // bd
+        | compareMemory // be
+        | compareA // bf
         | returnIfNotZero // c0
         | popB // c1
         | jumpIfNotZero // c2
@@ -385,6 +385,38 @@ object moveAH extends Opcode(#7c) {}
 object moveAL extends Opcode(#7d) {}
 object moveAMemory extends Opcode(#7e) {}
 object moveAA extends Opcode(#7f) {}
+object addB extends Opcode(#80) {}
+object addC extends Opcode(#81) {}
+object addD extends Opcode(#82) {}
+object addE extends Opcode(#83) {}
+object addH extends Opcode(#84) {}
+object addL extends Opcode(#85) {}
+object addMemory extends Opcode(#86) {}
+object addA extends Opcode(#87) {}
+object addBWithCarry extends Opcode(#88) {}
+object addCWithCarry extends Opcode(#89) {}
+object addDWithCarry extends Opcode(#8a) {}
+object addEWithCarry extends Opcode(#8b) {}
+object addHWithCarry extends Opcode(#8c) {}
+object addLWithCarry extends Opcode(#8d) {}
+object addMemoryWithCarry extends Opcode(#8e) {}
+object addAWithCarry extends Opcode(#8f) {}
+object subtractB extends Opcode(#90) {}
+object subtractC extends Opcode(#91) {}
+object subtractD extends Opcode(#92) {}
+object subtractE extends Opcode(#93) {}
+object subtractH extends Opcode(#94) {}
+object subtractL extends Opcode(#95) {}
+object subtractMemory extends Opcode(#96) {}
+object subtractA extends Opcode(#97) {}
+object subtractBWithBorrow extends Opcode(#98) {}
+object subtractCWithBorrow extends Opcode(#99) {}
+object subtractDWithBorrow extends Opcode(#9a) {}
+object subtractEWithBorrow extends Opcode(#9b) {}
+object subtractHWithBorrow extends Opcode(#9c) {}
+object subtractLWithBorrow extends Opcode(#9d) {}
+object subtractMemoryWithBorrow extends Opcode(#9e) {}
+object subtractAWithBorrow extends Opcode(#9f) {}
 object andB extends Opcode(#a0) {}
 object andC extends Opcode(#a1) {}
 object andD extends Opcode(#a2) {}
@@ -393,7 +425,30 @@ object andH extends Opcode(#a4) {}
 object andL extends Opcode(#a5) {}
 object andMemory extends Opcode(#a6) {}
 object andA extends Opcode(#a7) {}
+object xorB extends Opcode(#a8) {}
+object xorC extends Opcode(#a9) {}
+object xorD extends Opcode(#aa) {}
+object xorE extends Opcode(#ab) {}
+object xorH extends Opcode(#ac) {}
+object xorL extends Opcode(#ad) {}
+object xorMemory extends Opcode(#ae) {}
 object xorA extends Opcode(#af) {}
+object orB extends Opcode(#b0) {}
+object orC extends Opcode(#b1) {}
+object orD extends Opcode(#b2) {}
+object orE extends Opcode(#b3) {}
+object orH extends Opcode(#b4) {}
+object orL extends Opcode(#b5) {}
+object orMemory extends Opcode(#b6) {}
+object orA extends Opcode(#b7) {}
+object compareB extends Opcode(#b8) {}
+object compareC extends Opcode(#b9) {}
+object compareD extends Opcode(#ba) {}
+object compareE extends Opcode(#bb) {}
+object compareH extends Opcode(#bc) {}
+object compareL extends Opcode(#bd) {}
+object compareMemory extends Opcode(#be) {}
+object compareA extends Opcode(#bf) {}
 object returnIfNotZero extends Opcode(#c0) {}
 object popB extends Opcode(#c1) {}
 object jumpIfNotZero extends Opcode(#c2, 3) {}
