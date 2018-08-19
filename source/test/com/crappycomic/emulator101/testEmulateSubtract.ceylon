@@ -5,23 +5,23 @@ import ceylon.test {
 }
 
 import com.crappycomic.emulator101 {
-    ByteRegister,
     State,
     emulate,
+    flagParity,
     flagAuxiliaryCarry,
     flagCarry,
-    flagParity,
+    flagZero,
     flagSign,
-    flagZero
+    ByteRegister
 }
 
 test
 parameters(`value testRegisterParameters`)
-shared void testEmulateAddA(Byte registerValue) {
-    value result = registerValue.unsigned + registerValue.unsigned;
+shared void testEmulateSubtractA(Byte registerValue) {
+    value result = registerValue.unsigned - registerValue.unsigned;
     value resultByte = result.byte;
     value startState = testState {
-        opcode = #87;
+        opcode = #97;
         `State.registerA`->registerValue,
         `State.carry`->true // Make sure carry flag doesn't get included
     };
@@ -44,18 +44,18 @@ shared void testEmulateAddA(Byte registerValue) {
     assertEquals(cycles, 4);
 }
 
-{[Byte, Boolean]*} testEmulateAddAWithCarryParameters
+{[Byte, Boolean]*} testEmulateSubtractAWithBorrowParameters
         = testRegisterParameters.product(testBooleanParameters);
 
 test
-parameters(`value testEmulateAddAWithCarryParameters`)
-shared void testEmulateAddAWithCarry(Byte registerValue, Boolean carry) {
-    value result = registerValue.unsigned + registerValue.unsigned + (carry then 1 else 0);
+parameters(`value testEmulateSubtractAWithBorrowParameters`)
+shared void testEmulateSubtractAWithBorrow(Byte registerValue, Boolean borrow) {
+    value result = registerValue.unsigned - registerValue.unsigned - (borrow then 1 else 0);
     value resultByte = result.byte;
     value startState = testState {
-        opcode = #8f;
+        opcode = #9f;
         `State.registerA`->registerValue,
-        `State.carry`->carry
+        `State.carry`->borrow
     };
     value [endState, cycles] = emulate(startState);
     
@@ -77,25 +77,23 @@ shared void testEmulateAddAWithCarry(Byte registerValue, Boolean carry) {
 }
 
 {[Integer, Integer, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
-testEmulateAddImmediateParameters = {
+testEmulateSubtractImmediateParameters = {
     [#00, #00, #00, false, true, false, true, false],
-    [#00, #01, #01, false, false, false, false, false],
-    [#01, #00, #01, false, false, false, false, false],
-    [#11, #22, #33, false, true, false, false, false],
-    [#0f, #01, #10, false, false, true, false, false],
-    [#7f, #01, #80, false, false, true, false, true],
-    [#ff, #02, #01, true, false, true, false, false]
+    [#03, #02, #01, false, false, false, false, false],
+    [#ff, #80, #7f, false, false, false, false, false],
+    [#ff, #7e, #81, false, true, false, false, true],
+    [#01, #02, #ff, true, true, true, false, true]
 };
 
 test
-parameters(`value testEmulateAddImmediateParameters`)
-shared void testEmulateAddImmediate(Integer registerA, Integer data, Integer result,
+parameters(`value testEmulateSubtractImmediateParameters`)
+shared void testEmulateSubtractImmediate(Integer registerA, Integer data, Integer result,
         Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
         Boolean expectedZero, Boolean expectedSign) {
     value startState = testState {
-        opcode = #c6;
+        opcode = #d6;
         `State.registerA`->registerA.byte,
-        `State.carry`->true, // Make sure carry flag doesn't get included
+        `State.carry`->true, // Make sure carry bit doesn't interfere.
         testStateProgramCounter + 1->data.byte
     };
     value [endState, cycles] = emulate(startState);
@@ -118,32 +116,25 @@ shared void testEmulateAddImmediate(Integer registerA, Integer data, Integer res
 }
 
 {[Integer, Integer, Boolean, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
-testEmulateAddImmediateWithCarryParameters = {
+testEmulateSubtractImmediateWithBorrowParameters = {
     [#00, #00, false, #00, false, true, false, true, false],
-    [#00, #00, true, #01, false, false, false, false, false],
-    [#00, #01, false, #01, false, false, false, false, false],
-    [#00, #01, true, #02, false, false, false, false, false],
-    [#01, #00, false, #01, false, false, false, false, false],
-    [#01, #00, true, #02, false, false, false, false, false],
-    [#11, #22, false, #33, false, true, false, false, false],
-    [#11, #22, true, #34, false, false, false, false, false],
-    [#0f, #01, false, #10, false, false, true, false, false],
-    [#0f, #01, true, #11, false, true, true, false, false],
-    [#7f, #01, false, #80, false, false, true, false, true],
-    [#7f, #01, true, #81, false, true, true, false, true],
-    [#ff, #02, false, #01, true, false, true, false, false],
-    [#ff, #02, true, #02, true, false, true, false, false]
+    [#00, #00, true, #ff, true, true, true, false, true],
+    [#03, #02, false, #01, false, false, false, false, false],
+    [#03, #02, true, #00, false, true, false, true, false],
+    [#ff, #80, false, #7f, false, false, false, false, false],
+    [#03, #02, false, #01, false, false, false, false, false],
+    [#ff, #7e, false, #81, false, true, false, false, true]
 };
 
 test
-parameters(`value testEmulateAddImmediateWithCarryParameters`)
-shared void testEmulateAddImmediateWithCarry(Integer registerA, Integer data, Boolean carry,
+parameters(`value testEmulateSubtractImmediateWithBorrowParameters`)
+shared void testEmulateSubtractImmediateWithBorrow(Integer registerA, Integer data, Boolean borrow,
         Integer result, Boolean expectedCarry, Boolean expectedParity,
         Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
     value startState = testState {
-        opcode = #ce;
+        opcode = #de;
         `State.registerA`->registerA.byte,
-        `State.carry`->carry,
+        `State.carry`->borrow,
         testStateProgramCounter + 1->data.byte
     };
     value [endState, cycles] = emulate(startState);
@@ -165,9 +156,9 @@ shared void testEmulateAddImmediateWithCarry(Integer registerA, Integer data, Bo
     assertEquals(cycles, 7);
 }
 
-void testEmulateAddRegister(Integer opcode, ByteRegister register, Byte registerA,
-        Byte registerValue) {
-    value result = registerA.unsigned + registerValue.unsigned;
+void testEmulateSubtractRegister(Integer opcode, ByteRegister register, Byte registerA,
+    Byte registerValue) {
+    value result = registerA.unsigned - registerValue.unsigned;
     value resultByte = result.byte;
     value startState = testState {
         opcode = opcode;
@@ -194,14 +185,14 @@ void testEmulateAddRegister(Integer opcode, ByteRegister register, Byte register
     assertEquals(cycles, 4);
 }
 
-{[Byte, Byte]*} testEmulateAddRegisterParameters
+{[Byte, Byte]*} testEmulateSubtractRegisterParameters
         = testRegisterParameters.product(testRegisterParameters);
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddB(Byte registerA, Byte registerValue) {
-    testEmulateAddRegister {
-        opcode = #80;
+parameters(`value testEmulateSubtractRegisterParameters`)
+shared void testEmulateSubtractB(Byte registerA, Byte registerValue) {
+    testEmulateSubtractRegister {
+        opcode = #90;
         register = `State.registerB`;
         registerA = registerA;
         registerValue = registerValue;
@@ -209,10 +200,10 @@ shared void testEmulateAddB(Byte registerA, Byte registerValue) {
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddC(Byte registerA, Byte registerValue) {
-    testEmulateAddRegister {
-        opcode = #81;
+parameters(`value testEmulateSubtractRegisterParameters`)
+shared void testEmulateSubtractC(Byte registerA, Byte registerValue) {
+    testEmulateSubtractRegister {
+        opcode = #91;
         register = `State.registerC`;
         registerA = registerA;
         registerValue = registerValue;
@@ -220,10 +211,10 @@ shared void testEmulateAddC(Byte registerA, Byte registerValue) {
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddD(Byte registerA, Byte registerValue) {
-    testEmulateAddRegister {
-        opcode = #82;
+parameters(`value testEmulateSubtractRegisterParameters`)
+shared void testEmulateSubtractD(Byte registerA, Byte registerValue) {
+    testEmulateSubtractRegister {
+        opcode = #92;
         register = `State.registerD`;
         registerA = registerA;
         registerValue = registerValue;
@@ -231,10 +222,10 @@ shared void testEmulateAddD(Byte registerA, Byte registerValue) {
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddE(Byte registerA, Byte registerValue) {
-    testEmulateAddRegister {
-        opcode = #83;
+parameters(`value testEmulateSubtractRegisterParameters`)
+shared void testEmulateSubtractE(Byte registerA, Byte registerValue) {
+    testEmulateSubtractRegister {
+        opcode = #93;
         register = `State.registerE`;
         registerA = registerA;
         registerValue = registerValue;
@@ -242,10 +233,10 @@ shared void testEmulateAddE(Byte registerA, Byte registerValue) {
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddH(Byte registerA, Byte registerValue) {
-    testEmulateAddRegister {
-        opcode = #84;
+parameters(`value testEmulateSubtractRegisterParameters`)
+shared void testEmulateSubtractH(Byte registerA, Byte registerValue) {
+    testEmulateSubtractRegister {
+        opcode = #94;
         register = `State.registerH`;
         registerA = registerA;
         registerValue = registerValue;
@@ -253,28 +244,28 @@ shared void testEmulateAddH(Byte registerA, Byte registerValue) {
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddL(Byte registerA, Byte registerValue) {
-    testEmulateAddRegister {
-        opcode = #85;
+parameters(`value testEmulateSubtractRegisterParameters`)
+shared void testEmulateSubtractL(Byte registerA, Byte registerValue) {
+    testEmulateSubtractRegister {
+        opcode = #95;
         register = `State.registerL`;
         registerA = registerA;
         registerValue = registerValue;
     };
 }
 
-{[Byte, Byte, Boolean]*} testEmulateAddRegisterWithCarryParameters
-        = secondProduct(testEmulateAddRegisterParameters, testBooleanParameters);
+{[Byte, Byte, Boolean]*} testEmulateSubtractRegisterWithBorrowParameters
+        = secondProduct(testEmulateSubtractRegisterParameters, testBooleanParameters);
 
-void testEmulateAddRegisterWithCarry(Integer opcode, ByteRegister register, Byte registerA,
-        Byte registerValue, Boolean carry) {
-    value result = registerA.unsigned + registerValue.unsigned + (carry then 1 else 0);
+void testEmulateSubtractRegisterWithBorrow(Integer opcode, ByteRegister register, Byte registerA,
+    Byte registerValue, Boolean borrow) {
+    value result = registerA.unsigned - registerValue.unsigned - (borrow then 1 else 0);
     value resultByte = result.byte;
     value startState = testState {
         opcode = opcode;
         `State.registerA`->registerA,
         register->registerValue,
-        `State.carry`->carry
+        `State.carry`->borrow
     };
     value [endState, cycles] = emulate(startState);
     
@@ -296,73 +287,73 @@ void testEmulateAddRegisterWithCarry(Integer opcode, ByteRegister register, Byte
 }
 
 test
-parameters(`value testEmulateAddRegisterWithCarryParameters`)
-shared void testEmulateAddBWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
-    testEmulateAddRegisterWithCarry {
-        opcode = #88;
+parameters(`value testEmulateSubtractRegisterWithBorrowParameters`)
+shared void testEmulateSubtractBWithBorrow(Byte registerA, Byte registerValue, Boolean borrow) {
+    testEmulateSubtractRegisterWithBorrow {
+        opcode = #98;
         register = `State.registerB`;
         registerA = registerA;
         registerValue = registerValue;
-        carry = carry;
+        borrow = borrow;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterWithCarryParameters`)
-shared void testEmulateAddCWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
-    testEmulateAddRegisterWithCarry {
-        opcode = #89;
+parameters(`value testEmulateSubtractRegisterWithBorrowParameters`)
+shared void testEmulateSubtractCWithBorrow(Byte registerA, Byte registerValue, Boolean borrow) {
+    testEmulateSubtractRegisterWithBorrow {
+        opcode = #99;
         register = `State.registerC`;
         registerA = registerA;
         registerValue = registerValue;
-        carry = carry;
+        borrow = borrow;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterWithCarryParameters`)
-shared void testEmulateAddDWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
-    testEmulateAddRegisterWithCarry {
-        opcode = #8a;
+parameters(`value testEmulateSubtractRegisterWithBorrowParameters`)
+shared void testEmulateSubtractDWithBorrow(Byte registerA, Byte registerValue, Boolean borrow) {
+    testEmulateSubtractRegisterWithBorrow {
+        opcode = #9a;
         register = `State.registerD`;
         registerA = registerA;
         registerValue = registerValue;
-        carry = carry;
+        borrow = borrow;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterWithCarryParameters`)
-shared void testEmulateAddEWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
-    testEmulateAddRegisterWithCarry {
-        opcode = #8b;
+parameters(`value testEmulateSubtractRegisterWithBorrowParameters`)
+shared void testEmulateSubtractEWithBorrow(Byte registerA, Byte registerValue, Boolean borrow) {
+    testEmulateSubtractRegisterWithBorrow {
+        opcode = #9b;
         register = `State.registerE`;
         registerA = registerA;
         registerValue = registerValue;
-        carry = carry;
+        borrow = borrow;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterWithCarryParameters`)
-shared void testEmulateAddHWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
-    testEmulateAddRegisterWithCarry {
-        opcode = #8c;
+parameters(`value testEmulateSubtractRegisterWithBorrowParameters`)
+shared void testEmulateSubtractHWithBorrow(Byte registerA, Byte registerValue, Boolean borrow) {
+    testEmulateSubtractRegisterWithBorrow {
+        opcode = #9c;
         register = `State.registerH`;
         registerA = registerA;
         registerValue = registerValue;
-        carry = carry;
+        borrow = borrow;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterWithCarryParameters`)
-shared void testEmulateAddLWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
-    testEmulateAddRegisterWithCarry {
-        opcode = #8d;
+parameters(`value testEmulateSubtractRegisterWithBorrowParameters`)
+shared void testEmulateSubtractLWithBorrow(Byte registerA, Byte registerValue, Boolean borrow) {
+    testEmulateSubtractRegisterWithBorrow {
+        opcode = #9d;
         register = `State.registerL`;
         registerA = registerA;
         registerValue = registerValue;
-        carry = carry;
+        borrow = borrow;
     };
 }

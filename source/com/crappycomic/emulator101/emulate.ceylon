@@ -28,13 +28,13 @@ shared [State, Integer] emulate(State state) {
         case (addLWithCarry) emulateAddRegister(`State.registerL`, true)
         case (addMemoryWithCarry) nothing
         case (addImmediateWithCarry) emulateAddImmediate(true)
-        case (andA) nothing
-        case (andB) nothing
-        case (andC) nothing
-        case (andD) nothing
-        case (andE) nothing
-        case (andH) nothing
-        case (andL) nothing
+        case (andA) emulateAndRegister(`State.registerA`)
+        case (andB) emulateAndRegister(`State.registerB`)
+        case (andC) emulateAndRegister(`State.registerC`)
+        case (andD) emulateAndRegister(`State.registerD`)
+        case (andE) emulateAndRegister(`State.registerE`)
+        case (andH) emulateAndRegister(`State.registerH`)
+        case (andL) emulateAndRegister(`State.registerL`)
         case (andImmediate) emulateAndImmediate
         case (andMemory) nothing
         case (call) emulateCallIf((state) => true)
@@ -202,22 +202,22 @@ shared [State, Integer] emulate(State state) {
         case (rotateAccumulatorRight) emulateRotateAccumulatorRight
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) nothing
-        case (subtractA) nothing
-        case (subtractB) nothing
-        case (subtractC) nothing
-        case (subtractD) nothing
-        case (subtractE) nothing
-        case (subtractH) nothing
-        case (subtractL) nothing
+        case (subtractA) emulateSubtractRegister(`State.registerA`, false)
+        case (subtractB) emulateSubtractRegister(`State.registerB`, false)
+        case (subtractC) emulateSubtractRegister(`State.registerC`, false)
+        case (subtractD) emulateSubtractRegister(`State.registerD`, false)
+        case (subtractE) emulateSubtractRegister(`State.registerE`, false)
+        case (subtractH) emulateSubtractRegister(`State.registerH`, false)
+        case (subtractL) emulateSubtractRegister(`State.registerL`, false)
         case (subtractMemory) nothing
         case (subtractImmediate) emulateSubtractImmediate(false)
-        case (subtractAWithBorrow) nothing
-        case (subtractBWithBorrow) nothing
-        case (subtractCWithBorrow) nothing
-        case (subtractDWithBorrow) nothing
-        case (subtractEWithBorrow) nothing
-        case (subtractHWithBorrow) nothing
-        case (subtractLWithBorrow) nothing
+        case (subtractAWithBorrow) emulateSubtractRegister(`State.registerA`, true)
+        case (subtractBWithBorrow) emulateSubtractRegister(`State.registerB`, true)
+        case (subtractCWithBorrow) emulateSubtractRegister(`State.registerC`, true)
+        case (subtractDWithBorrow) emulateSubtractRegister(`State.registerD`, true)
+        case (subtractEWithBorrow) emulateSubtractRegister(`State.registerE`, true)
+        case (subtractHWithBorrow) emulateSubtractRegister(`State.registerH`, true)
+        case (subtractLWithBorrow) emulateSubtractRegister(`State.registerL`, true)
         case (subtractMemoryWithBorrow) nothing
         case (subtractImmediateWithBorrow) emulateSubtractImmediate(true)
         case (xorA) emulateXorRegister(`State.registerA`)
@@ -343,6 +343,23 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + andImmediate.size
         },
         7
+    ];
+}
+
+[State, Integer] emulateAndRegister(ByteRegister register)
+        (Opcode opcode, State state) {
+    value result = state.registerA.and(register.bind(state).get());
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        4
     ];
 }
 
@@ -748,6 +765,27 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + addImmediate.size
         },
         7
+    ];
+}
+
+[State, Integer] emulateSubtractRegister(ByteRegister register, Boolean withBorrow)
+        (Opcode opcode, State state) {
+    value left = state.registerA;
+    value right = register.bind(state).get();
+    value result = left.unsigned - right.unsigned - (withBorrow && state.carry then 1 else 0);
+    value resultByte = result.byte;
+    
+    return [
+        state.with {
+            `State.registerA`->result.byte,
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        4
     ];
 }
 

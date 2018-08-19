@@ -1,3 +1,6 @@
+import ceylon.language.meta.declaration {
+    FunctionDeclaration
+}
 import ceylon.language.meta.model {
     Attribute
 }
@@ -31,9 +34,6 @@ import com.crappycomic.emulator101 {
     flagSign,
     flagZero,
     word
-}
-import ceylon.language.meta.declaration {
-    FunctionDeclaration
 }
 
 Boolean isAlwaysTaken(Boolean flagValue) => true;
@@ -200,41 +200,6 @@ shared void verifyAllOpcodesTested(Opcode opcode) {
     assertTrue(testFunction.annotated<TestAnnotation>(), "Function is not annotated test");
     assertTrue(testFunction.annotated<SharedAnnotation>(), "Function is not shared");
     assertFalse(testFunction.annotated<IgnoreAnnotation>(), "Function is ignored");
-}
-
-{[Integer, Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateAndImmediateParameters = {
-    [#00, #00, #00, true, true, false],
-    [#01, #01, #01, false, false, false],
-    [#01, #00, #00, true, true, false],
-    [#77, #0f, #07, false, false, false],
-    [#8f, #f0, #80, false, false, true]
-};
-
-test
-parameters(`value testEmulateAndImmediateParameters`)
-shared void testEmulateAndImmediate(Integer registerA, Integer data, Integer result,
-        Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
-    value startState = testState {
-        opcode = #e6;
-        `State.registerA`->registerA.byte,
-        testStateProgramCounter + 1->data.byte
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState,
-        `State.registerA`, `State.flags`, `State.programCounter`);
-    assertEquals(endState.registerA, result.byte);
-    assertFlags {
-        startState = startState;
-        endState = endState;
-        expectedCarry = false;
-        expectedParity = expectedParity;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
-    };
-    assertEquals(endState.programCounter, startState.programCounter + 2);
-    
-    assertEquals(cycles, 7);
 }
 
 void testEmulateCallIf(Integer opcode, BitFlag flag, Boolean flagValue, Boolean(Boolean) taken) {
@@ -1731,86 +1696,6 @@ shared void testEmulateStoreAccumulatorDirect() {
     assertEquals(endState.programCounter, startState.programCounter + 3);
     
     assertEquals(cycles, 13);
-}
-
-{[Integer, Integer, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
-testEmulateSubtractImmediateParameters = {
-    [#00, #00, #00, false, true, false, true, false],
-    [#03, #02, #01, false, false, false, false, false],
-    [#ff, #80, #7f, false, false, false, false, false],
-    [#ff, #7e, #81, false, true, false, false, true],
-    [#01, #02, #ff, true, true, true, false, true]
-};
-
-test
-parameters(`value testEmulateSubtractImmediateParameters`)
-shared void testEmulateSubtractImmediate(Integer registerA, Integer data, Integer result,
-        Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
-        Boolean expectedZero, Boolean expectedSign) {
-    value startState = testState {
-        opcode = #d6;
-        `State.registerA`->registerA.byte,
-        `State.carry`->true, // Make sure carry bit doesn't interfere.
-        testStateProgramCounter + 1->data.byte
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState,
-        `State.registerA`, `State.flags`, `State.programCounter`);
-    assertEquals(endState.registerA, result.byte);
-    assertFlags {
-        startState = startState;
-        endState = endState;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
-    };
-    assertEquals(endState.programCounter, startState.programCounter + 2);
-    
-    assertEquals(cycles, 7);
-}
-
-{[Integer, Integer, Boolean, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
-testEmulateSubtractImmediateWithBorrowParameters = {
-    [#00, #00, false, #00, false, true, false, true, false],
-    [#00, #00, true, #ff, true, true, true, false, true],
-    [#03, #02, false, #01, false, false, false, false, false],
-    [#03, #02, true, #00, false, true, false, true, false],
-    [#ff, #80, false, #7f, false, false, false, false, false],
-    [#03, #02, false, #01, false, false, false, false, false],
-    [#ff, #7e, false, #81, false, true, false, false, true]
-};
-
-test
-parameters(`value testEmulateSubtractImmediateWithBorrowParameters`)
-shared void testEmulateSubtractImmediateWithBorrow(Integer registerA, Integer data, Boolean carry,
-        Integer result, Boolean expectedCarry, Boolean expectedParity,
-        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
-    value startState = testState {
-        opcode = #de;
-        `State.registerA`->registerA.byte,
-        `State.carry`->carry,
-        testStateProgramCounter + 1->data.byte
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState,
-        `State.registerA`, `State.flags`, `State.programCounter`);
-    assertEquals(endState.registerA, result.byte);
-    assertFlags {
-        startState = startState;
-        endState = endState;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
-    };
-    assertEquals(endState.programCounter, startState.programCounter + 2);
-    
-    assertEquals(cycles, 7);
 }
 
 test
