@@ -72,6 +72,8 @@ shared void runCpuDiagnostic() {
         
         state = result[0];
         
+        //print("A:``format(state.registerA, 2)``, B:``format(state.registerB, 2)``, C:``format(state.registerC, 2)``, D:``format(state.registerD, 2)``, E:``format(state.registerE, 2)``, H:``format(state.registerH, 2)``, L:``format(state.registerL, 2)``, PC:``format(state.programCounter, 4)``, SP:``format(state.stackPointer, 4)``, ``state.carry then "C" else "c"````state.parity then "P" else "p"````state.zero then "Z" else "z"````state.sign then "S" else "s"``");
+        
         if (state.programCounter < initialProgramCounter) {
             throw Exception("TODO");
         }

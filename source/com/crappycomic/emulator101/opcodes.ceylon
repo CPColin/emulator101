@@ -12,7 +12,7 @@ shared abstract class Opcode
         | loadPairImmediateB // 01
         // 02
         | incrementPairB // 03
-        // 04
+        | incrementB // 04
         | decrementB // 05
         | moveImmediateB // 06
         | rotateAccumulatorLeft // 07
@@ -20,7 +20,7 @@ shared abstract class Opcode
         | doubleAddB // 09
         // 0a
         // 0b
-        // 0c
+        | incrementC // 0c
         | decrementC // 0d
         | moveImmediateC // 0e
         | rotateAccumulatorRight // 0f
@@ -29,7 +29,7 @@ shared abstract class Opcode
         | loadPairImmediateD // 11
         // 12
         | incrementPairD // 13
-        // 14
+        | incrementD // 14
         | decrementD // 15
         | moveImmediateD // 16
         // 17
@@ -37,7 +37,7 @@ shared abstract class Opcode
         | doubleAddD // 19
         | loadAccumulatorD // 1a
         // 1b
-        // 1c
+        | incrementE // 1c
         | decrementE // 1d
         | moveImmediateE // 1e
         // 1f
@@ -45,7 +45,7 @@ shared abstract class Opcode
         | loadPairImmediateH // 21
         | storeHLDirect // 22
         | incrementPairH // 23
-        // 24
+        | incrementH // 24
         | decrementH // 25
         | moveImmediateH // 26
         | decimalAdjust // 27
@@ -53,7 +53,7 @@ shared abstract class Opcode
         | doubleAddH // 29
         | loadHLDirect // 2a
         | decrementPairH // 2b
-        // 2c
+        | incrementL // 2c
         | decrementL // 2d
         | moveImmediateL // 2e
         // 2f
@@ -217,7 +217,7 @@ shared abstract class Opcode
         | call // cd
         | addImmediateWithCarry // ce
         // cf
-        // d0
+        | returnIfNoCarry // d0
         | popD // d1
         | jumpIfNoCarry // d2
         | output // d3
@@ -225,7 +225,7 @@ shared abstract class Opcode
         | pushD // d5
         | subtractImmediate // d6
         // d7
-        // d8
+        | returnIfCarry // d8
         // d9
         | jumpIfCarry // da
         | input // db
@@ -233,7 +233,7 @@ shared abstract class Opcode
         // dd
         | subtractImmediateWithBorrow // de
         // df
-        // e0
+        | returnIfParityOdd // e0
         | popH // e1
         | jumpIfParityOdd // e2
         // e3
@@ -241,7 +241,7 @@ shared abstract class Opcode
         | pushH // e5
         | andImmediate // e6
         // e7
-        // e8
+        | returnIfParityEven // e8
         // e9
         | jumpIfParityEven // ea
         | exchangeRegisters // eb
@@ -249,7 +249,7 @@ shared abstract class Opcode
         // ed
         | xorImmediate // ee
         // ef
-        // f0
+        | returnIfPlus // f0
         | popStatus // f1
         | jumpIfPlus // f2
         | disableInterrupts // f3
@@ -257,7 +257,7 @@ shared abstract class Opcode
         | pushStatus // f5
         | orImmediate // f6
         // f7
-        // f8
+        | returnIfMinus // f8
         // f9
         | jumpIfMinus // fa
         | enableInterrupts // fb
@@ -281,30 +281,36 @@ shared abstract class Opcode
 object noop extends Opcode(#00) {}
 object loadPairImmediateB extends Opcode(#01, 3) {}
 object incrementPairB extends Opcode(#03) {}
+object incrementB extends Opcode(#04) {}
 object decrementB extends Opcode(#05) {}
 object moveImmediateB extends Opcode(#06, 2) {}
 object rotateAccumulatorLeft extends Opcode(#07) {}
 object doubleAddB extends Opcode(#09) {}
+object incrementC extends Opcode(#0c) {}
 object decrementC extends Opcode(#0d) {}
 object moveImmediateC extends Opcode(#0e, 2) {}
 object rotateAccumulatorRight extends Opcode(#0f) {}
 object loadPairImmediateD extends Opcode(#11, 3) {}
 object incrementPairD extends Opcode(#13) {}
+object incrementD extends Opcode(#14) {}
 object decrementD extends Opcode(#15) {}
 object moveImmediateD extends Opcode(#16, 2) {}
 object doubleAddD extends Opcode(#19) {}
 object loadAccumulatorD extends Opcode(#1a) {}
+object incrementE extends Opcode(#1c) {}
 object decrementE extends Opcode(#1d) {}
 object moveImmediateE extends Opcode(#1e, 2) {}
 object loadPairImmediateH extends Opcode(#21, 3) {}
 object storeHLDirect extends Opcode(#22, 3) {}
 object incrementPairH extends Opcode(#23) {}
+object incrementH extends Opcode(#24) {}
 object decrementH extends Opcode(#25) {}
 object moveImmediateH extends Opcode(#26, 2) {}
 object decimalAdjust extends Opcode(#27) {}
 object doubleAddH extends Opcode(#29) {}
 object loadHLDirect extends Opcode(#2a, 3) {}
 object decrementPairH extends Opcode(#2b) {}
+object incrementL extends Opcode(#2c) {}
 object decrementL extends Opcode(#2d) {}
 object moveImmediateL extends Opcode(#2e, 2) {}
 object loadPairImmediateStackPointer extends Opcode(#31, 3) {}
@@ -401,31 +407,37 @@ object jumpIfZero extends Opcode(#ca, 3) {}
 object callIfZero extends Opcode(#cc, 3) {}
 object call extends Opcode(#cd, 3) {}
 object addImmediateWithCarry extends Opcode(#ce, 2) {}
+object returnIfNoCarry extends Opcode(#d0) {}
 object popD extends Opcode(#d1) {}
 object jumpIfNoCarry extends Opcode(#d2, 3) {}
 object output extends Opcode(#d3, 2) {}
 object callIfNoCarry extends Opcode(#d4, 3) {}
 object pushD extends Opcode(#d5) {}
 object subtractImmediate extends Opcode(#d6, 2) {}
+object returnIfCarry extends Opcode(#d8) {}
 object jumpIfCarry extends Opcode(#da, 3) {}
 object input extends Opcode(#db, 2) {}
 object callIfCarry extends Opcode(#dc, 3) {}
 object subtractImmediateWithBorrow extends Opcode(#de, 2) {}
+object returnIfParityOdd extends Opcode(#e0) {}
 object popH extends Opcode(#e1) {}
 object jumpIfParityOdd extends Opcode(#e2, 3) {}
 object callIfParityOdd extends Opcode(#e4, 3) {}
 object pushH extends Opcode(#e5) {}
 object andImmediate extends Opcode(#e6, 2) {}
+object returnIfParityEven extends Opcode(#e8) {}
 object jumpIfParityEven extends Opcode(#ea, 3) {}
 object exchangeRegisters extends Opcode(#eb) {}
 object callIfParityEven extends Opcode(#ec, 3) {}
 object xorImmediate extends Opcode(#ee, 2) {}
+object returnIfPlus extends Opcode(#f0) {}
 object popStatus extends Opcode(#f1) {}
 object jumpIfPlus extends Opcode(#f2, 3) {}
 object disableInterrupts extends Opcode(#f3) {}
 object callIfPlus extends Opcode(#f4, 3) {}
 object pushStatus extends Opcode(#f5) {}
 object orImmediate extends Opcode(#f6, 2) {}
+object returnIfMinus extends Opcode(#f8) {}
 object jumpIfMinus extends Opcode(#fa, 3) {}
 object enableInterrupts extends Opcode(#fb) {}
 object callIfMinus extends Opcode(#fc, 3) {}

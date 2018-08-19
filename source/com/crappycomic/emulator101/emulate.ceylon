@@ -32,13 +32,13 @@ shared [State, Integer] emulate(State state) {
         case (callIfZero) emulateCallIf(State.zero)
         case (compareImmediate) emulateCompareImmediate
         case (decimalAdjust) nothing
-        case (decrementA) emulateDecrement(`State.registerA`)
-        case (decrementB) emulateDecrement(`State.registerB`)
-        case (decrementC) emulateDecrement(`State.registerC`)
-        case (decrementD) emulateDecrement(`State.registerD`)
-        case (decrementE) emulateDecrement(`State.registerE`)
-        case (decrementH) emulateDecrement(`State.registerH`)
-        case (decrementL) emulateDecrement(`State.registerL`)
+        case (decrementA) emulateDecrementRegister(`State.registerA`)
+        case (decrementB) emulateDecrementRegister(`State.registerB`)
+        case (decrementC) emulateDecrementRegister(`State.registerC`)
+        case (decrementD) emulateDecrementRegister(`State.registerD`)
+        case (decrementE) emulateDecrementRegister(`State.registerE`)
+        case (decrementH) emulateDecrementRegister(`State.registerH`)
+        case (decrementL) emulateDecrementRegister(`State.registerL`)
         case (decrementMemory) nothing
         case (decrementPairH) nothing
         case (disableInterrupts) nothing
@@ -48,7 +48,13 @@ shared [State, Integer] emulate(State state) {
         case (enableInterrupts) nothing
         case (exchangeRegisters) emulateExchangeRegisters
         case (halt) nothing
-        case (incrementA) nothing
+        case (incrementA) emulateIncrementRegister(`State.registerA`)
+        case (incrementB) emulateIncrementRegister(`State.registerB`)
+        case (incrementC) emulateIncrementRegister(`State.registerC`)
+        case (incrementD) emulateIncrementRegister(`State.registerD`)
+        case (incrementE) emulateIncrementRegister(`State.registerE`)
+        case (incrementH) emulateIncrementRegister(`State.registerH`)
+        case (incrementL) emulateIncrementRegister(`State.registerL`)
         case (incrementPairB) emulateIncrementPair(`State.registerB`, `State.registerC`)
         case (incrementPairD) emulateIncrementPair(`State.registerD`, `State.registerE`)
         case (incrementPairH) emulateIncrementPair(`State.registerH`, `State.registerL`)
@@ -151,9 +157,15 @@ shared [State, Integer] emulate(State state) {
         case (pushD) emulatePush(`State.registerD`, `State.registerE`)
         case (pushH) emulatePush(`State.registerH`, `State.registerL`)
         case (pushStatus) emulatePush(`State.registerA`, `State.flags`)
-        case (\ireturn) emulateReturnIf((_) => true, 10)
-        case (returnIfNotZero) nothing
-        case (returnIfZero) nothing
+        case (\ireturn) emulateReturnIf((state) => true, 10)
+        case (returnIfCarry) emulateReturnIf(State.carry)
+        case (returnIfMinus) emulateReturnIf(State.sign)
+        case (returnIfNoCarry) emulateReturnIf(not(State.carry))
+        case (returnIfNotZero) emulateReturnIf(not(State.zero))
+        case (returnIfParityEven) emulateReturnIf(State.parity)
+        case (returnIfParityOdd) emulateReturnIf(not(State.parity))
+        case (returnIfPlus) emulateReturnIf(not(State.sign))
+        case (returnIfZero) emulateReturnIf(State.zero)
         case (rotateAccumulatorLeft) nothing
         case (rotateAccumulatorRight) emulateRotateAccumulatorRight
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
@@ -302,7 +314,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateDecrement(ByteRegister register)
+[State, Integer] emulateDecrementRegister(ByteRegister register)
         (Opcode opcode, State state) {
     value val = register.bind(state).get().predecessor;
     
@@ -362,6 +374,24 @@ shared Boolean flagZero(Byte val) => val.zero;
         state.with {
             highRegister->high,
             lowRegister->low,
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateIncrementRegister(ByteRegister register)
+        (Opcode opcode, State state) {
+    value initial = register.bind(state).get();
+    value val = initial.successor;
+    
+    return [
+        state.with {
+            register->register.bind(state).get().successor,
+            `State.parity`->flagParity(val),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(initial, 1.byte, val),
+            `State.zero`->flagZero(val),
+            `State.sign`->flagSign(val),
             `State.programCounter`->state.programCounter + opcode.size
         },
         5
@@ -567,7 +597,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateReturnIf(Boolean(State) condition, Integer returnCycles)
+[State, Integer] emulateReturnIf(Boolean(State) condition, Integer returnCycles = 11)
         (Opcode opcode, State state) {
     if (condition(state)) {
         value address = word {
@@ -590,7 +620,12 @@ shared Boolean flagZero(Byte val) => val.zero;
             returnCycles // RET is 10, others are 11
         ];
     } else {
-        return nothing; // no test yet, 5 cycles
+        return [
+            state.with {
+                `State.programCounter`->state.programCounter + opcode.size
+            },
+            5
+        ];
     }
 }
 

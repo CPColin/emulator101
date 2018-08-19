@@ -36,6 +36,29 @@ import ceylon.language.meta.declaration {
     FunctionDeclaration
 }
 
+Boolean isAlwaysTaken(Boolean flagValue) => true;
+
+Boolean isTaken(Boolean flagValue) => flagValue;
+
+Boolean isNotTaken(Boolean flagValue) => !flagValue;
+
+{[BitFlag, Boolean]*} testTakenParameters = {
+    [`State.carry`, false],
+    [`State.carry`, true],
+    [`State.parity`, false],
+    [`State.parity`, true],
+    [`State.auxiliaryCarry`, false],
+    [`State.auxiliaryCarry`, true],
+    [`State.zero`, false],
+    [`State.zero`, true],
+    [`State.sign`, false],
+    [`State.sign`, true]
+};
+
+{Boolean*} testBooleanParameters = `Boolean`.caseValues;
+
+{Byte*} testByteParameters = 0.byte..255.byte;
+
 Integer testStateProgramCounter = #120;
 
 Integer testStateStackPointer = #100;
@@ -160,10 +183,6 @@ void assertStatesEqual(State startState, State endState, Attribute<State>* excep
             "Memory should not have changed.");
     }
 }
-
-{Boolean*} testBooleanParameters = `Boolean`.caseValues;
-
-{Byte*} testByteParameters = 0.byte..255.byte;
 
 {Opcode*} verifyAllOpcodesTestedParameters = `Opcode`.caseValues;
 
@@ -311,31 +330,7 @@ shared void testEmulateAndImmediate(Integer registerA, Integer data, Integer res
     assertEquals(cycles, 7);
 }
 
-test
-shared void testEmulateCall() {
-    value addressHigh = #33.byte;
-    value addressLow = #44.byte;
-    value address = word(addressHigh, addressLow);
-    value [startProgramCounterHigh, startProgramCounterLow] = bytes(testStateProgramCounter);
-    value startState = testState {
-        opcode = #cd;
-        testStateProgramCounter + 1->addressLow,
-        testStateProgramCounter + 2->addressHigh
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState,
-        `State.stackPointer`, `State.programCounter`, `State.memory`);
-    assertEquals(endState.stackPointer, startState.stackPointer - 2);
-    assertEquals(endState.programCounter, address);
-    assertMemoriesEqual(startState, endState,
-        endState.stackPointer->startProgramCounterLow,
-        endState.stackPointer + 1->startProgramCounterHigh);
-    
-    assertEquals(cycles, 17);
-}
-
-void testEmulateCallIf(Integer opcode, BitFlag flag, Boolean flagValue) {
+void testEmulateCallIf(Integer opcode, BitFlag flag, Boolean flagValue, Boolean(Boolean) taken) {
     value addressHigh = #33.byte;
     value addressLow = #44.byte;
     value address = word(addressHigh, addressLow);
@@ -348,7 +343,7 @@ void testEmulateCallIf(Integer opcode, BitFlag flag, Boolean flagValue) {
     };
     value [endState, cycles] = emulate(startState);
     
-    if (flagValue) {
+    if (taken(flagValue)) {
         assertStatesEqual(startState, endState,
             `State.stackPointer`, `State.programCounter`, `State.memory`);
         assertEquals(endState.stackPointer, startState.stackPointer - 2);
@@ -366,83 +361,58 @@ void testEmulateCallIf(Integer opcode, BitFlag flag, Boolean flagValue) {
     }
 }
 
-void testEmulateCallIfNot(Integer opcode, BitFlag flag, Boolean flagValue) {
-    value addressHigh = #33.byte;
-    value addressLow = #44.byte;
-    value address = word(addressHigh, addressLow);
-    value [startProgramCounterHigh, startProgramCounterLow] = bytes(testStateProgramCounter);
-    value startState = testState {
-        opcode = opcode;
-        flag->flagValue,
-        testStateProgramCounter + 1->addressLow,
-        testStateProgramCounter + 2->addressHigh
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    if (flagValue) {
-        assertStatesEqual(startState, endState, `State.programCounter`);
-        assertEquals(endState.programCounter, startState.programCounter + 3);
-        
-        assertEquals(cycles, 11);
-    } else {
-        assertStatesEqual(startState, endState,
-            `State.stackPointer`, `State.programCounter`, `State.memory`);
-        assertEquals(endState.stackPointer, startState.stackPointer - 2);
-        assertEquals(endState.programCounter, address);
-        assertMemoriesEqual(startState, endState,
-            endState.stackPointer->startProgramCounterLow,
-            endState.stackPointer + 1->startProgramCounterHigh);
-        
-        assertEquals(cycles, 17);
-    }
+test
+parameters(`value testTakenParameters`)
+shared void testEmulateCall(BitFlag flag, Boolean flagValue) {
+    testEmulateCallIf(#cd, flag, flagValue, isAlwaysTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfNotZero(Boolean zero) {
-    testEmulateCallIfNot(#c4, `State.zero`, zero);
+shared void testEmulateCallIfNotZero(Boolean flagValue) {
+    testEmulateCallIf(#c4, `State.zero`, flagValue, isNotTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfZero(Boolean zero) {
-    testEmulateCallIf(#cc, `State.zero`, zero);
+shared void testEmulateCallIfZero(Boolean flagValue) {
+    testEmulateCallIf(#cc, `State.zero`, flagValue, isTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfNotCarry(Boolean carry) {
-    testEmulateCallIfNot(#d4, `State.carry`, carry);
+shared void testEmulateCallIfNotCarry(Boolean flagValue) {
+    testEmulateCallIf(#d4, `State.carry`, flagValue, isNotTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfCarry(Boolean carry) {
-    testEmulateCallIf(#dc, `State.carry`, carry);
+shared void testEmulateCallIfCarry(Boolean flagValue) {
+    testEmulateCallIf(#dc, `State.carry`, flagValue, isTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfParityOdd(Boolean odd) {
-    testEmulateCallIfNot(#e4, `State.parity`, odd);
+shared void testEmulateCallIfParityOdd(Boolean flagValue) {
+    testEmulateCallIf(#e4, `State.parity`, flagValue, isNotTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfParityEven(Boolean even) {
-    testEmulateCallIf(#ec, `State.parity`, even);
+shared void testEmulateCallIfParityEven(Boolean flagValue) {
+    testEmulateCallIf(#ec, `State.parity`, flagValue, isTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfPlus(Boolean plus) {
-    testEmulateCallIfNot(#f4, `State.sign`, plus);
+shared void testEmulateCallIfPlus(Boolean flagValue) {
+    testEmulateCallIf(#f4, `State.sign`, flagValue, isNotTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfMinus(Boolean minus) {
-    testEmulateCallIf(#fc, `State.sign`, minus);
+shared void testEmulateCallIfMinus(Boolean flagValue) {
+    testEmulateCallIf(#fc, `State.sign`, flagValue, isTaken);
 }
 
 {[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateCompareImmediateParameters = {
@@ -480,6 +450,7 @@ shared void testEmulateCompareImmediate(Integer registerA, Integer data, Boolean
     assertEquals(cycles, 7);
 }
 
+// TODO: forgot to test auxiliary carry!
 {[Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateDecrementRegisterParameters = [
     [#01, #00, true, true, false],
     [#10, #0f, true, false, false],
@@ -724,6 +695,151 @@ shared void testEmulateExchangeRegisters() {
     assertEquals(cycles, 5);
 }
 
+{[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateIncrementRegisterParameters = {
+    [#00, #01, false, false, false, false],
+    [#01, #02, false, false, false, false],
+    [#0f, #10, false, true, false, false],
+    [#7f, #80, false, true, false, true],
+    [#80, #81, true, false, false, true],
+    [#ff, #00, true, true, true, false]
+};
+
+void testEmulateIncrementRegister(Integer opcode, ByteRegister register, Integer start,
+        Integer expected, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
+        Boolean expectedZero, Boolean expectedSign) {
+    value startState = testState {
+        opcode = opcode;
+        register->start.byte
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, register, `State.flags`, `State.programCounter`);
+    assertEquals(register.bind(endState).get(), expected.byte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 5);
+}
+
+test
+parameters(`value testEmulateIncrementRegisterParameters`)
+shared void testEmulateIncrementA(Integer start, Integer expected, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    testEmulateIncrementRegister {
+        opcode = #3c;
+        register = `State.registerA`;
+        start = start;
+        expected = expected;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+}
+
+test
+parameters(`value testEmulateIncrementRegisterParameters`)
+shared void testEmulateIncrementB(Integer start, Integer expected, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    testEmulateIncrementRegister {
+        opcode = #04;
+        register = `State.registerB`;
+        start = start;
+        expected = expected;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+}
+
+test
+parameters(`value testEmulateIncrementRegisterParameters`)
+shared void testEmulateIncrementC(Integer start, Integer expected, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    testEmulateIncrementRegister {
+        opcode = #0c;
+        register = `State.registerC`;
+        start = start;
+        expected = expected;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+}
+
+test
+parameters(`value testEmulateIncrementRegisterParameters`)
+shared void testEmulateIncrementD(Integer start, Integer expected, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    testEmulateIncrementRegister {
+        opcode = #14;
+        register = `State.registerD`;
+        start = start;
+        expected = expected;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+}
+
+test
+parameters(`value testEmulateIncrementRegisterParameters`)
+shared void testEmulateIncrementE(Integer start, Integer expected, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    testEmulateIncrementRegister {
+        opcode = #1c;
+        register = `State.registerE`;
+        start = start;
+        expected = expected;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+}
+
+test
+parameters(`value testEmulateIncrementRegisterParameters`)
+shared void testEmulateIncrementH(Integer start, Integer expected, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    testEmulateIncrementRegister {
+        opcode = #24;
+        register = `State.registerH`;
+        start = start;
+        expected = expected;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+}
+
+test
+parameters(`value testEmulateIncrementRegisterParameters`)
+shared void testEmulateIncrementL(Integer start, Integer expected, Boolean expectedParity,
+        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+    testEmulateIncrementRegister {
+        opcode = #2c;
+        register = `State.registerL`;
+        start = start;
+        expected = expected;
+        expectedParity = expectedParity;
+        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
+        expectedZero = expectedZero;
+        expectedSign = expectedSign;
+    };
+}
+
 {[Integer, Integer, Integer, Integer]*} testEmulateIncrementPairParameters = {
     [#00, #00, #00, #01],
     [#00, #09, #00, #0a],
@@ -795,25 +911,7 @@ shared void testEmulateIncrementPairH(Integer start1, Integer start2,
     };
 }
 
-test
-shared void testEmulateJump() {
-    value high = #43.byte;
-    value low = #21.byte;
-    value address = word(high, low);
-    value startState = testState {
-        opcode = #c3;
-        testStateProgramCounter + 1->low,
-        testStateProgramCounter + 2->high
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState, `State.programCounter`);
-    assertEquals(endState.programCounter, address);
-    
-    assertEquals(cycles, 10);
-}
-
-void testEmulateJumpIf(Integer opcode, BitFlag flag, Boolean flagValue) {
+void testEmulateJumpIf(Integer opcode, BitFlag flag, Boolean flagValue, Boolean(Boolean) taken) {
     value high = #43.byte;
     value low = #21.byte;
     value address = word(high, low);
@@ -824,26 +922,7 @@ void testEmulateJumpIf(Integer opcode, BitFlag flag, Boolean flagValue) {
         testStateProgramCounter + 2->high
     };
     value [endState, cycles] = emulate(startState);
-    value expectedProgramCounter = flagValue then address else startState.programCounter + 3;
-    
-    assertStatesEqual(startState, endState, `State.programCounter`);
-    assertEquals(endState.programCounter, expectedProgramCounter);
-    
-    assertEquals(cycles, 10);
-}
-
-void testEmulateJumpIfNot(Integer opcode, BitFlag flag, Boolean flagValue) {
-    value high = #43.byte;
-    value low = #21.byte;
-    value address = word(high, low);
-    value startState = testState {
-        opcode = opcode;
-        flag->flagValue,
-        testStateProgramCounter + 1->low,
-        testStateProgramCounter + 2->high
-    };
-    value [endState, cycles] = emulate(startState);
-    value expectedProgramCounter = flagValue then startState.programCounter + 3 else address;
+    value expectedProgramCounter = taken(flagValue) then address else startState.programCounter + 3;
     
     assertStatesEqual(startState, endState, `State.programCounter`);
     assertEquals(endState.programCounter, expectedProgramCounter);
@@ -852,51 +931,57 @@ void testEmulateJumpIfNot(Integer opcode, BitFlag flag, Boolean flagValue) {
 }
 
 test
-parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfNotZero(Boolean zero) {
-    testEmulateJumpIfNot(#c2, `State.zero`, zero);
+parameters(`value testTakenParameters`)
+shared void testEmulateJump(BitFlag flag, Boolean flagValue) {
+    testEmulateJumpIf(#c3, flag, flagValue, isAlwaysTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfZero(Boolean zero) {
-    testEmulateJumpIf(#ca, `State.zero`, zero);
+shared void testEmulateJumpIfNotZero(Boolean flagValue) {
+    testEmulateJumpIf(#c2, `State.zero`, flagValue, isNotTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfNoCarry(Boolean carry) {
-    testEmulateJumpIfNot(#d2, `State.carry`, carry);
+shared void testEmulateJumpIfZero(Boolean flagValue) {
+    testEmulateJumpIf(#ca, `State.zero`, flagValue, isTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfCarry(Boolean carry) {
-    testEmulateJumpIf(#da, `State.carry`, carry);
+shared void testEmulateJumpIfNoCarry(Boolean flagValue) {
+    testEmulateJumpIf(#d2, `State.carry`, flagValue, isNotTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfParityOdd(Boolean odd) {
-    testEmulateJumpIfNot(#e2, `State.parity`, odd);
+shared void testEmulateJumpIfCarry(Boolean flagValue) {
+    testEmulateJumpIf(#da, `State.carry`, flagValue, isTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfParityEven(Boolean even) {
-    testEmulateJumpIf(#ea, `State.parity`, even);
+shared void testEmulateJumpIfParityOdd(Boolean flagValue) {
+    testEmulateJumpIf(#e2, `State.parity`, flagValue, isNotTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfPlus(Boolean plus) {
-    testEmulateJumpIfNot(#f2, `State.sign`, plus);
+shared void testEmulateJumpIfParityEven(Boolean flagValue) {
+    testEmulateJumpIf(#ea, `State.parity`, flagValue, isTaken);
 }
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateJumpIfMinus(Boolean minus) {
-    testEmulateJumpIf(#fa, `State.sign`, minus);
+shared void testEmulateJumpIfPlus(Boolean flagValue) {
+    testEmulateJumpIf(#f2, `State.sign`, flagValue, isNotTaken);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateJumpIfMinus(Boolean flagValue) {
+    testEmulateJumpIf(#fa, `State.sign`, flagValue, isTaken);
 }
 
 test
@@ -1602,15 +1687,16 @@ shared void testEmulatePushStatus() {
     };
 }
 
-test
-shared void testEmulateReturn() {
+void testEmulateReturnIf(Integer opcode, BitFlag flag, Boolean flagValue, Boolean(Boolean) taken,
+        Integer takenCycles = 11) {
     value high = #01.byte;
     value low = #ab.byte;
     value address = word(high, low);
     value [testStateProgramCounterHigh, testStateProgramCounterLow]
             = bytes(testStateProgramCounter);
     value startState = testState {
-        opcode = #c9;
+        opcode = opcode;
+        flag->flagValue,
         testStateStackPointer->low,
         testStateStackPointer + 1->high,
         // Simulate the CALL instruction that led us to the RET instruction.
@@ -1620,11 +1706,72 @@ shared void testEmulateReturn() {
     };
     value [endState, cycles] = emulate(startState);
     
-    assertStatesEqual(startState, endState, `State.stackPointer`, `State.programCounter`);
-    assertEquals(endState.stackPointer, startState.stackPointer + 2);
-    assertEquals(endState.programCounter, address + 3);
-    
-    assertEquals(cycles, 10);
+    if (taken(flagValue)) {
+        assertStatesEqual(startState, endState, `State.stackPointer`, `State.programCounter`);
+        assertEquals(endState.stackPointer, startState.stackPointer + 2);
+        assertEquals(endState.programCounter, address + 3);
+        
+        assertEquals(cycles, takenCycles);
+    } else {
+        assertStatesEqual(startState, endState, `State.programCounter`);
+        assertEquals(endState.programCounter, startState.programCounter + 1);
+        
+        assertEquals(cycles, 5);
+    }
+}
+
+test
+parameters(`value testTakenParameters`)
+shared void testEmulateReturn(BitFlag flag, Boolean flagValue) {
+    testEmulateReturnIf(#c9, flag, flagValue, isAlwaysTaken, 10);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateReturnIfNotZero(Boolean flagValue) {
+    testEmulateReturnIf(#c0, `State.zero`, flagValue, isNotTaken);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateReturnIfZero(Boolean flagValue) {
+    testEmulateReturnIf(#c8, `State.zero`, flagValue, isTaken);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateReturnIfNoCarry(Boolean flagValue) {
+    testEmulateReturnIf(#d0, `State.carry`, flagValue, isNotTaken);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateReturnIfCarry(Boolean flagValue) {
+    testEmulateReturnIf(#d8, `State.carry`, flagValue, isTaken);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateReturnIfParityOdd(Boolean flagValue) {
+    testEmulateReturnIf(#e0, `State.parity`, flagValue, isNotTaken);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateReturnIfParityEven(Boolean flagValue) {
+    testEmulateReturnIf(#e8, `State.parity`, flagValue, isTaken);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateReturnIfPlus(Boolean flagValue) {
+    testEmulateReturnIf(#f0, `State.sign`, flagValue, isNotTaken);
+}
+
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateReturnIfMinus(Boolean flagValue) {
+    testEmulateReturnIf(#f8, `State.sign`, flagValue, isTaken);
 }
 
 {[Integer, Integer, Boolean]*} testRotateAccumulatorRightParameters = {
