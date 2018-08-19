@@ -11,12 +11,12 @@ shared [State, Integer] emulate(State state) {
     
     value emulator = switch (opcode)
         case (addA) nothing
-        case (addB) nothing
-        case (addC) nothing
-        case (addD) nothing
-        case (addE) nothing
-        case (addH) nothing
-        case (addL) nothing
+        case (addB) emulateAddRegister(`State.registerB`, false)
+        case (addC) emulateAddRegister(`State.registerC`, false)
+        case (addD) emulateAddRegister(`State.registerD`, false)
+        case (addE) emulateAddRegister(`State.registerE`, false)
+        case (addH) emulateAddRegister(`State.registerH`, false)
+        case (addL) emulateAddRegister(`State.registerL`, false)
         case (addMemory) nothing
         case (addImmediate) emulateAddImmediate(false)
         case (addAWithCarry) nothing
@@ -306,6 +306,27 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + addImmediate.size
         },
         7
+    ];
+}
+
+[State, Integer] emulateAddRegister(ByteRegister register, Boolean withCarry)
+        (Opcode opcode, State state) {
+    value left = state.registerA;
+    value right = register.bind(state).get();
+    value result = left.unsigned + right.unsigned + (withCarry && state.carry then 1 else 0);
+    value resultByte = result.byte;
+    
+    return [
+        state.with {
+            `State.registerA`->result.byte,
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        4
     ];
 }
 
