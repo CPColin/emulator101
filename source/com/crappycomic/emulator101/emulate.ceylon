@@ -10,7 +10,7 @@ shared [State, Integer] emulate(State state) {
     assert (exists opcode);
     
     value emulator = switch (opcode)
-        case (addA) nothing
+        case (addA) emulateAddRegister(`State.registerA`, false)
         case (addB) emulateAddRegister(`State.registerB`, false)
         case (addC) emulateAddRegister(`State.registerC`, false)
         case (addD) emulateAddRegister(`State.registerD`, false)
@@ -19,13 +19,13 @@ shared [State, Integer] emulate(State state) {
         case (addL) emulateAddRegister(`State.registerL`, false)
         case (addMemory) nothing
         case (addImmediate) emulateAddImmediate(false)
-        case (addAWithCarry) nothing
-        case (addBWithCarry) nothing
-        case (addCWithCarry) nothing
-        case (addDWithCarry) nothing
-        case (addEWithCarry) nothing
-        case (addHWithCarry) nothing
-        case (addLWithCarry) nothing
+        case (addAWithCarry) emulateAddRegister(`State.registerA`, true)
+        case (addBWithCarry) emulateAddRegister(`State.registerB`, true)
+        case (addCWithCarry) emulateAddRegister(`State.registerC`, true)
+        case (addDWithCarry) emulateAddRegister(`State.registerD`, true)
+        case (addEWithCarry) emulateAddRegister(`State.registerE`, true)
+        case (addHWithCarry) emulateAddRegister(`State.registerH`, true)
+        case (addLWithCarry) emulateAddRegister(`State.registerL`, true)
         case (addMemoryWithCarry) nothing
         case (addImmediateWithCarry) emulateAddImmediate(true)
         case (andA) nothing

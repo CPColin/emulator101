@@ -17,14 +17,14 @@ String format(Byte|Integer val, Integer width) {
 
 [String, String?] mnemonicAndArguments(Opcode opcode)
         => switch (opcode)
-            case (addA) ["SUB", "A"]
-            case (addB) ["SUB", "B"]
-            case (addC) ["SUB", "C"]
-            case (addD) ["SUB", "D"]
-            case (addE) ["SUB", "E"]
-            case (addH) ["SUB", "H"]
-            case (addL) ["SUB", "L"]
-            case (addMemory) ["SUB", "M"]
+            case (addA) ["ADD", "A"]
+            case (addB) ["ADD", "B"]
+            case (addC) ["ADD", "C"]
+            case (addD) ["ADD", "D"]
+            case (addE) ["ADD", "E"]
+            case (addH) ["ADD", "H"]
+            case (addL) ["ADD", "L"]
+            case (addMemory) ["ADD", "M"]
             case (addImmediate) ["ADI", "#"]
             case (addAWithCarry) ["ADC", "A"]
             case (addBWithCarry) ["ADC", "B"]

@@ -55,10 +55,6 @@ Boolean isNotTaken(Boolean flagValue) => !flagValue;
     [`State.sign`, true]
 };
 
-{Boolean*} testBooleanParameters = `Boolean`.caseValues;
-
-{Byte*} testByteParameters = 0.byte..255.byte;
-
 Integer testStateProgramCounter = #120;
 
 Integer testStateStackPointer = #100;

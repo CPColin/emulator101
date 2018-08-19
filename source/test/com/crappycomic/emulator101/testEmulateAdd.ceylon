@@ -6,7 +6,73 @@ import ceylon.test {
 import com.crappycomic.emulator101 {
     ByteRegister,
     State,
-    emulate
+    emulate,
+    flagAuxiliaryCarry,
+    flagCarry,
+    flagParity,
+    flagSign,
+    flagZero
+}
+
+test
+parameters(`value testRegisterParameters`)
+shared void testEmulateAddA(Byte registerValue) {
+    value result = registerValue.unsigned + registerValue.unsigned;
+    value resultByte = result.byte;
+    value startState = testState {
+        opcode = #87;
+        `State.registerA`->registerValue,
+        `State.carry`->true // Make sure carry flag doesn't get included
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, resultByte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedAuxiliaryCarry = flagAuxiliaryCarry(registerValue, registerValue, resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 4);
+}
+
+{[Byte, Boolean]*} testEmulateAddAWithCarryParameters
+        = testRegisterParameters.product(testBooleanParameters);
+
+test
+parameters(`value testEmulateAddAWithCarryParameters`)
+shared void testEmulateAddAWithCarry(Byte registerValue, Boolean carry) {
+    value result = registerValue.unsigned + registerValue.unsigned + (carry then 1 else 0);
+    value resultByte = result.byte;
+    value startState = testState {
+        opcode = #8f;
+        `State.registerA`->registerValue,
+        `State.carry`->carry
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, resultByte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedAuxiliaryCarry = flagAuxiliaryCarry(registerValue, registerValue, resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 4);
 }
 
 {[Integer, Integer, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
@@ -98,39 +164,130 @@ shared void testEmulateAddImmediateWithCarry(Integer registerA, Integer data, Bo
     assertEquals(cycles, 7);
 }
 
-{[Integer, Integer, Integer, Boolean, Boolean, Boolean, Boolean, Boolean]*}
-testEmulateAddRegisterParameters = {
-    [#00, #00, #00, false, true, false, true, false],
-    [#00, #01, #01, false, false, false, false, false],
-    [#01, #00, #01, false, false, false, false, false],
-    [#11, #22, #33, false, true, false, false, false],
-    [#0f, #01, #10, false, false, true, false, false],
-    [#7f, #01, #80, false, false, true, false, true],
-    [#ff, #02, #01, true, false, true, false, false]
-};
-
-void testEmulateAddRegister(Integer opcode, ByteRegister register, Integer registerA,
-        Integer registerValue, Integer result, Boolean expectedCarry, Boolean expectedParity,
-        Boolean expectedAuxiliaryCarry, Boolean expectedZero, Boolean expectedSign) {
+void testEmulateAddRegister(Integer opcode, ByteRegister register, Byte registerA,
+        Byte registerValue) {
+    value result = registerA.unsigned + registerValue.unsigned;
+    value resultByte = result.byte;
     value startState = testState {
         opcode = opcode;
-        `State.registerA`->registerA.byte,
-        register->registerValue.byte,
+        `State.registerA`->registerA,
+        register->registerValue,
         `State.carry`->true // Make sure carry flag doesn't get included
     };
     value [endState, cycles] = emulate(startState);
     
     assertStatesEqual(startState, endState,
         `State.registerA`, `State.flags`, `State.programCounter`);
-    assertEquals(endState.registerA, result.byte);
+    assertEquals(endState.registerA, resultByte);
     assertFlags {
         startState = startState;
         endState = endState;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedAuxiliaryCarry = flagAuxiliaryCarry(registerA, registerValue, resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 4);
+}
+
+{[Byte, Byte]*} testEmulateAddRegisterParameters
+        = testRegisterParameters.product(testRegisterParameters);
+
+test
+parameters(`value testEmulateAddRegisterParameters`)
+shared void testEmulateAddB(Byte registerA, Byte registerValue) {
+    testEmulateAddRegister {
+        opcode = #80;
+        register = `State.registerB`;
+        registerA = registerA;
+        registerValue = registerValue;
+    };
+}
+
+test
+parameters(`value testEmulateAddRegisterParameters`)
+shared void testEmulateAddC(Byte registerA, Byte registerValue) {
+    testEmulateAddRegister {
+        opcode = #81;
+        register = `State.registerC`;
+        registerA = registerA;
+        registerValue = registerValue;
+    };
+}
+
+test
+parameters(`value testEmulateAddRegisterParameters`)
+shared void testEmulateAddD(Byte registerA, Byte registerValue) {
+    testEmulateAddRegister {
+        opcode = #82;
+        register = `State.registerD`;
+        registerA = registerA;
+        registerValue = registerValue;
+    };
+}
+
+test
+parameters(`value testEmulateAddRegisterParameters`)
+shared void testEmulateAddE(Byte registerA, Byte registerValue) {
+    testEmulateAddRegister {
+        opcode = #83;
+        register = `State.registerE`;
+        registerA = registerA;
+        registerValue = registerValue;
+    };
+}
+
+test
+parameters(`value testEmulateAddRegisterParameters`)
+shared void testEmulateAddH(Byte registerA, Byte registerValue) {
+    testEmulateAddRegister {
+        opcode = #84;
+        register = `State.registerH`;
+        registerA = registerA;
+        registerValue = registerValue;
+    };
+}
+
+test
+parameters(`value testEmulateAddRegisterParameters`)
+shared void testEmulateAddL(Byte registerA, Byte registerValue) {
+    testEmulateAddRegister {
+        opcode = #85;
+        register = `State.registerL`;
+        registerA = registerA;
+        registerValue = registerValue;
+    };
+}
+
+{[Byte, Byte, Boolean]*} testEmulateAddRegisterWithCarryParameters
+        = secondProduct(testEmulateAddRegisterParameters, testBooleanParameters);
+
+void testEmulateAddRegisterWithCarry(Integer opcode, ByteRegister register, Byte registerA,
+        Byte registerValue, Boolean carry) {
+    value result = registerA.unsigned + registerValue.unsigned + (carry then 1 else 0);
+    value resultByte = result.byte;
+    value startState = testState {
+        opcode = opcode;
+        `State.registerA`->registerA,
+        register->registerValue,
+        `State.carry`->carry
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, resultByte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedAuxiliaryCarry = flagAuxiliaryCarry(registerA, registerValue, resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
     };
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
@@ -138,115 +295,73 @@ void testEmulateAddRegister(Integer opcode, ByteRegister register, Integer regis
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddB(Integer registerA, Integer registerValue, Integer result,
-        Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
-        Boolean expectedZero, Boolean expectedSign) {
-    testEmulateAddRegister {
-        opcode = #80;
+parameters(`value testEmulateAddRegisterWithCarryParameters`)
+shared void testEmulateAddBWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
+    testEmulateAddRegisterWithCarry {
+        opcode = #88;
         register = `State.registerB`;
         registerA = registerA;
         registerValue = registerValue;
-        result = result;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
+        carry = carry;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddC(Integer registerA, Integer registerValue, Integer result,
-    Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
-    Boolean expectedZero, Boolean expectedSign) {
-    testEmulateAddRegister {
-        opcode = #81;
+parameters(`value testEmulateAddRegisterWithCarryParameters`)
+shared void testEmulateAddCWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
+    testEmulateAddRegisterWithCarry {
+        opcode = #89;
         register = `State.registerC`;
         registerA = registerA;
         registerValue = registerValue;
-        result = result;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
+        carry = carry;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddD(Integer registerA, Integer registerValue, Integer result,
-    Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
-    Boolean expectedZero, Boolean expectedSign) {
-    testEmulateAddRegister {
-        opcode = #82;
+parameters(`value testEmulateAddRegisterWithCarryParameters`)
+shared void testEmulateAddDWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
+    testEmulateAddRegisterWithCarry {
+        opcode = #8a;
         register = `State.registerD`;
         registerA = registerA;
         registerValue = registerValue;
-        result = result;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
+        carry = carry;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddE(Integer registerA, Integer registerValue, Integer result,
-    Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
-    Boolean expectedZero, Boolean expectedSign) {
-    testEmulateAddRegister {
-        opcode = #83;
+parameters(`value testEmulateAddRegisterWithCarryParameters`)
+shared void testEmulateAddEWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
+    testEmulateAddRegisterWithCarry {
+        opcode = #8b;
         register = `State.registerE`;
         registerA = registerA;
         registerValue = registerValue;
-        result = result;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
+        carry = carry;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddH(Integer registerA, Integer registerValue, Integer result,
-    Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
-    Boolean expectedZero, Boolean expectedSign) {
-    testEmulateAddRegister {
-        opcode = #84;
+parameters(`value testEmulateAddRegisterWithCarryParameters`)
+shared void testEmulateAddHWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
+    testEmulateAddRegisterWithCarry {
+        opcode = #8c;
         register = `State.registerH`;
         registerA = registerA;
         registerValue = registerValue;
-        result = result;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
+        carry = carry;
     };
 }
 
 test
-parameters(`value testEmulateAddRegisterParameters`)
-shared void testEmulateAddL(Integer registerA, Integer registerValue, Integer result,
-        Boolean expectedCarry, Boolean expectedParity, Boolean expectedAuxiliaryCarry,
-        Boolean expectedZero, Boolean expectedSign) {
-    testEmulateAddRegister {
-        opcode = #85;
+parameters(`value testEmulateAddRegisterWithCarryParameters`)
+shared void testEmulateAddLWithCarry(Byte registerA, Byte registerValue, Boolean carry) {
+    testEmulateAddRegisterWithCarry {
+        opcode = #8d;
         register = `State.registerL`;
         registerA = registerA;
         registerValue = registerValue;
-        result = result;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedAuxiliaryCarry = expectedAuxiliaryCarry;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
+        carry = carry;
     };
 }
