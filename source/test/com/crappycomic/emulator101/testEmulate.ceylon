@@ -1411,42 +1411,6 @@ shared void testEmulateNoop() {
     assertEquals(cycles, 4);
 }
 
-{[Integer, Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateOrImmediateParameters = {
-    [#00, #00, #00, true, true, false],
-    [#00, #01, #01, false, false, false],
-    [#01, #01, #01, false, false, false],
-    [#01, #00, #01, false, false, false],
-    [#07, #70, #77, true, false, false],
-    [#8f, #f0, #ff, true, false, true]
-};
-
-test
-parameters(`value testEmulateOrImmediateParameters`)
-shared void testEmulateOrImmediate(Integer registerA, Integer data, Integer result,
-    Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
-    value startState = testState {
-        opcode = #f6;
-        `State.registerA`->registerA.byte,
-        testStateProgramCounter + 1->data.byte
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState,
-        `State.registerA`, `State.flags`, `State.programCounter`);
-    assertEquals(endState.registerA, result.byte);
-    assertFlags {
-        startState = startState;
-        endState = endState;
-        expectedCarry = false;
-        expectedParity = expectedParity;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
-    };
-    assertEquals(endState.programCounter, startState.programCounter + 2);
-    
-    assertEquals(cycles, 7);
-}
-
 test
 shared void testOutput() {
     value startState = testState {

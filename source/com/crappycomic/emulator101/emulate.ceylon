@@ -171,13 +171,13 @@ shared [State, Integer] emulate(State state) {
         case (moveMemoryH) emulateMoveMemoryRegister(`State.registerH`)
         case (moveMemoryL) emulateMoveMemoryRegister(`State.registerL`)
         case (noop) emulateNoop
-        case (orA) nothing
-        case (orB) nothing
-        case (orC) nothing
-        case (orD) nothing
-        case (orE) nothing
-        case (orH) nothing
-        case (orL) nothing
+        case (orA) emulateOrRegister(`State.registerA`)
+        case (orB) emulateOrRegister(`State.registerB`)
+        case (orC) emulateOrRegister(`State.registerC`)
+        case (orD) emulateOrRegister(`State.registerD`)
+        case (orE) emulateOrRegister(`State.registerE`)
+        case (orH) emulateOrRegister(`State.registerH`)
+        case (orL) emulateOrRegister(`State.registerL`)
         case (orMemory) nothing
         case (orImmediate) emulateOrImmediate
         case (output) emulateOutput
@@ -643,6 +643,23 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + orImmediate.size
         },
         7
+    ];
+}
+
+[State, Integer] emulateOrRegister(ByteRegister register)
+        (Opcode opcode, State state) {
+    value result = state.registerA.or(register.bind(state).get());
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        4
     ];
 }
 
