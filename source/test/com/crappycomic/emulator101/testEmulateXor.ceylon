@@ -10,7 +10,8 @@ import com.crappycomic.emulator101 {
     emulate,
     flagParity,
     flagSign,
-    flagZero
+    flagZero,
+    bytes
 }
 
 test
@@ -168,4 +169,35 @@ shared void testEmulateXorL(Byte registerA, Byte registerValue) {
         registerA = registerA;
         registerValue = registerValue;
     };
+}
+
+test
+parameters(`value testEmulateXorRegisterParameters`)
+shared void testEmulateXorMemory(Byte registerValue, Byte memoryValue) {
+    value result = registerValue.xor(memoryValue);
+    value address = #010a;
+    value [high, low] = bytes(address);
+    value startState = testState {
+        opcode = #ae;
+        `State.registerA`->registerValue,
+        `State.registerH`->high,
+        `State.registerL`->low,
+        address->memoryValue
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, result);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = false;
+        expectedParity = flagParity(result);
+        expectedZero = flagZero(result);
+        expectedSign = flagSign(result);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 7);
 }

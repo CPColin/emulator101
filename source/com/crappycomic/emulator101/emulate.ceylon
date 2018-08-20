@@ -39,7 +39,7 @@ shared [State, Integer] emulate(State state) {
         case (andH) emulateAndRegister(`State.registerH`)
         case (andL) emulateAndRegister(`State.registerL`)
         case (andImmediate) emulateAndImmediate
-        case (andMemory) nothing
+        case (andMemory) emulateAndMemory
         case (call) emulateCallIf((state) => true)
         case (callIfCarry) emulateCallIf(State.carry)
         case (callIfMinus) emulateCallIf(State.sign)
@@ -181,7 +181,7 @@ shared [State, Integer] emulate(State state) {
         case (orE) emulateOrRegister(`State.registerE`)
         case (orH) emulateOrRegister(`State.registerH`)
         case (orL) emulateOrRegister(`State.registerL`)
-        case (orMemory) nothing
+        case (orMemory) emulateOrMemory
         case (orImmediate) emulateOrImmediate
         case (output) emulateOutput
         case (popB) emulatePop(`State.registerB`, `State.registerC`)
@@ -230,7 +230,7 @@ shared [State, Integer] emulate(State state) {
         case (xorE) emulateXorRegister(`State.registerE`)
         case (xorH) emulateXorRegister(`State.registerH`)
         case (xorL) emulateXorRegister(`State.registerL`)
-        case (xorMemory) nothing
+        case (xorMemory) emulateXorMemory
         case (xorImmediate) emulateXorImmediate
         ;
     
@@ -367,6 +367,23 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.zero`->flagZero(result),
             `State.sign`->flagSign(result),
             `State.programCounter`->state.programCounter + andImmediate.size
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateAndMemory(State state) {
+    value address = word(state.registerH, state.registerL);
+    value result = state.registerA.and(state.memory[address] else 0.byte);
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + andMemory.size
         },
         7
     ];
@@ -712,6 +729,23 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateOrMemory(State state) {
+    value address = word(state.registerH, state.registerL);
+    value result = state.registerA.or(state.memory[address] else 0.byte);
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + orMemory.size
+        },
+        7
+    ];
+}
+
 [State, Integer] emulateOrRegister(ByteRegister register)
         (Opcode opcode, State state) {
     value result = state.registerA.or(register.bind(state).get());
@@ -906,6 +940,23 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.zero`->flagZero(result),
             `State.sign`->flagSign(result),
             `State.programCounter`->state.programCounter + xorImmediate.size
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateXorMemory(State state) {
+    value address = word(state.registerH, state.registerL);
+    value result = state.registerA.xor(state.memory[address] else 0.byte);
+    
+    return [
+        state.with {
+            `State.registerA`->result,
+            `State.carry`->false,
+            `State.parity`->flagParity(result),
+            `State.zero`->flagZero(result),
+            `State.sign`->flagSign(result),
+            `State.programCounter`->state.programCounter + xorMemory.size
         },
         7
     ];

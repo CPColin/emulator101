@@ -253,7 +253,7 @@ shared void testEmulateCallIfZero(Boolean flagValue) {
 
 test
 parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfNotCarry(Boolean flagValue) {
+shared void testEmulateCallIfNoCarry(Boolean flagValue) {
     testEmulateCallIf(#d4, `State.carry`, flagValue, isNotTaken);
 }
 
