@@ -12,7 +12,8 @@ import com.crappycomic.emulator101 {
     flagCarry,
     flagZero,
     flagSign,
-    ByteRegister
+    ByteRegister,
+    bytes
 }
 
 test
@@ -42,6 +43,39 @@ shared void testEmulateSubtractA(Byte registerValue) {
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 4);
+}
+
+test
+parameters(`value testEmulateSubtractRegisterParameters`)
+shared void testEmulateSubtractMemory(Byte registerValue, Byte memoryValue) {
+    value result = registerValue.unsigned - memoryValue.unsigned;
+    value resultByte = result.byte;
+    value address = #010a;
+    value [high, low] = bytes(address);
+    value startState = testState {
+        opcode = #96;
+        `State.registerA`->registerValue,
+        `State.registerH`->high,
+        `State.registerL`->low,
+        address->memoryValue
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, resultByte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedAuxiliaryCarry = flagAuxiliaryCarry(registerValue, memoryValue, resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 7);
 }
 
 {[Byte, Boolean]*} testEmulateSubtractAWithBorrowParameters
@@ -356,4 +390,39 @@ shared void testEmulateSubtractLWithBorrow(Byte registerA, Byte registerValue, B
         registerValue = registerValue;
         borrow = borrow;
     };
+}
+
+test
+parameters(`value testEmulateSubtractRegisterWithBorrowParameters`)
+shared void testEmulateSubtractMemoryWithBorrow(Byte registerValue, Byte memoryValue,
+        Boolean borrow) {
+    value result = registerValue.unsigned - memoryValue.unsigned - (borrow then 1 else 0);
+    value resultByte = result.byte;
+    value address = #010a;
+    value [high, low] = bytes(address);
+    value startState = testState {
+        opcode = #9e;
+        `State.registerA`->registerValue,
+        `State.registerH`->high,
+        `State.registerL`->low,
+        `State.carry`->borrow,
+        address->memoryValue
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, resultByte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedAuxiliaryCarry = flagAuxiliaryCarry(registerValue, memoryValue, resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 7);
 }

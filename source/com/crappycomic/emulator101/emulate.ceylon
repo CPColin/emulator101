@@ -20,7 +20,7 @@ shared [State, Integer] emulate(State state) {
         case (addE) emulateAddRegister(`State.registerE`, false)
         case (addH) emulateAddRegister(`State.registerH`, false)
         case (addL) emulateAddRegister(`State.registerL`, false)
-        case (addMemory) nothing
+        case (addMemory) emulateAddMemory(false)
         case (addImmediate) emulateAddImmediate(false)
         case (addAWithCarry) emulateAddRegister(`State.registerA`, true)
         case (addBWithCarry) emulateAddRegister(`State.registerB`, true)
@@ -29,7 +29,7 @@ shared [State, Integer] emulate(State state) {
         case (addEWithCarry) emulateAddRegister(`State.registerE`, true)
         case (addHWithCarry) emulateAddRegister(`State.registerH`, true)
         case (addLWithCarry) emulateAddRegister(`State.registerL`, true)
-        case (addMemoryWithCarry) nothing
+        case (addMemoryWithCarry) emulateAddMemory(true)
         case (addImmediateWithCarry) emulateAddImmediate(true)
         case (andA) emulateAndRegister(`State.registerA`)
         case (andB) emulateAndRegister(`State.registerB`)
@@ -56,7 +56,7 @@ shared [State, Integer] emulate(State state) {
         case (compareE) emulateCompareRegister(`State.registerE`)
         case (compareH) emulateCompareRegister(`State.registerH`)
         case (compareL) emulateCompareRegister(`State.registerL`)
-        case (compareMemory) nothing
+        case (compareMemory) emulateCompareMemory
         case (compareImmediate) emulateCompareImmediate
         case (decimalAdjust) nothing
         case (decrementA) emulateDecrementRegister(`State.registerA`)
@@ -212,7 +212,7 @@ shared [State, Integer] emulate(State state) {
         case (subtractE) emulateSubtractRegister(`State.registerE`, false)
         case (subtractH) emulateSubtractRegister(`State.registerH`, false)
         case (subtractL) emulateSubtractRegister(`State.registerL`, false)
-        case (subtractMemory) nothing
+        case (subtractMemory) emulateSubtractMemory(false)
         case (subtractImmediate) emulateSubtractImmediate(false)
         case (subtractAWithBorrow) emulateSubtractRegister(`State.registerA`, true)
         case (subtractBWithBorrow) emulateSubtractRegister(`State.registerB`, true)
@@ -221,7 +221,7 @@ shared [State, Integer] emulate(State state) {
         case (subtractEWithBorrow) emulateSubtractRegister(`State.registerE`, true)
         case (subtractHWithBorrow) emulateSubtractRegister(`State.registerH`, true)
         case (subtractLWithBorrow) emulateSubtractRegister(`State.registerL`, true)
-        case (subtractMemoryWithBorrow) nothing
+        case (subtractMemoryWithBorrow) emulateSubtractMemory(true)
         case (subtractImmediateWithBorrow) emulateSubtractImmediate(true)
         case (xorA) emulateXorRegister(`State.registerA`)
         case (xorB) emulateXorRegister(`State.registerB`)
@@ -292,7 +292,8 @@ shared Boolean flagSign(Byte val) => val.get(7);
 
 shared Boolean flagZero(Byte val) => val.zero;
 
-[State, Integer] emulateAddImmediate(Boolean withCarry)(State state) {
+[State, Integer] emulateAddImmediate(Boolean withCarry)
+        (Opcode opcode, State state) {
     value left = state.registerA;
     value right = dataByte(state);
     value result = left.unsigned + right.unsigned + (withCarry && state.carry then 1 else 0);
@@ -306,7 +307,29 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
             `State.zero`->flagZero(resultByte),
             `State.sign`->flagSign(resultByte),
-            `State.programCounter`->state.programCounter + addImmediate.size
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateAddMemory(Boolean withCarry)
+        (Opcode opcode, State state) {
+    value left = state.registerA;
+    value address = word(state.registerH, state.registerL);
+    value right = state.memory[address] else 0.byte;
+    value result = left.unsigned + right.unsigned + (withCarry && state.carry then 1 else 0);
+    value resultByte = result.byte;
+    
+    return [
+        state.with {
+            `State.registerA`->result.byte,
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + opcode.size
         },
         7
     ];
@@ -405,6 +428,26 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.zero`->flagZero(resultByte),
             `State.sign`->flagSign(resultByte),
             `State.programCounter`->state.programCounter + compareImmediate.size
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateCompareMemory(State state) {
+    value left = state.registerA;
+    value address = word(state.registerH, state.registerL);
+    value right = state.memory[address] else 0.byte;
+    value result = left.unsigned - right.unsigned;
+    value resultByte = result.byte;
+    
+    return [
+        state.with {
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, result.byte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + compareMemory.size
         },
         7
     ];
@@ -788,7 +831,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateSubtractImmediate(Boolean withBorrow)(State state) {
+[State, Integer] emulateSubtractImmediate(Boolean withBorrow)
+        (Opcode opcode, State state) {
     value left = state.registerA;
     value right = dataByte(state);
     value result = left.unsigned - right.unsigned - (withBorrow && state.carry then 1 else 0);
@@ -802,7 +846,29 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
             `State.zero`->flagZero(resultByte),
             `State.sign`->flagSign(resultByte),
-            `State.programCounter`->state.programCounter + addImmediate.size
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        7
+    ];
+}
+
+[State, Integer] emulateSubtractMemory(Boolean withBorrow)
+        (Opcode opcode, State state) {
+    value left = state.registerA;
+    value address = word(state.registerH, state.registerL);
+    value right = state.memory[address] else 0.byte;
+    value result = left.unsigned - right.unsigned - (withBorrow && state.carry then 1 else 0);
+    value resultByte = result.byte;
+    
+    return [
+        state.with {
+            `State.registerA`->result.byte,
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + opcode.size
         },
         7
     ];

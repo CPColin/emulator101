@@ -12,7 +12,8 @@ import com.crappycomic.emulator101 {
     flagCarry,
     flagParity,
     flagSign,
-    flagZero
+    flagZero,
+    bytes
 }
 
 test
@@ -263,6 +264,39 @@ shared void testEmulateAddL(Byte registerA, Byte registerValue) {
     };
 }
 
+test
+parameters(`value testEmulateAddRegisterParameters`)
+shared void testEmulateAddMemory(Byte registerValue, Byte memoryValue) {
+    value result = registerValue.unsigned + memoryValue.unsigned;
+    value resultByte = result.byte;
+    value address = #010a;
+    value [high, low] = bytes(address);
+    value startState = testState {
+        opcode = #86;
+        `State.registerA`->registerValue,
+        `State.registerH`->high,
+        `State.registerL`->low,
+        address->memoryValue
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, resultByte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedAuxiliaryCarry = flagAuxiliaryCarry(registerValue, memoryValue, resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 7);
+}
+
 {[Byte, Byte, Boolean]*} testEmulateAddRegisterWithCarryParameters
         = secondProduct(testEmulateAddRegisterParameters, testBooleanParameters);
 
@@ -365,4 +399,38 @@ shared void testEmulateAddLWithCarry(Byte registerA, Byte registerValue, Boolean
         registerValue = registerValue;
         carry = carry;
     };
+}
+
+test
+parameters(`value testEmulateAddRegisterWithCarryParameters`)
+shared void testEmulateAddMemoryWithCarry(Byte registerValue, Byte memoryValue, Boolean carry) {
+    value result = registerValue.unsigned + memoryValue.unsigned + (carry then 1 else 0);
+    value resultByte = result.byte;
+    value address = #010a;
+    value [high, low] = bytes(address);
+    value startState = testState {
+        opcode = #8e;
+        `State.registerA`->registerValue,
+        `State.registerH`->high,
+        `State.registerL`->low,
+        `State.carry`->carry,
+        address->memoryValue
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerA`, `State.flags`, `State.programCounter`);
+    assertEquals(endState.registerA, resultByte);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedAuxiliaryCarry = flagAuxiliaryCarry(registerValue, memoryValue, resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 7);
 }

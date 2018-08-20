@@ -7,6 +7,7 @@ import ceylon.test {
 import com.crappycomic.emulator101 {
     ByteRegister,
     State,
+    bytes,
     emulate,
     flagCarry,
     flagParity,
@@ -164,4 +165,34 @@ shared void testEmulateCompareL(Byte registerA, Byte registerValue) {
         registerA = registerA;
         registerValue = registerValue;
     };
+}
+
+test
+parameters(`value testEmulateCompareRegisterParameters`)
+shared void testEmulateCompareMemory(Byte registerA, Byte memoryValue) {
+    value result = registerA.unsigned - memoryValue.unsigned;
+    value resultByte = result.byte;
+    value address = #010a;
+    value [high, low] = bytes(address);
+    value startState = testState {
+        opcode = #be;
+        `State.registerA`->registerA,
+        `State.registerH`->high,
+        `State.registerL`->low,
+        address->memoryValue
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, `State.flags`, `State.programCounter`);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = flagCarry(result);
+        expectedParity = flagParity(resultByte);
+        expectedZero = flagZero(resultByte);
+        expectedSign = flagSign(resultByte);
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 7);
 }
