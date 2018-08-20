@@ -221,12 +221,12 @@ shared [State, Integer] emulate(State state) {
         case (subtractMemoryWithBorrow) nothing
         case (subtractImmediateWithBorrow) emulateSubtractImmediate(true)
         case (xorA) emulateXorRegister(`State.registerA`)
-        case (xorB) nothing
-        case (xorC) nothing
-        case (xorD) nothing
-        case (xorE) nothing
-        case (xorH) nothing
-        case (xorL) nothing
+        case (xorB) emulateXorRegister(`State.registerB`)
+        case (xorC) emulateXorRegister(`State.registerC`)
+        case (xorD) emulateXorRegister(`State.registerD`)
+        case (xorE) emulateXorRegister(`State.registerE`)
+        case (xorH) emulateXorRegister(`State.registerH`)
+        case (xorL) emulateXorRegister(`State.registerL`)
         case (xorMemory) nothing
         case (xorImmediate) emulateXorImmediate
         ;
