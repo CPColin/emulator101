@@ -9,6 +9,9 @@ shared [State, Integer] emulate(State state) {
     
     assert (exists opcode);
     
+    // TODO: Idea: In places where we only read from a register, we could use Byte(State),
+    // instead of ByteRegister, and maybe be a littler cleaner/faster.
+    
     value emulator = switch (opcode)
         case (addA) emulateAddRegister(`State.registerA`, false)
         case (addB) emulateAddRegister(`State.registerB`, false)
@@ -46,13 +49,13 @@ shared [State, Integer] emulate(State state) {
         case (callIfParityOdd) emulateCallIf(not(State.parity))
         case (callIfPlus) emulateCallIf(not(State.sign))
         case (callIfZero) emulateCallIf(State.zero)
-        case (compareA) nothing
-        case (compareB) nothing
-        case (compareC) nothing
-        case (compareD) nothing
-        case (compareE) nothing
-        case (compareH) nothing
-        case (compareL) nothing
+        case (compareA) emulateCompareRegister(`State.registerA`)
+        case (compareB) emulateCompareRegister(`State.registerB`)
+        case (compareC) emulateCompareRegister(`State.registerC`)
+        case (compareD) emulateCompareRegister(`State.registerD`)
+        case (compareE) emulateCompareRegister(`State.registerE`)
+        case (compareH) emulateCompareRegister(`State.registerH`)
+        case (compareL) emulateCompareRegister(`State.registerL`)
         case (compareMemory) nothing
         case (compareImmediate) emulateCompareImmediate
         case (decimalAdjust) nothing
@@ -404,6 +407,26 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + compareImmediate.size
         },
         7
+    ];
+}
+
+[State, Integer] emulateCompareRegister(ByteRegister register)
+        (Opcode opcode, State state) {
+    value left = state.registerA;
+    value right = register.bind(state).get();
+    value result = left.unsigned - right.unsigned;
+    value resultByte = result.byte;
+    
+    return [
+        state.with {
+            `State.carry`->flagCarry(result),
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, result.byte),
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        4
     ];
 }
 

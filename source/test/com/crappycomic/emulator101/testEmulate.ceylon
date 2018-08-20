@@ -287,41 +287,6 @@ shared void testEmulateCallIfMinus(Boolean flagValue) {
     testEmulateCallIf(#fc, `State.sign`, flagValue, isTaken);
 }
 
-{[Integer, Integer, Boolean, Boolean, Boolean, Boolean]*} testEmulateCompareImmediateParameters = {
-    [#00, #00, false, true, true, false],
-    [#01, #00, false, false, false, false],
-    [#00, #01, true, true, false, true],
-    [#00, #02, true, false, false, true],
-    [#a0, #a0, false, true, true, false],
-    [#ff, #fe, false, false, false, false],
-    [#ff, #01, false, false, false, true]
-};
-
-test
-parameters(`value testEmulateCompareImmediateParameters`)
-shared void testEmulateCompareImmediate(Integer registerA, Integer data, Boolean expectedCarry,
-        Boolean expectedParity, Boolean expectedZero, Boolean expectedSign) {
-    value startState = testState {
-        opcode = #fe;
-        `State.registerA`->registerA.byte,
-        testStateProgramCounter + 1->data.byte
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState, `State.flags`, `State.programCounter`);
-    assertFlags {
-        startState = startState;
-        endState = endState;
-        expectedCarry = expectedCarry;
-        expectedParity = expectedParity;
-        expectedZero = expectedZero;
-        expectedSign = expectedSign;
-    };
-    assertEquals(endState.programCounter, startState.programCounter + 2);
-    
-    assertEquals(cycles, 7);
-}
-
 // TODO: forgot to test auxiliary carry!
 {[Integer, Integer, Boolean, Boolean, Boolean]*} testEmulateDecrementRegisterParameters = [
     [#01, #00, true, true, false],
