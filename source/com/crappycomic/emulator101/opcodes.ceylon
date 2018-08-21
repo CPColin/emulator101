@@ -61,7 +61,7 @@ shared abstract class Opcode
         | loadPairImmediateStackPointer // 31
         | storeAccumulatorDirect // 32
         // 33
-        // 34
+        | incrementMemory // 34
         | decrementMemory // 35
         | moveImmediateMemory // 36
         // 37
@@ -315,6 +315,7 @@ object decrementL extends Opcode(#2d) {}
 object moveImmediateL extends Opcode(#2e, 2) {}
 object loadPairImmediateStackPointer extends Opcode(#31, 3) {}
 object storeAccumulatorDirect extends Opcode(#32, 3) {}
+object incrementMemory extends Opcode(#34) {}
 object decrementMemory extends Opcode(#35) {}
 object moveImmediateMemory extends Opcode(#36, 2) {}
 object loadAccumulatorDirect extends Opcode(#3a, 3) {}

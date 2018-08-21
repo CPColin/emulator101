@@ -66,7 +66,7 @@ shared [State, Integer] emulate(State state) {
         case (decrementE) emulateDecrementRegister(`State.registerE`)
         case (decrementH) emulateDecrementRegister(`State.registerH`)
         case (decrementL) emulateDecrementRegister(`State.registerL`)
-        case (decrementMemory) nothing
+        case (decrementMemory) emulateDecrementMemory
         case (decrementPairH) nothing
         case (disableInterrupts) nothing
         case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
@@ -82,6 +82,7 @@ shared [State, Integer] emulate(State state) {
         case (incrementE) emulateIncrementRegister(`State.registerE`)
         case (incrementH) emulateIncrementRegister(`State.registerH`)
         case (incrementL) emulateIncrementRegister(`State.registerL`)
+        case (incrementMemory) emulateIncrementMemory
         case (incrementPairB) emulateIncrementPair(`State.registerB`, `State.registerC`)
         case (incrementPairD) emulateIncrementPair(`State.registerD`, `State.registerE`)
         case (incrementPairH) emulateIncrementPair(`State.registerH`, `State.registerL`)
@@ -490,15 +491,34 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateDecrementMemory(State state) {
+    value address = word(state.registerH, state.registerL);
+    value initial = state.memory[address] else 0.byte;
+    value val = initial.predecessor;
+    
+    return [
+        state.with {
+            address->val,
+            `State.parity`->flagParity(val),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(initial, -1.byte, val),
+            `State.zero`->flagZero(val),
+            `State.sign`->flagSign(val),
+            `State.programCounter`->state.programCounter + incrementMemory.size
+        },
+        10
+    ];
+}
+
 [State, Integer] emulateDecrementRegister(ByteRegister register)
         (Opcode opcode, State state) {
-    value val = register.bind(state).get().predecessor;
+    value initial = register.bind(state).get();
+    value val = initial.predecessor;
     
     return [
         state.with {
             register->val,
             `State.parity`->flagParity(val),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(state.registerB, 1.byte, val),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(initial, -1.byte, val),
             `State.zero`->flagZero(val),
             `State.sign`->flagSign(val),
             `State.programCounter`->state.programCounter + opcode.size
@@ -553,6 +573,24 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + opcode.size
         },
         5
+    ];
+}
+
+[State, Integer] emulateIncrementMemory(State state) {
+    value address = word(state.registerH, state.registerL);
+    value initial = state.memory[address] else 0.byte;
+    value val = initial.successor;
+    
+    return [
+        state.with {
+            address->val,
+            `State.parity`->flagParity(val),
+            `State.auxiliaryCarry`->flagAuxiliaryCarry(initial, 1.byte, val),
+            `State.zero`->flagZero(val),
+            `State.sign`->flagSign(val),
+            `State.programCounter`->state.programCounter + incrementMemory.size
+        },
+        10
     ];
 }
 
