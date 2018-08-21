@@ -19,7 +19,7 @@ shared abstract class Opcode
         // 08
         | doubleAddB // 09
         // 0a
-        // 0b
+        | decrementPairB // 0b
         | incrementC // 0c
         | decrementC // 0d
         | moveImmediateC // 0e
@@ -36,7 +36,7 @@ shared abstract class Opcode
         // 18
         | doubleAddD // 19
         | loadAccumulatorD // 1a
-        // 1b
+        | decrementPairD // 1b
         | incrementE // 1c
         | decrementE // 1d
         | moveImmediateE // 1e
@@ -286,6 +286,7 @@ object decrementB extends Opcode(#05) {}
 object moveImmediateB extends Opcode(#06, 2) {}
 object rotateAccumulatorLeft extends Opcode(#07) {}
 object doubleAddB extends Opcode(#09) {}
+object decrementPairB extends Opcode(#0b) {}
 object incrementC extends Opcode(#0c) {}
 object decrementC extends Opcode(#0d) {}
 object moveImmediateC extends Opcode(#0e, 2) {}
@@ -297,6 +298,7 @@ object decrementD extends Opcode(#15) {}
 object moveImmediateD extends Opcode(#16, 2) {}
 object doubleAddD extends Opcode(#19) {}
 object loadAccumulatorD extends Opcode(#1a) {}
+object decrementPairD extends Opcode(#1b) {}
 object incrementE extends Opcode(#1c) {}
 object decrementE extends Opcode(#1d) {}
 object moveImmediateE extends Opcode(#1e, 2) {}

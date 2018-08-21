@@ -71,6 +71,8 @@ String format(Byte|Integer val, Integer width) {
             case (decrementH) ["DCR", "H"]
             case (decrementL) ["DCR", "L"]
             case (decrementMemory) ["DCR", "M"]
+            case (decrementPairB) ["DCX", "B"]
+            case (decrementPairD) ["DCX", "D"]
             case (decrementPairH) ["DCX", "H"]
             case (disableInterrupts) ["DI", null]
             case (doubleAddB) ["DAD", "B"]

@@ -67,7 +67,9 @@ shared [State, Integer] emulate(State state) {
         case (decrementH) emulateDecrementRegister(`State.registerH`)
         case (decrementL) emulateDecrementRegister(`State.registerL`)
         case (decrementMemory) emulateDecrementMemory
-        case (decrementPairH) nothing
+        case (decrementPairB) emulateDecrementPair(`State.registerB`, `State.registerC`)
+        case (decrementPairD) emulateDecrementPair(`State.registerD`, `State.registerE`)
+        case (decrementPairH) emulateDecrementPair(`State.registerH`, `State.registerL`)
         case (disableInterrupts) nothing
         case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
         case (doubleAddD) emulateDoubleAdd(`State.registerD`, `State.registerE`)
@@ -506,6 +508,21 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + incrementMemory.size
         },
         10
+    ];
+}
+
+[State, Integer] emulateDecrementPair(ByteRegister highRegister, ByteRegister lowRegister)
+        (Opcode opcode, State state) {
+    value pair = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
+    value [high, low] = bytes(pair - 1);
+    
+    return [
+        state.with {
+            highRegister->high,
+            lowRegister->low,
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        5
     ];
 }
 

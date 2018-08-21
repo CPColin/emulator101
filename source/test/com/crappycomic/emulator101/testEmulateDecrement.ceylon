@@ -7,6 +7,7 @@ import ceylon.test {
 import com.crappycomic.emulator101 {
     ByteRegister,
     State,
+    bytes,
     emulate,
     flagAuxiliaryCarry,
     flagParity,
@@ -136,4 +137,43 @@ shared void testEmulateDecrementMemory(Byte memoryValue) {
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 10);
+}
+
+{[Byte, Byte]*} testEmulateDecrementPairParameters
+        = testRegisterParameters.product(testRegisterParameters);
+
+void testEmulateDecrementPair(Integer opcode, ByteRegister registerHigh, ByteRegister registerLow,
+        Byte high, Byte low) {
+    value [expectedHigh, expectedLow] = bytes(word(high, low) - 1);
+    value startState = testState {
+        opcode = opcode;
+        registerHigh->high,
+        registerLow->low
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, registerHigh, registerLow, `State.programCounter`);
+    assertEquals(registerHigh.bind(endState).get(), expectedHigh);
+    assertEquals(registerLow.bind(endState).get(), expectedLow);
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 5);
+}
+
+test
+parameters(`value testEmulateDecrementPairParameters`)
+shared void testEmulateDecrementPairB(Byte high, Byte low) {
+    testEmulateDecrementPair(#0b, `State.registerB`, `State.registerC`, high, low);
+}
+
+test
+parameters(`value testEmulateDecrementPairParameters`)
+shared void testEmulateDecrementPairD(Byte high, Byte low) {
+    testEmulateDecrementPair(#1b, `State.registerD`, `State.registerE`, high, low);
+}
+
+test
+parameters(`value testEmulateDecrementPairParameters`)
+shared void testEmulateDecrementPairH(Byte high, Byte low) {
+    testEmulateDecrementPair(#2b, `State.registerH`, `State.registerL`, high, low);
 }
