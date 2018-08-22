@@ -165,7 +165,8 @@ void assertStatesEqual(State startState, State endState, Attribute<State>* excep
             "Processor flags should not have changed.");
     }
     
-    if (!except.contains(`State.stackPointer`)) {
+    if (!except.containsAny(
+            {`State.stackPointer`, `State.stackPointerHigh`, `State.stackPointerLow`})) {
         assertEquals(endState.stackPointer, startState.stackPointer,
             "Stack pointer should not have changed.");
     }

@@ -128,19 +128,5 @@ shared void testEmulateLoadPairImmediateH() {
 
 test
 shared void testEmulateLoadPairImmediateStackPointer() {
-    value high = #a6.byte;
-    value low = #b7.byte;
-    value data = word(high, low);
-    value startState = testState {
-        opcode = #31;
-        testStateProgramCounter + 1-> low,
-        testStateProgramCounter + 2-> high
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState, `State.stackPointer`, `State.programCounter`);
-    assertEquals(endState.stackPointer, data);
-    assertEquals(endState.programCounter, startState.programCounter + 3);
-    
-    assertEquals(cycles, 10);
+    testEmulateLoadPairImmediate(#31, `State.stackPointerHigh`, `State.stackPointerLow`);
 }

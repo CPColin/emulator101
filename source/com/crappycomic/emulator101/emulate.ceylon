@@ -105,7 +105,8 @@ shared [State, Integer] emulate(State state) {
         case (loadPairImmediateB) emulateLoadPairImmediate(`State.registerB`, `State.registerC`)
         case (loadPairImmediateD) emulateLoadPairImmediate(`State.registerD`, `State.registerE`)
         case (loadPairImmediateH) emulateLoadPairImmediate(`State.registerH`, `State.registerL`)
-        case (loadPairImmediateStackPointer) emulateLoadPairImmediateStackPointer
+        case (loadPairImmediateStackPointer)
+            emulateLoadPairImmediate(`State.stackPointerHigh`, `State.stackPointerLow`)
         case (moveImmediateA) emulateMoveImmediate(`State.registerA`)
         case (moveImmediateB) emulateMoveImmediate(`State.registerB`)
         case (moveImmediateC) emulateMoveImmediate(`State.registerC`)
@@ -766,16 +767,6 @@ shared Boolean flagZero(Byte val) => val.zero;
             highRegister->high,
             lowRegister->low,
             `State.programCounter`->state.programCounter + opcode.size
-        },
-        10
-    ];
-}
-
-[State, Integer] emulateLoadPairImmediateStackPointer(State state) {
-    return [
-        state.with {
-            `State.stackPointer`->dataWord(state),
-            `State.programCounter`->state.programCounter + loadPairImmediateStackPointer.size
         },
         10
     ];
