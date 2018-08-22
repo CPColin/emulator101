@@ -102,6 +102,7 @@ String format(Byte|Integer val, Integer width) {
             case (jumpIfParityOdd) ["JPO", "$"]
             case (jumpIfPlus) ["JP", "$"]
             case (jumpIfZero) ["JZ", "$"]
+            case (loadAccumulatorB) ["LDAX", "B"]
             case (loadAccumulatorD) ["LDAX", "D"]
             case (loadAccumulatorDirect) ["LDA", "$"]
             case (loadHLDirect) ["LHLD", "$"]

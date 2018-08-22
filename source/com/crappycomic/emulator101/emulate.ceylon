@@ -98,6 +98,7 @@ shared [State, Integer] emulate(State state) {
         case (jumpIfParityOdd) emulateJumpIf(not(State.parity))
         case (jumpIfPlus) emulateJumpIf(not(State.sign))
         case (jumpIfZero) emulateJumpIf(State.zero)
+        case (loadAccumulatorB) emulateLoadAccumulator(`State.registerB`, `State.registerC`)
         case (loadAccumulatorD) emulateLoadAccumulator(`State.registerD`, `State.registerE`)
         case (loadAccumulatorDirect) emulateLoadAccumulatorDirect
         case (loadHLDirect) emulateLoadHLDirect

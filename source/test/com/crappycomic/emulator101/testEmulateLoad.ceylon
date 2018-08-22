@@ -10,17 +10,17 @@ import com.crappycomic.emulator101 {
     word
 }
 
-test
-shared void testEmulateLoadAccumulatorD() {
+void testEmulateLoadAccumulatorRegister(Integer opcode, ByteRegister highRegister,
+        ByteRegister lowRegister) {
     value high = #01.byte;
     value low = #23.byte;
     value address = word(high, low);
     value val = #56.byte;
     value startState = testState {
-        opcode = #1a;
+        opcode = opcode;
         `State.registerA`->#78.byte,
-        `State.registerD`->high,
-        `State.registerE`->low,
+        highRegister->high,
+        lowRegister->low,
         address->val
     };
     value [endState, cycles] = emulate(startState);
@@ -31,6 +31,16 @@ shared void testEmulateLoadAccumulatorD() {
     assertEquals(endState.programCounter, startState.programCounter + 1);
     
     assertEquals(cycles, 7);
+}
+
+test
+shared void testEmulateLoadAccumulatorB() {
+    testEmulateLoadAccumulatorRegister(#0a, `State.registerB`, `State.registerC`);
+}
+
+test
+shared void testEmulateLoadAccumulatorD() {
+    testEmulateLoadAccumulatorRegister(#1a, `State.registerD`, `State.registerE`);
 }
 
 test
