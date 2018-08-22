@@ -82,7 +82,7 @@ State testState(Integer opcode,
         interruptsEnabled = false;
         stopped = false;
     }.with {
-        testStateProgramCounter->opcode.byte,
+        testStateProgramCounter->opcode.byte, // TODO: could cause a bug if stack pointer is updated
         *updates
     };
 

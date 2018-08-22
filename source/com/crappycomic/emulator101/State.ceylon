@@ -82,6 +82,9 @@ shared class State {
     shared Boolean zero => flags.get(flagBitZero);
     shared Boolean sign => flags.get(flagBitSign);
     
+    shared Byte stackPointerHigh => stackPointer.rightLogicalShift(8).byte;
+    shared Byte stackPointerLow => stackPointer.byte;
+    
     "Returns a copy of this object with the given updates applied."
     shared State with(
             {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates) {
@@ -105,7 +108,10 @@ shared class State {
                 zero = bitFlagUpdates[`State.zero`] else zero;
                 sign = bitFlagUpdates[`State.sign`] else sign;
             };
-            stackPointer = integerRegisterUpdates[`State.stackPointer`] else stackPointer;
+            stackPointer = integerRegisterUpdates[`State.stackPointer`] else word {
+                high = byteRegisterUpdates[`State.stackPointerHigh`] else stackPointerHigh;
+                low = byteRegisterUpdates[`State.stackPointerLow`] else stackPointerLow;
+            };
             programCounter = integerRegisterUpdates[`State.programCounter`] else programCounter;
             memory = if (!memoryUpdates.empty)
                     then updateMemory(memory, *memoryUpdates)

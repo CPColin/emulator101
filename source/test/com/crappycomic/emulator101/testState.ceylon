@@ -5,7 +5,8 @@ import ceylon.test {
 }
 
 import com.crappycomic.emulator101 {
-    State
+    State,
+    bytes
 }
 
 {[Boolean, Boolean, Boolean, Boolean, Boolean, Integer]*} testPackFlagsParameters = {
@@ -54,6 +55,43 @@ shared void testPackFlags(Boolean sign, Boolean zero, Boolean auxiliaryCarry, Bo
         zero = zero;
         sign = sign;
     }, expected.byte);
+}
+
+test
+shared void testStateWithStackPointerBytes() {
+    value val = #1234;
+    value [high, low] = bytes(val);
+    value startState = testState {
+        opcode = 0;
+        `State.stackPointer`->0
+    };
+    value endState = startState.with {
+        `State.stackPointerHigh`->high,
+        `State.stackPointerLow`->low
+    };
+    
+    assertStatesEqual(startState, endState, `State.stackPointer`);
+    assertEquals(endState.stackPointerHigh, high);
+    assertEquals(endState.stackPointerLow, low);
+    assertEquals(endState.stackPointer, val);
+}
+
+test
+shared void testStateWithStackPointerWord() {
+    value val = #1234;
+    value [high, low] = bytes(val);
+    value startState = testState {
+        opcode = 0;
+        `State.stackPointer`->0
+    };
+    value endState = startState.with {
+        `State.stackPointer`->val
+    };
+    
+    assertStatesEqual(startState, endState, `State.stackPointer`);
+    assertEquals(endState.stackPointerHigh, high);
+    assertEquals(endState.stackPointerLow, low);
+    assertEquals(endState.stackPointer, val);
 }
 
 test
