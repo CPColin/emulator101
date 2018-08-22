@@ -80,6 +80,7 @@ State testState(Integer opcode,
         programCounter = testStateProgramCounter;
         memory = Array<Byte>.ofSize(#0200, #ff.byte);
         interruptsEnabled = false;
+        stopped = false;
     }.with {
         testStateProgramCounter->opcode.byte,
         *updates
@@ -177,6 +178,16 @@ void assertStatesEqual(State startState, State endState, Attribute<State>* excep
     if (!except.contains(`State.memory`)) {
         assertEquals(endState.memory, startState.memory,
             "Memory should not have changed.");
+    }
+    
+    if (!except.contains(`State.interruptsEnabled`)) {
+        assertEquals(endState.interruptsEnabled, startState.interruptsEnabled,
+            "Interrupts Enabled flag should not have changed.");
+    }
+    
+    if (!except.contains(`State.stopped`)) {
+        assertEquals(endState.stopped, startState.stopped,
+            "Stopped flag should not have changed.");
     }
 }
 
@@ -1120,37 +1131,6 @@ test
 parameters(`value testBooleanParameters`)
 shared void testEmulateReturnIfMinus(Boolean flagValue) {
     testEmulateReturnIf(#f8, `State.sign`, flagValue, isTaken);
-}
-
-{[Integer, Integer, Boolean]*} testRotateAccumulatorRightParameters = {
-    [#00, #00, false],
-    [#01, #80, true],
-    [#02, #01, false],
-    [#fe, #7f, false],
-    [#ff, #ff, true]
-};
-
-test
-parameters(`value testRotateAccumulatorRightParameters`)
-shared void testEmulateRotateAccumulatorRight(Integer initialValue, Integer expectedValue,
-        Boolean expectedCarry) {
-    value startState = testState {
-        opcode = #0f;
-        `State.registerA`->initialValue.byte
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    assertStatesEqual(startState, endState,
-        `State.registerA`, `State.flags`, `State.programCounter`);
-    assertEquals(endState.registerA, expectedValue.byte);
-    assertFlags {
-        startState = startState;
-        endState = endState;
-        expectedCarry = expectedCarry;
-    };
-    assertEquals(endState.programCounter, startState.programCounter + 1);
-    
-    assertEquals(cycles, 4);
 }
 
 {[Boolean, Boolean, Boolean, Boolean]*} testFlagAuxiliaryCarryParameters = {

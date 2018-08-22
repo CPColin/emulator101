@@ -1,38 +1,11 @@
-import ceylon.language.meta.declaration {
-    FunctionDeclaration
-}
-import ceylon.language.meta.model {
-    Attribute
-}
 import ceylon.test {
     assertEquals,
-    assertFalse,
-    assertTrue,
-    assumeTrue,
-    parameters,
     test
-}
-import ceylon.test.annotation {
-    IgnoreAnnotation,
-    TestAnnotation
 }
 
 import com.crappycomic.emulator101 {
-    BitFlag,
-    BitFlagUpdate,
-    ByteRegister,
-    ByteRegisterUpdate,
-    IntegerRegisterUpdate,
-    MemoryUpdate,
-    Opcode,
     State,
-    bytes,
     emulate,
-    flagAuxiliaryCarry,
-    flagCarry,
-    flagParity,
-    flagSign,
-    flagZero,
     word
 }
 

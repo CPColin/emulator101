@@ -34,6 +34,7 @@ State initialState(Array<Byte> memory, Integer initialProgramCounter) => State {
         programCounter = initialProgramCounter;
         memory = memory;
         interruptsEnabled = false;
+        stopped = false;
     };
 
 "Runs the disassembler on the provided input."

@@ -15,14 +15,14 @@ shared abstract class Opcode
         | incrementB // 04
         | decrementB // 05
         | moveImmediateB // 06
-        | rotateAccumulatorLeft // 07
+        | rotateLeft // 07
         | doubleAddB // 09
         // 0a
         | decrementPairB // 0b
         | incrementC // 0c
         | decrementC // 0d
         | moveImmediateC // 0e
-        | rotateAccumulatorRight // 0f
+        | rotateRight // 0f
         // 0f
         | loadPairImmediateD // 11
         // 12
@@ -272,13 +272,13 @@ object incrementPairB extends Opcode(#03) {}
 object incrementB extends Opcode(#04) {}
 object decrementB extends Opcode(#05) {}
 object moveImmediateB extends Opcode(#06, 2) {}
-object rotateAccumulatorLeft extends Opcode(#07) {}
+object rotateLeft extends Opcode(#07) {}
 object doubleAddB extends Opcode(#09) {}
 object decrementPairB extends Opcode(#0b) {}
 object incrementC extends Opcode(#0c) {}
 object decrementC extends Opcode(#0d) {}
 object moveImmediateC extends Opcode(#0e, 2) {}
-object rotateAccumulatorRight extends Opcode(#0f) {}
+object rotateRight extends Opcode(#0f) {}
 object loadPairImmediateD extends Opcode(#11, 3) {}
 object incrementPairD extends Opcode(#13) {}
 object incrementD extends Opcode(#14) {}

@@ -27,3 +27,12 @@
                 for (z in zs)
                     [x, y, z]
         };
+
+"Augments [[Iterable.product]] to take three streams at once."
+{[X, Y, Z]*} tripleProduct<X, Y, Z>({X*} xs, {Y*} ys, {Z*} zs)
+        => {
+            for (x in xs)
+                for (y in ys)
+                    for (z in zs)
+                        [x, y, z]
+        };

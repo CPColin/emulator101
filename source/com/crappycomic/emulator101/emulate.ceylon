@@ -58,7 +58,7 @@ shared [State, Integer] emulate(State state) {
         case (compareL) emulateCompareRegister(`State.registerL`)
         case (compareMemory) emulateCompareMemory
         case (compareImmediate) emulateCompareImmediate
-        case (decimalAdjust) nothing
+        case (decimalAdjust) emulateDecimalAdjust
         case (decrementA) emulateDecrementRegister(`State.registerA`)
         case (decrementB) emulateDecrementRegister(`State.registerB`)
         case (decrementC) emulateDecrementRegister(`State.registerC`)
@@ -70,13 +70,13 @@ shared [State, Integer] emulate(State state) {
         case (decrementPairB) emulateDecrementPair(`State.registerB`, `State.registerC`)
         case (decrementPairD) emulateDecrementPair(`State.registerD`, `State.registerE`)
         case (decrementPairH) emulateDecrementPair(`State.registerH`, `State.registerL`)
-        case (disableInterrupts) nothing
+        case (disableInterrupts) emulateDisableInterrupts
         case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
         case (doubleAddD) emulateDoubleAdd(`State.registerD`, `State.registerE`)
         case (doubleAddH) emulateDoubleAdd(`State.registerH`, `State.registerL`)
-        case (enableInterrupts) nothing
+        case (enableInterrupts) emulateEnableInterrupts
         case (exchangeRegisters) emulateExchangeRegisters
-        case (halt) nothing
+        case (halt) emulateHalt
         case (incrementA) emulateIncrementRegister(`State.registerA`)
         case (incrementB) emulateIncrementRegister(`State.registerB`)
         case (incrementC) emulateIncrementRegister(`State.registerC`)
@@ -88,7 +88,7 @@ shared [State, Integer] emulate(State state) {
         case (incrementPairB) emulateIncrementPair(`State.registerB`, `State.registerC`)
         case (incrementPairD) emulateIncrementPair(`State.registerD`, `State.registerE`)
         case (incrementPairH) emulateIncrementPair(`State.registerH`, `State.registerL`)
-        case (input) nothing
+        case (input) emulateInput
         case (jump) emulateJumpIf((state) => true)
         case (jumpIfCarry) emulateJumpIf(State.carry)
         case (jumpIfMinus) emulateJumpIf(State.sign)
@@ -204,8 +204,8 @@ shared [State, Integer] emulate(State state) {
         case (returnIfParityOdd) emulateReturnIf(not(State.parity))
         case (returnIfPlus) emulateReturnIf(not(State.sign))
         case (returnIfZero) emulateReturnIf(State.zero)
-        case (rotateAccumulatorLeft) nothing
-        case (rotateAccumulatorRight) emulateRotateAccumulatorRight
+        case (rotateLeft) emulateRotateLeft
+        case (rotateRight) emulateRotateRight
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) emulateStoreHLDirect
         case (subtractA) emulateSubtractRegister(`State.registerA`, false)
@@ -493,6 +493,41 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateDecimalAdjust(State state) {
+    variable value result = state.registerA.unsigned;
+    Boolean auxiliaryCarry;
+    Boolean carry;
+    
+    if (state.auxiliaryCarry || result.and(#0f) > #09) {
+        result += #06;
+        auxiliaryCarry = true;
+    } else {
+        auxiliaryCarry = false;
+    }
+    
+    if (state.carry || result.and(#f0) > #90) {
+        result += #60;
+        carry = true;
+    } else {
+        carry = false;
+    }
+    
+    value resultByte = result.byte;
+    
+    return [
+        state.with {
+            `State.registerA`->resultByte,
+            `State.carry`->carry,
+            `State.parity`->flagParity(resultByte),
+            `State.auxiliaryCarry`->auxiliaryCarry,
+            `State.zero`->flagZero(resultByte),
+            `State.sign`->flagSign(resultByte),
+            `State.programCounter`->state.programCounter + decimalAdjust.size
+        },
+        4
+    ];
+}
+
 [State, Integer] emulateDecrementMemory(State state) {
     value address = word(state.registerH, state.registerL);
     value initial = state.memory[address] else 0.byte;
@@ -544,6 +579,16 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateDisableInterrupts(State state) {
+    return [
+        state.with {
+            `State.interruptsEnabled`->false,
+            `State.programCounter`->state.programCounter + disableInterrupts.size
+        },
+        4
+    ];
+}
+
 [State, Integer] emulateDoubleAdd(ByteRegister highRegister, ByteRegister lowRegister)
         (Opcode opcode, State state) {
     value registerHL = word(state.registerH, state.registerL);
@@ -565,6 +610,16 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateEnableInterrupts(State state) {
+    return [
+        state.with {
+            `State.interruptsEnabled`->true,
+            `State.programCounter`->state.programCounter + disableInterrupts.size
+        },
+        4
+    ];
+}
+
 [State, Integer] emulateExchangeRegisters(State state) {
     return [
         state.with {
@@ -575,6 +630,16 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + exchangeRegisters.size
         },
         5
+    ];
+}
+
+[State, Integer] emulateHalt(State state) {
+    return [
+        state.with {
+            `State.stopped`->true,
+            `State.programCounter`->state.programCounter + halt.size
+        },
+        7
     ];
 }
 
@@ -626,6 +691,16 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + opcode.size
         },
         5
+    ];
+}
+
+[State, Integer] emulateInput(State state) {
+    // TODO: Hook into system hardware.
+    return [
+        state.with {
+            `State.programCounter`->state.programCounter + input.size
+        },
+        10
     ];
 }
 
@@ -907,7 +982,21 @@ shared Boolean flagZero(Byte val) => val.zero;
     }
 }
 
-[State, Integer] emulateRotateAccumulatorRight(State state) {
+[State, Integer] emulateRotateLeft(State state) {
+    value carry = state.registerA.get(7);
+    value val = state.registerA.leftLogicalShift(1).set(0, carry);
+    
+    return [
+        state.with {
+            `State.registerA`->val,
+            `State.carry`->carry,
+            `State.programCounter`->state.programCounter + rotateLeft.size
+        },
+        4
+    ];
+}
+
+[State, Integer] emulateRotateRight(State state) {
     value carry = state.registerA.get(0);
     value val = state.registerA.rightLogicalShift(1).set(7, carry);
     
@@ -915,7 +1004,7 @@ shared Boolean flagZero(Byte val) => val.zero;
         state.with {
             `State.registerA`->val,
             `State.carry`->carry,
-            `State.programCounter`->state.programCounter + rotateAccumulatorRight.size
+            `State.programCounter`->state.programCounter + rotateRight.size
         },
         4
     ];
