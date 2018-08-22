@@ -100,7 +100,7 @@ shared [State, Integer] emulate(State state) {
         case (jumpIfZero) emulateJumpIf(State.zero)
         case (loadAccumulatorD) emulateLoadAccumulator(`State.registerD`, `State.registerE`)
         case (loadAccumulatorDirect) emulateLoadAccumulatorDirect
-        case (loadHLDirect) nothing
+        case (loadHLDirect) emulateLoadHLDirect
         case (loadPairImmediateB) emulateLoadPairImmediate(`State.registerB`, `State.registerC`)
         case (loadPairImmediateD) emulateLoadPairImmediate(`State.registerD`, `State.registerE`)
         case (loadPairImmediateH) emulateLoadPairImmediate(`State.registerH`, `State.registerL`)
@@ -207,7 +207,7 @@ shared [State, Integer] emulate(State state) {
         case (rotateAccumulatorLeft) nothing
         case (rotateAccumulatorRight) emulateRotateAccumulatorRight
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
-        case (storeHLDirect) nothing
+        case (storeHLDirect) emulateStoreHLDirect
         case (subtractA) emulateSubtractRegister(`State.registerA`, false)
         case (subtractB) emulateSubtractRegister(`State.registerB`, false)
         case (subtractC) emulateSubtractRegister(`State.registerC`, false)
@@ -668,6 +668,19 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateLoadHLDirect(State state) {
+    value address = dataWord(state);
+    
+    return [
+        state.with {
+            `State.registerH`->(state.memory[address + 1] else 0.byte),
+            `State.registerL`->(state.memory[address] else 0.byte),
+            `State.programCounter`->state.programCounter + loadHLDirect.size
+        },
+        16
+    ];
+}
+
 [State, Integer] emulateLoadPairImmediate(ByteRegister highRegister, ByteRegister lowRegister)
         (Opcode opcode, State state) {
     value [high, low] = dataBytes(state);
@@ -917,6 +930,19 @@ shared Boolean flagZero(Byte val) => val.zero;
             address->state.registerA
         },
         13
+    ];
+}
+
+[State, Integer] emulateStoreHLDirect(State state) {
+    value address = dataWord(state);
+    
+    return [
+        state.with {
+            address + 1->state.registerH,
+            address->state.registerL,
+            `State.programCounter`->state.programCounter + storeHLDirect.size
+        },
+        16
     ];
 }
 
