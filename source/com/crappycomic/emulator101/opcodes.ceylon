@@ -16,7 +16,6 @@ shared abstract class Opcode
         | decrementB // 05
         | moveImmediateB // 06
         | rotateAccumulatorLeft // 07
-        // 08
         | doubleAddB // 09
         // 0a
         | decrementPairB // 0b
@@ -25,7 +24,6 @@ shared abstract class Opcode
         | moveImmediateC // 0e
         | rotateAccumulatorRight // 0f
         // 0f
-        // 10
         | loadPairImmediateD // 11
         // 12
         | incrementPairD // 13
@@ -33,7 +31,6 @@ shared abstract class Opcode
         | decrementD // 15
         | moveImmediateD // 16
         // 17
-        // 18
         | doubleAddD // 19
         | loadAccumulatorD // 1a
         | decrementPairD // 1b
@@ -41,7 +38,6 @@ shared abstract class Opcode
         | decrementE // 1d
         | moveImmediateE // 1e
         // 1f
-        // 20
         | loadPairImmediateH // 21
         | storeHLDirect // 22
         | incrementPairH // 23
@@ -49,7 +45,6 @@ shared abstract class Opcode
         | decrementH // 25
         | moveImmediateH // 26
         | decimalAdjust // 27
-        // 28
         | doubleAddH // 29
         | loadHLDirect // 2a
         | decrementPairH // 2b
@@ -57,7 +52,6 @@ shared abstract class Opcode
         | decrementL // 2d
         | moveImmediateL // 2e
         // 2f
-        // 30
         | loadPairImmediateStackPointer // 31
         | storeAccumulatorDirect // 32
         // 33
@@ -65,7 +59,6 @@ shared abstract class Opcode
         | decrementMemory // 35
         | moveImmediateMemory // 36
         // 37
-        // 38
         // 39
         | loadAccumulatorDirect // 3a
         // 3b
@@ -212,7 +205,6 @@ shared abstract class Opcode
         | returnIfZero // c8
         | \ireturn // c9
         | jumpIfZero // ca
-        // cb
         | callIfZero // cc
         | call // cd
         | addImmediateWithCarry // ce
@@ -226,11 +218,9 @@ shared abstract class Opcode
         | subtractImmediate // d6
         // d7
         | returnIfCarry // d8
-        // d9
         | jumpIfCarry // da
         | input // db
         | callIfCarry // dc
-        // dd
         | subtractImmediateWithBorrow // de
         // df
         | returnIfParityOdd // e0
@@ -246,7 +236,6 @@ shared abstract class Opcode
         | jumpIfParityEven // ea
         | exchangeRegisters // eb
         | callIfParityEven // ec
-        // ed
         | xorImmediate // ee
         // ef
         | returnIfPlus // f0
@@ -262,7 +251,6 @@ shared abstract class Opcode
         | jumpIfMinus // fa
         | enableInterrupts // fb
         | callIfMinus // fc
-        // fd
         | compareImmediate // fe
         // ff
         {
