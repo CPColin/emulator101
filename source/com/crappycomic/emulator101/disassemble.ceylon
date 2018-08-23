@@ -62,6 +62,7 @@ String format(Byte|Integer val, Integer width) {
             case (compareL) ["CMP", "L"]
             case (compareMemory) ["CMP", "M"]
             case (compareImmediate) ["CPI", "#"]
+            case (complementAccumulator) ["CMA", null]
             case (complementCarry) ["CMC", null]
             case (decimalAdjust) ["DAA", null]
             case (decrementA) ["DCR", "A"]

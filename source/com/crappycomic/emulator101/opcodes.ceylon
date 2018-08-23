@@ -50,7 +50,7 @@ shared abstract class Opcode
         | incrementL // 2c
         | decrementL // 2d
         | moveImmediateL // 2e
-        // 2f
+        | complementAccumulator // 2f
         | loadPairImmediateStackPointer // 31
         | storeAccumulatorDirect // 32
         // 33
@@ -305,6 +305,7 @@ object decrementPairH extends Opcode(#2b) {}
 object incrementL extends Opcode(#2c) {}
 object decrementL extends Opcode(#2d) {}
 object moveImmediateL extends Opcode(#2e, 2) {}
+object complementAccumulator extends Opcode(#2f) {}
 object loadPairImmediateStackPointer extends Opcode(#31, 3) {}
 object storeAccumulatorDirect extends Opcode(#32, 3) {}
 object incrementMemory extends Opcode(#34) {}

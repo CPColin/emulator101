@@ -60,6 +60,7 @@ shared [State, Integer] emulate(State state) {
         case (compareL) emulateCompareRegister(`State.registerL`)
         case (compareMemory) emulateCompareMemory
         case (compareImmediate) emulateCompareImmediate
+        case (complementAccumulator) emulateComplementAccumulator
         case (complementCarry) emulateComplementCarry
         case (decimalAdjust) emulateDecimalAdjust
         case (decrementA) emulateDecrementRegister(`State.registerA`)
@@ -458,6 +459,16 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + compareImmediate.size
         },
         7
+    ];
+}
+
+[State, Integer] emulateComplementAccumulator(State state) {
+    return [
+        state.with {
+            `State.registerA`->state.registerA.not,
+            `State.programCounter`->state.programCounter + complementAccumulator.size
+        },
+        4
     ];
 }
 

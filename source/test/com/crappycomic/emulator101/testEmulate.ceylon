@@ -300,6 +300,22 @@ shared void testEmulateCallIfMinus(Boolean flagValue) {
 }
 
 test
+parameters(`value testRegisterParameters`)
+shared void testEmulateComplementAccumulator(Byte registerValue) {
+    value startState = testState {
+        opcode = #2f;
+        `State.registerA`->registerValue
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, `State.registerA`, `State.programCounter`);
+    assertEquals(endState.registerA, registerValue.not);
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 4);
+}
+
+test
 parameters(`value testBooleanParameters`)
 shared void testEmulateComplementCarry(Boolean carry) {
     value startState = testState {
