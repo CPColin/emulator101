@@ -211,6 +211,8 @@ String format(Byte|Integer val, Integer width) {
             case (returnIfParityOdd) ["RPO", null]
             case (returnIfPlus) ["RP", null]
             case (returnIfZero) ["RZ", null]
+            case (storeAccumulatorB) ["STAX", "B"]
+            case (storeAccumulatorD) ["STAX", "D"]
             case (storeAccumulatorDirect) ["STA", "$"]
             case (storeHLDirect) ["SHLD", "$"]
             case (subtractA) ["SUB", "A"]

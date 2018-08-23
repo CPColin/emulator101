@@ -10,7 +10,7 @@ import ceylon.language.meta {
 shared abstract class Opcode
         of noop // 00
         | loadPairImmediateB // 01
-        // 02
+        | storeAccumulatorB // 02
         | incrementPairB // 03
         | incrementB // 04
         | decrementB // 05
@@ -25,7 +25,7 @@ shared abstract class Opcode
         | rotateRight // 0f
         // 0f
         | loadPairImmediateD // 11
-        // 12
+        | storeAccumulatorD // 12
         | incrementPairD // 13
         | incrementD // 14
         | decrementD // 15
@@ -268,6 +268,7 @@ shared abstract class Opcode
 
 object noop extends Opcode(#00) {}
 object loadPairImmediateB extends Opcode(#01, 3) {}
+object storeAccumulatorB extends Opcode(#02) {}
 object incrementPairB extends Opcode(#03) {}
 object incrementB extends Opcode(#04) {}
 object decrementB extends Opcode(#05) {}
@@ -281,6 +282,7 @@ object decrementC extends Opcode(#0d) {}
 object moveImmediateC extends Opcode(#0e, 2) {}
 object rotateRight extends Opcode(#0f) {}
 object loadPairImmediateD extends Opcode(#11, 3) {}
+object storeAccumulatorD extends Opcode(#12) {}
 object incrementPairD extends Opcode(#13) {}
 object incrementD extends Opcode(#14) {}
 object decrementD extends Opcode(#15) {}

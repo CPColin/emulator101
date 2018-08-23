@@ -5,15 +5,13 @@ import ceylon.test {
 }
 
 import com.crappycomic.emulator101 {
+    ByteRegister,
     State,
+    bytes,
     emulate,
     flagParity,
     flagSign,
-    flagZero,
-    ByteRegister,
-    bytes,
-    flagAuxiliaryCarry,
-    flagCarry
+    flagZero
 }
 
 test

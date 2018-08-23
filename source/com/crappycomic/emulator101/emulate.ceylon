@@ -12,6 +12,8 @@ shared [State, Integer] emulate(State state) {
     // TODO: Idea: In places where we only read from a register, we could use Byte(State),
     // instead of ByteRegister, and maybe be a littler cleaner/faster.
     
+    // TODO: Break up into smaller files, so my laptop doesn't melt.
+    
     value emulator = switch (opcode)
         case (addA) emulateAddRegister(`State.registerA`, false)
         case (addB) emulateAddRegister(`State.registerB`, false)
@@ -208,6 +210,8 @@ shared [State, Integer] emulate(State state) {
         case (returnIfZero) emulateReturnIf(State.zero)
         case (rotateLeft) emulateRotateLeft
         case (rotateRight) emulateRotateRight
+        case (storeAccumulatorB) emulateStoreAccumulator(`State.registerB`, `State.registerC`)
+        case (storeAccumulatorD) emulateStoreAccumulator(`State.registerD`, `State.registerE`)
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) emulateStoreHLDirect
         case (subtractA) emulateSubtractRegister(`State.registerA`, false)
@@ -999,6 +1003,19 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + rotateRight.size
         },
         4
+    ];
+}
+
+[State, Integer] emulateStoreAccumulator(ByteRegister registerHigh, ByteRegister registerLow)
+        (Opcode opcode, State state) {
+    value address = word(registerHigh.bind(state).get(), registerLow.bind(state).get());
+    
+    return [
+        state.with {
+            address->state.registerA,
+            `State.programCounter`->state.programCounter + opcode.size
+        },
+        7
     ];
 }
 
