@@ -23,7 +23,6 @@ shared abstract class Opcode
         | decrementC // 0d
         | moveImmediateC // 0e
         | rotateRight // 0f
-        // 0f
         | loadPairImmediateD // 11
         | storeAccumulatorD // 12
         | incrementPairD // 13
@@ -65,7 +64,7 @@ shared abstract class Opcode
         | incrementA // 3c
         | decrementA // 3d
         | moveImmediateA // 3e
-        // 3f
+        | complementCarry // 3f
         | moveBB // 40
         | moveBC // 41
         | moveBD // 42
@@ -316,6 +315,7 @@ object loadAccumulatorDirect extends Opcode(#3a, 3) {}
 object incrementA extends Opcode(#3c) {}
 object decrementA extends Opcode(#3d) {}
 object moveImmediateA extends Opcode(#3e, 2) {}
+object complementCarry extends Opcode(#3f) {}
 object moveBB extends Opcode(#40) {}
 object moveBC extends Opcode(#41) {}
 object moveBD extends Opcode(#42) {}

@@ -299,6 +299,26 @@ shared void testEmulateCallIfMinus(Boolean flagValue) {
     testEmulateCallIf(#fc, `State.sign`, flagValue, isTaken);
 }
 
+test
+parameters(`value testBooleanParameters`)
+shared void testEmulateComplementCarry(Boolean carry) {
+    value startState = testState {
+        opcode = #3f;
+        `State.carry`->carry
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, `State.flags`, `State.programCounter`);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = !carry;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 4);
+}
+
 {[Integer, Integer, Integer, Boolean]*} testEmulateDoubleAddParameters = {
     [#0000, #0000, #0000, false],
     [#0123, #4567, #468a, false],
