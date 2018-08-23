@@ -1134,6 +1134,25 @@ shared void testEmulateReturnIfMinus(Boolean flagValue) {
     testEmulateReturnIf(#f8, `State.sign`, flagValue, isTaken);
 }
 
+test
+shared void testEmulateSetCarry() {
+    value startState = testState {
+        opcode = #37;
+        `State.carry`->false
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, `State.flags`, `State.programCounter`);
+    assertFlags {
+        startState = startState;
+        endState = endState;
+        expectedCarry = true;
+    };
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 4);
+}
+
 {[Boolean, Boolean, Boolean, Boolean]*} testFlagAuxiliaryCarryParameters = {
     [false, false, false, false],
     [false, false, true, true],

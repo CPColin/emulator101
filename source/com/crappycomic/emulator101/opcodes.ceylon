@@ -58,7 +58,7 @@ shared abstract class Opcode
         | incrementMemory // 34
         | decrementMemory // 35
         | moveImmediateMemory // 36
-        // 37
+        | setCarry // 37
         // 39
         | loadAccumulatorDirect // 3a
         // 3b
@@ -311,6 +311,7 @@ object storeAccumulatorDirect extends Opcode(#32, 3) {}
 object incrementMemory extends Opcode(#34) {}
 object decrementMemory extends Opcode(#35) {}
 object moveImmediateMemory extends Opcode(#36, 2) {}
+object setCarry extends Opcode(#37) {}
 object loadAccumulatorDirect extends Opcode(#3a, 3) {}
 object incrementA extends Opcode(#3c) {}
 object decrementA extends Opcode(#3d) {}

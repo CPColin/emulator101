@@ -210,6 +210,7 @@ shared [State, Integer] emulate(State state) {
         case (returnIfZero) emulateReturnIf(State.zero)
         case (rotateLeft) emulateRotateLeft
         case (rotateRight) emulateRotateRight
+        case (setCarry) emulateSetCarry
         case (storeAccumulatorB) emulateStoreAccumulator(`State.registerB`, `State.registerC`)
         case (storeAccumulatorD) emulateStoreAccumulator(`State.registerD`, `State.registerE`)
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
@@ -1001,6 +1002,16 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.registerA`->val,
             `State.carry`->carry,
             `State.programCounter`->state.programCounter + rotateRight.size
+        },
+        4
+    ];
+}
+
+[State, Integer] emulateSetCarry(State state) {
+    return [
+        state.with {
+            `State.carry`->true,
+            `State.programCounter`->state.programCounter + setCarry.size
         },
         4
     ];
