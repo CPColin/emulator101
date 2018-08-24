@@ -200,14 +200,14 @@ shared abstract class Opcode
         | callIfNotZero // c4
         | pushB // c5
         | addImmediate // c6
-        | reset0 // c7
+        | restart0 // c7
         | returnIfZero // c8
         | \ireturn // c9
         | jumpIfZero // ca
         | callIfZero // cc
         | call // cd
         | addImmediateWithCarry // ce
-        | reset1 // cf
+        | restart1 // cf
         | returnIfNoCarry // d0
         | popD // d1
         | jumpIfNoCarry // d2
@@ -215,13 +215,13 @@ shared abstract class Opcode
         | callIfNoCarry // d4
         | pushD // d5
         | subtractImmediate // d6
-        | reset2 // d7
+        | restart2 // d7
         | returnIfCarry // d8
         | jumpIfCarry // da
         | input // db
         | callIfCarry // dc
         | subtractImmediateWithBorrow // de
-        | reset3 // df
+        | restart3 // df
         | returnIfParityOdd // e0
         | popH // e1
         | jumpIfParityOdd // e2
@@ -229,14 +229,14 @@ shared abstract class Opcode
         | callIfParityOdd // e4
         | pushH // e5
         | andImmediate // e6
-        | reset4 // e7
+        | restart4 // e7
         | returnIfParityEven // e8
         | loadProgramCounter // e9
         | jumpIfParityEven // ea
         | exchangeRegisters // eb
         | callIfParityEven // ec
         | xorImmediate // ee
-        | reset5 // ef
+        | restart5 // ef
         | returnIfPlus // f0
         | popStatus // f1
         | jumpIfPlus // f2
@@ -244,14 +244,14 @@ shared abstract class Opcode
         | callIfPlus // f4
         | pushStatus // f5
         | orImmediate // f6
-        | reset6 // f7
+        | restart6 // f7
         | returnIfMinus // f8
         | loadStackPointer // f9
         | jumpIfMinus // fa
         | enableInterrupts // fb
         | callIfMinus // fc
         | compareImmediate // fe
-        | reset7 // ff
+        | restart7 // ff
         {
     shared Byte byte;
     
@@ -456,14 +456,14 @@ object pushB extends Opcode(#c5) {}
 object pushD extends Opcode(#d5) {}
 object pushH extends Opcode(#e5) {}
 object pushStatus extends Opcode(#f5) {}
-object reset0 extends Opcode(#c7) {}
-object reset1 extends Opcode(#cf) {}
-object reset2 extends Opcode(#d7) {}
-object reset3 extends Opcode(#df) {}
-object reset4 extends Opcode(#e7) {}
-object reset5 extends Opcode(#ef) {}
-object reset6 extends Opcode(#f7) {}
-object reset7 extends Opcode(#ff) {}
+object restart0 extends Opcode(#c7) {}
+object restart1 extends Opcode(#cf) {}
+object restart2 extends Opcode(#d7) {}
+object restart3 extends Opcode(#df) {}
+object restart4 extends Opcode(#e7) {}
+object restart5 extends Opcode(#ef) {}
+object restart6 extends Opcode(#f7) {}
+object restart7 extends Opcode(#ff) {}
 object \ireturn extends Opcode(#c9) {}
 object returnIfCarry extends Opcode(#d8) {}
 object returnIfMinus extends Opcode(#f8) {}

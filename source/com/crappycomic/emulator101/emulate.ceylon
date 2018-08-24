@@ -74,12 +74,14 @@ shared [State, Integer] emulate(State state) {
         case (decrementPairB) emulateDecrementPair(`State.registerB`, `State.registerC`)
         case (decrementPairD) emulateDecrementPair(`State.registerD`, `State.registerE`)
         case (decrementPairH) emulateDecrementPair(`State.registerH`, `State.registerL`)
-        case (decrementPairStackPointer) nothing
+        case (decrementPairStackPointer)
+            emulateDecrementPair(`State.stackPointerHigh`, `State.stackPointerLow`)
         case (disableInterrupts) emulateDisableInterrupts
         case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
         case (doubleAddD) emulateDoubleAdd(`State.registerD`, `State.registerE`)
         case (doubleAddH) emulateDoubleAdd(`State.registerH`, `State.registerL`)
-        case (doubleAddStackPointer) nothing
+        case (doubleAddStackPointer)
+            emulateDoubleAdd(`State.stackPointerHigh`, `State.stackPointerLow`)
         case (enableInterrupts) emulateEnableInterrupts
         case (exchangeRegisters) emulateExchangeRegisters
         case (exchangeStack) nothing
@@ -207,14 +209,14 @@ shared [State, Integer] emulate(State state) {
         case (pushD) emulatePush(`State.registerD`, `State.registerE`)
         case (pushH) emulatePush(`State.registerH`, `State.registerL`)
         case (pushStatus) emulatePush(`State.registerA`, `State.flags`)
-        case (reset0) nothing
-        case (reset1) nothing
-        case (reset2) nothing
-        case (reset3) nothing
-        case (reset4) nothing
-        case (reset5) nothing
-        case (reset6) nothing
-        case (reset7) nothing
+        case (restart0) nothing
+        case (restart1) nothing
+        case (restart2) nothing
+        case (restart3) nothing
+        case (restart4) nothing
+        case (restart5) nothing
+        case (restart6) nothing
+        case (restart7) nothing
         case (\ireturn) emulateReturnIf((state) => true, 10)
         case (returnIfCarry) emulateReturnIf(State.carry)
         case (returnIfMinus) emulateReturnIf(State.sign)

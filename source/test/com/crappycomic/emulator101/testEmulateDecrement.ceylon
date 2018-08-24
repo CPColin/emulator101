@@ -177,3 +177,9 @@ parameters(`value testEmulateDecrementPairParameters`)
 shared void testEmulateDecrementPairH(Byte high, Byte low) {
     testEmulateDecrementPair(#2b, `State.registerH`, `State.registerL`, high, low);
 }
+
+test
+parameters(`value testEmulateDecrementPairParameters`)
+shared void testEmulateDecrementPairStackPointer(Byte high, Byte low) {
+    testEmulateDecrementPair(#3b, `State.stackPointerHigh`, `State.stackPointerLow`, high, low);
+}
