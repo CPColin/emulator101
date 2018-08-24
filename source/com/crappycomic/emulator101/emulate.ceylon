@@ -225,9 +225,9 @@ shared [State, Integer] emulate(State state) {
         case (returnIfPlus) emulateReturnIf(not(State.sign))
         case (returnIfZero) emulateReturnIf(State.zero)
         case (rotateLeft) emulateRotateLeft
-        case (rotateLeftThroughCarry) nothing
+        case (rotateLeftThroughCarry) emulateRotateLeftThroughCarry
         case (rotateRight) emulateRotateRight
-        case (rotateRightThroughCarry) nothing
+        case (rotateRightThroughCarry) emulateRotateRightThroughCarry
         case (setCarry) emulateSetCarry
         case (storeAccumulatorB) emulateStoreAccumulator(`State.registerB`, `State.registerC`)
         case (storeAccumulatorD) emulateStoreAccumulator(`State.registerD`, `State.registerE`)
@@ -1031,9 +1031,37 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateRotateLeftThroughCarry(State state) {
+    value carry = state.registerA.get(7);
+    value val = state.registerA.leftLogicalShift(1).set(0, state.carry);
+    
+    return [
+        state.with {
+            `State.registerA`->val,
+            `State.carry`->carry,
+            `State.programCounter`->state.programCounter + rotateLeftThroughCarry.size
+        },
+        4
+    ];
+}
+
 [State, Integer] emulateRotateRight(State state) {
     value carry = state.registerA.get(0);
     value val = state.registerA.rightLogicalShift(1).set(7, carry);
+    
+    return [
+        state.with {
+            `State.registerA`->val,
+            `State.carry`->carry,
+            `State.programCounter`->state.programCounter + rotateRight.size
+        },
+        4
+    ];
+}
+
+[State, Integer] emulateRotateRightThroughCarry(State state) {
+    value carry = state.registerA.get(0);
+    value val = state.registerA.rightLogicalShift(1).set(7, state.carry);
     
     return [
         state.with {

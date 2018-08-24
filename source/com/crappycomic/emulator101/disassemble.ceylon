@@ -225,7 +225,7 @@ String format(Byte|Integer val, Integer width) {
             case (returnIfParityOdd) ["RPO", null]
             case (returnIfPlus) ["RP", null]
             case (returnIfZero) ["RZ", null]
-            case (rotateLeft) ["RLC", null]
+            case (rotateLeft) ["RLC", null] // Is it just me, or are these backward?
             case (rotateLeftThroughCarry) ["RAL", null]
             case (rotateRight) ["RRC", null]
             case (rotateRightThroughCarry) ["RAR", null]
