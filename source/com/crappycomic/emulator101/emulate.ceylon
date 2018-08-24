@@ -74,12 +74,15 @@ shared [State, Integer] emulate(State state) {
         case (decrementPairB) emulateDecrementPair(`State.registerB`, `State.registerC`)
         case (decrementPairD) emulateDecrementPair(`State.registerD`, `State.registerE`)
         case (decrementPairH) emulateDecrementPair(`State.registerH`, `State.registerL`)
+        case (decrementPairStackPointer) nothing
         case (disableInterrupts) emulateDisableInterrupts
         case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
         case (doubleAddD) emulateDoubleAdd(`State.registerD`, `State.registerE`)
         case (doubleAddH) emulateDoubleAdd(`State.registerH`, `State.registerL`)
+        case (doubleAddStackPointer) nothing
         case (enableInterrupts) emulateEnableInterrupts
         case (exchangeRegisters) emulateExchangeRegisters
+        case (exchangeStack) nothing
         case (halt) emulateHalt
         case (incrementA) emulateIncrementRegister(`State.registerA`)
         case (incrementB) emulateIncrementRegister(`State.registerB`)
@@ -92,6 +95,7 @@ shared [State, Integer] emulate(State state) {
         case (incrementPairB) emulateIncrementPair(`State.registerB`, `State.registerC`)
         case (incrementPairD) emulateIncrementPair(`State.registerD`, `State.registerE`)
         case (incrementPairH) emulateIncrementPair(`State.registerH`, `State.registerL`)
+        case (incrementPairStackPointer) nothing
         case (input) emulateInput
         case (jump) emulateJumpIf((state) => true)
         case (jumpIfCarry) emulateJumpIf(State.carry)
@@ -111,6 +115,8 @@ shared [State, Integer] emulate(State state) {
         case (loadPairImmediateH) emulateLoadPairImmediate(`State.registerH`, `State.registerL`)
         case (loadPairImmediateStackPointer)
             emulateLoadPairImmediate(`State.stackPointerHigh`, `State.stackPointerLow`)
+        case (loadProgramCounter) nothing
+        case (loadStackPointer) nothing
         case (moveImmediateA) emulateMoveImmediate(`State.registerA`)
         case (moveImmediateB) emulateMoveImmediate(`State.registerB`)
         case (moveImmediateC) emulateMoveImmediate(`State.registerC`)
@@ -201,6 +207,14 @@ shared [State, Integer] emulate(State state) {
         case (pushD) emulatePush(`State.registerD`, `State.registerE`)
         case (pushH) emulatePush(`State.registerH`, `State.registerL`)
         case (pushStatus) emulatePush(`State.registerA`, `State.flags`)
+        case (reset0) nothing
+        case (reset1) nothing
+        case (reset2) nothing
+        case (reset3) nothing
+        case (reset4) nothing
+        case (reset5) nothing
+        case (reset6) nothing
+        case (reset7) nothing
         case (\ireturn) emulateReturnIf((state) => true, 10)
         case (returnIfCarry) emulateReturnIf(State.carry)
         case (returnIfMinus) emulateReturnIf(State.sign)
@@ -211,7 +225,9 @@ shared [State, Integer] emulate(State state) {
         case (returnIfPlus) emulateReturnIf(not(State.sign))
         case (returnIfZero) emulateReturnIf(State.zero)
         case (rotateLeft) emulateRotateLeft
+        case (rotateLeftThroughCarry) nothing
         case (rotateRight) emulateRotateRight
+        case (rotateRightThroughCarry) nothing
         case (setCarry) emulateSetCarry
         case (storeAccumulatorB) emulateStoreAccumulator(`State.registerB`, `State.registerC`)
         case (storeAccumulatorD) emulateStoreAccumulator(`State.registerD`, `State.registerE`)
