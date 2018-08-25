@@ -1,11 +1,13 @@
 import ceylon.test {
     assertEquals,
+    assertFalse,
+    assertNull,
     parameters,
-    test,
-    assertNull
+    test
 }
 
 import com.crappycomic.emulator101 {
+    Interrupt,
     State,
     bytes
 }
@@ -143,6 +145,40 @@ shared void testStatePackFlags(Boolean sign, Boolean zero, Boolean auxiliaryCarr
         zero = zero;
         sign = sign;
     }, expected.byte);
+}
+
+test
+shared void testStateWithInterrupt() {
+    value opcode = #23.byte;
+    value interrupt = Interrupt(opcode);
+    value startState = testState {
+        opcode = 0;
+        `State.interruptsEnabled`->true,
+        `State.stopped`->true
+    };
+    value endState = startState.withInterrupt(interrupt);
+    
+    assertStatesEqual(startState, endState,
+        `State.interruptsEnabled`, `State.stopped`, `State.interrupt`);
+    assertFalse(endState.interruptsEnabled);
+    assertFalse(endState.stopped);
+    assertEquals(endState.interrupt, interrupt);
+}
+
+test
+shared void testStateWithoutInterrupt() {
+    value opcode = #23.byte;
+    value interrupt = Interrupt(opcode);
+    value startState = testState {
+        opcode = 0;
+    }.withInterrupt(interrupt);
+    
+    assertEquals(startState.interrupt, interrupt);
+    
+    value endState = startState.with {};
+    
+    assertStatesEqual(startState, endState, `State.interrupt`);
+    assertNull(endState.interrupt);
 }
 
 test

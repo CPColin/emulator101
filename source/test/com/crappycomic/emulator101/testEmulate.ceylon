@@ -72,6 +72,7 @@ State testState(Integer opcode,
         memory = Array<Byte>.ofSize(testStateMemorySize, #ff.byte);
         interruptsEnabled = false;
         stopped = false;
+        interrupt = null;
     }.with {
         testStateProgramCounter->opcode.byte, // TODO: could cause a bug if stack pointer is updated
         *updates
@@ -180,6 +181,11 @@ void assertStatesEqual(State startState, State endState, Attribute<State>* excep
     if (!except.contains(`State.stopped`)) {
         assertEquals(endState.stopped, startState.stopped,
             "Stopped flag should not have changed.");
+    }
+    
+    if (!except.contains(`State.interrupt`)) {
+        assertEquals(endState.interrupt, startState.interrupt,
+            "Interrupt should not have changed.");
     }
 }
 

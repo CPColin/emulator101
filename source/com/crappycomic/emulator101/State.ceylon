@@ -46,6 +46,7 @@ shared class State {
     shared Memory memory;
     shared Boolean interruptsEnabled;
     shared Boolean stopped;
+    shared Interrupt? interrupt;
     
     shared new (
             Byte registerA,
@@ -60,7 +61,8 @@ shared class State {
             Integer programCounter,
             Memory memory,
             Boolean interruptsEnabled,
-            Boolean stopped) {
+            Boolean stopped,
+            Interrupt? interrupt) {
         this.registerA = registerA;
         this.registerB = registerB;
         this.registerC = registerC;
@@ -74,6 +76,7 @@ shared class State {
         this.memory = memory;
         this.interruptsEnabled = interruptsEnabled;
         this.stopped = stopped;
+        this.interrupt = interrupt;
     }
     
     shared Boolean carry => flags.get(flagBitCarry);
@@ -129,6 +132,27 @@ shared class State {
                     else memory;
             interruptsEnabled = bitFlagUpdates[`State.interruptsEnabled`] else interruptsEnabled;
             stopped = bitFlagUpdates[`State.stopped`] else stopped;
+            interrupt = null;
+        };
+    }
+    
+    "Returns a copy of this object with the given [[interrupt]] ready to execute."
+    shared State withInterrupt(Interrupt interrupt) {
+        return State {
+            registerA = registerA;
+            registerB = registerB;
+            registerC = registerC;
+            registerD = registerD;
+            registerE = registerE;
+            registerH = registerH;
+            registerL = registerL;
+            flags = flags;
+            stackPointer = stackPointer;
+            programCounter = programCounter;
+            memory = memory;
+            interruptsEnabled = false;
+            stopped = false;
+            interrupt = interrupt;
         };
     }
 }
