@@ -1,7 +1,7 @@
 "Emulates execution of the next instruction, given the current [[state]] of the CPU and memory.
  Returns the new state and the number of cycles the instruction took."
 shared [State, Integer] emulate(State state, Machine? machine = null) {
-    value val = state.memory[state.programCounter];
+    value val = state.opcode;
     
     assert (exists val);
     
@@ -274,17 +274,6 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
     }
 }
 
-Byte dataByte(State state) => state.memory[state.programCounter + 1] else 0.byte;
-
-Byte[2] dataBytes(State state) => [
-    state.memory[state.programCounter + 2] else 0.byte,
-    state.memory[state.programCounter + 1] else 0.byte
-];
-
-Integer dataWord(State state)
-        => let ([high, low] = dataBytes(state))
-            word(high, low);
-
 """Returns the appropriate value for the Auxiliary Carry flag, which is set when a carry comes out
    of the least significant nibble.
    
@@ -328,7 +317,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateAddImmediate(Boolean withCarry)
         (Opcode opcode, State state) {
     value left = state.registerA;
-    value right = dataByte(state);
+    value right = state.dataByte;
     value result = left.unsigned + right.unsigned + (withCarry && state.carry then 1 else 0);
     value resultByte = result.byte;
     
@@ -390,7 +379,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateAndImmediate(State state) {
-    value result = state.registerA.and(dataByte(state));
+    value result = state.registerA.and(state.dataByte);
     
     return [
         state.with {
@@ -443,7 +432,7 @@ shared Boolean flagZero(Byte val) => val.zero;
         (Opcode opcode, State state) {
     if (condition(state)) {
         value [high, low] = bytes(state.programCounter);
-        value address = dataWord(state);
+        value address = state.dataWord;
         
         return [
             state.with {
@@ -466,7 +455,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 
 [State, Integer] emulateCompareImmediate(State state) {
     value left = state.registerA;
-    value right = dataByte(state);
+    value right = state.dataByte;
     value result = left.unsigned - right.unsigned;
     value resultByte = result.byte;
     
@@ -762,7 +751,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateJumpIf(Boolean(State) condition)
         (Opcode opcode, State state) {
     value programCounter = condition(state)
-            then dataWord(state)
+            then state.dataWord
             else state.programCounter + opcode.size;
     
     return [
@@ -787,7 +776,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateLoadAccumulatorDirect(State state) {
-    value address = dataWord(state);
+    value address = state.dataWord;
     
     return [
         state.with {
@@ -799,7 +788,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateLoadHLDirect(State state) {
-    value address = dataWord(state);
+    value address = state.dataWord;
     
     return [
         state.with {
@@ -813,7 +802,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 
 [State, Integer] emulateLoadPairImmediate(ByteRegister highRegister, ByteRegister lowRegister)
         (Opcode opcode, State state) {
-    value [high, low] = dataBytes(state);
+    value [high, low] = state.dataBytes;
     
     return [
         state.with {
@@ -852,7 +841,7 @@ shared Boolean flagZero(Byte val) => val.zero;
         (Opcode opcode, State state) {
     return [
         state.with {
-            register->dataByte(state),
+            register->state.dataByte,
             `State.programCounter`->state.programCounter + opcode.size
         },
         5
@@ -867,7 +856,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     return [
         state.with {
             `State.programCounter`->state.programCounter + moveImmediateMemory.size,
-            address->dataByte(state)
+            address->state.dataByte
         },
         10
     ];
@@ -925,7 +914,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateOrImmediate(State state) {
-    value result = state.registerA.or(dataByte(state));
+    value result = state.registerA.or(state.dataByte);
     
     return [
         state.with {
@@ -1120,7 +1109,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateStoreAccumulatorDirect(State state) {
-    value address = dataWord(state);
+    value address = state.dataWord;
     
     return [
         state.with {
@@ -1132,7 +1121,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateStoreHLDirect(State state) {
-    value address = dataWord(state);
+    value address = state.dataWord;
     
     return [
         state.with {
@@ -1147,7 +1136,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateSubtractImmediate(Boolean withBorrow)
         (Opcode opcode, State state) {
     value left = state.registerA;
-    value right = dataByte(state);
+    value right = state.dataByte;
     value result = left.unsigned - right.unsigned - (withBorrow && state.carry then 1 else 0);
     value resultByte = result.byte;
     
@@ -1209,7 +1198,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateXorImmediate(State state) {
-    value result = state.registerA.xor(dataByte(state));
+    value result = state.registerA.xor(state.dataByte);
     
     return [
         state.with {

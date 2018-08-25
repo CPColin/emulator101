@@ -122,8 +122,8 @@ shared void runInvaders() {
     while (true) {
         disassemble(state.memory, state.programCounter);
         
-        value result = emulate(state);
+        value [result, cycles] = emulate(state);
         
-        state = result[0];
+        state = result;
     }
 }

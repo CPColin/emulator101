@@ -44,6 +44,8 @@ Boolean isNotTaken(Boolean flagValue) => !flagValue;
     [`State.sign`, true]
 };
 
+Integer testStateMemorySize = #0200;
+
 Integer testStateProgramCounter = #120;
 
 Integer testStateStackPointer = #100;
@@ -67,7 +69,7 @@ State testState(Integer opcode,
         };
         stackPointer = testStateStackPointer;
         programCounter = testStateProgramCounter;
-        memory = Array<Byte>.ofSize(#0200, #ff.byte);
+        memory = Array<Byte>.ofSize(testStateMemorySize, #ff.byte);
         interruptsEnabled = false;
         stopped = false;
     }.with {

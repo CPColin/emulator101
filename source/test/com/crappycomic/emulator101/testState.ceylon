@@ -1,7 +1,8 @@
 import ceylon.test {
     assertEquals,
     parameters,
-    test
+    test,
+    assertNull
 }
 
 import com.crappycomic.emulator101 {
@@ -9,7 +10,94 @@ import com.crappycomic.emulator101 {
     bytes
 }
 
-{[Boolean, Boolean, Boolean, Boolean, Boolean, Integer]*} testPackFlagsParameters = {
+test
+shared void testStateDataByte() {
+    value data = #36.byte;
+    value state = testState {
+        opcode = 0;
+        testStateProgramCounter + 1->data
+    };
+    
+    assertEquals(state.dataByte, data);
+}
+
+test
+shared void testStateDataByteOutOfRange() {
+    value state = testState {
+        opcode = 0;
+        `State.programCounter`->testStateMemorySize
+    };
+    
+    assertEquals(state.dataByte, 0.byte);
+}
+
+test
+shared void testStateDataBytes() {
+    value high = #36.byte;
+    value low = #df.byte;
+    value state = testState {
+        opcode = 0;
+        testStateProgramCounter + 1->low,
+        testStateProgramCounter + 2->high
+    };
+    
+    assertEquals(state.dataBytes, [high, low]);
+}
+
+test
+shared void testStateDataBytesOutOfRange() {
+    value state = testState {
+        opcode = 0;
+        `State.programCounter`->testStateMemorySize
+    };
+    
+    assertEquals(state.dataBytes, [0.byte, 0.byte]);
+}
+
+test
+shared void testStateDataWord() {
+    value high = #36.byte;
+    value low = #df.byte;
+    value state = testState {
+        opcode = 0;
+        testStateProgramCounter + 1->low,
+        testStateProgramCounter + 2->high
+    };
+    
+    assertEquals(state.dataWord, #36df);
+}
+
+test
+shared void testStateDataWordOutOfRange() {
+    value state = testState {
+        opcode = 0;
+        `State.programCounter`->testStateMemorySize
+    };
+    
+    assertEquals(state.dataWord, 0);
+}
+
+test
+shared void testStateOpcode() {
+    value opcode = #4b;
+    value state = testState {
+        opcode = opcode;
+    };
+    
+    assertEquals(state.opcode, opcode.byte);
+}
+
+test
+shared void testStateOpcodeOutOfRange() {
+    value state = testState {
+        opcode = 0;
+        `State.programCounter`->testStateMemorySize
+    };
+    
+    assertNull(state.opcode);
+}
+
+{[Boolean, Boolean, Boolean, Boolean, Boolean, Integer]*} testStatePackFlagsParameters = {
     [false, false, false, false, false, $00000010],
     [false, false, false, false, true, $00000011],
     [false, false, false, true, false, $00000110],
@@ -45,8 +133,8 @@ import com.crappycomic.emulator101 {
 };
 
 test
-parameters(`value testPackFlagsParameters`)
-shared void testPackFlags(Boolean sign, Boolean zero, Boolean auxiliaryCarry, Boolean parity,
+parameters(`value testStatePackFlagsParameters`)
+shared void testStatePackFlags(Boolean sign, Boolean zero, Boolean auxiliaryCarry, Boolean parity,
         Boolean carry, Integer expected) {
     assertEquals(State.packFlags {
         carry = carry;
@@ -95,7 +183,7 @@ shared void testStateWithStackPointerWord() {
 }
 
 test
-shared void testUpdateMemorySingle() {
+shared void testStateUpdateMemorySingle() {
     value size = 8;
     value fill = #ff.byte;
     value poke = 3;
@@ -112,7 +200,7 @@ shared void testUpdateMemorySingle() {
 }
 
 test
-shared void testUpdateMemoryMultiple() {
+shared void testStateUpdateMemoryMultiple() {
     value size = 8;
     value fill = #ff.byte;
     value poke1 = 3;

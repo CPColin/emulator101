@@ -85,6 +85,17 @@ shared class State {
     shared Byte stackPointerHigh => stackPointer.rightLogicalShift(8).byte;
     shared Byte stackPointerLow => stackPointer.byte;
     
+    shared Byte? opcode => memory[programCounter];
+    shared Byte dataByte => memory[programCounter + 1] else 0.byte;
+    shared Byte[2] dataBytes
+            => if (exists high = memory[programCounter + 2],
+                    exists low = memory[programCounter + 1])
+                then [high, low]
+                else [0.byte, 0.byte];
+    shared Integer dataWord
+            => let ([high, low] = dataBytes)
+                word(high, low);
+    
     "Returns a copy of this object with the given updates applied."
     shared State with(
             {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates) {
