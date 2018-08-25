@@ -210,14 +210,14 @@ shared [State, Integer] emulate(State state) {
         case (pushD) emulatePush(`State.registerD`, `State.registerE`)
         case (pushH) emulatePush(`State.registerH`, `State.registerL`)
         case (pushStatus) emulatePush(`State.registerA`, `State.flags`)
-        case (restart0) nothing
-        case (restart1) nothing
-        case (restart2) nothing
-        case (restart3) nothing
-        case (restart4) nothing
-        case (restart5) nothing
-        case (restart6) nothing
-        case (restart7) nothing
+        case (restart0) emulateRestart
+        case (restart1) emulateRestart
+        case (restart2) emulateRestart
+        case (restart3) emulateRestart
+        case (restart4) emulateRestart
+        case (restart5) emulateRestart
+        case (restart6) emulateRestart
+        case (restart7) emulateRestart
         case (\ireturn) emulateReturnIf((state) => true, 10)
         case (returnIfCarry) emulateReturnIf(State.carry)
         case (returnIfMinus) emulateReturnIf(State.sign)
