@@ -1,6 +1,6 @@
 "Emulates execution of the next instruction, given the current [[state]] of the CPU and memory.
  Returns the new state and the number of cycles the instruction took."
-shared [State, Integer] emulate(State state) {
+shared [State, Integer] emulate(State state, Machine? machine = null) {
     value val = state.memory[state.programCounter];
     
     assert (exists val);
@@ -267,6 +267,8 @@ shared [State, Integer] emulate(State state) {
     
     if (is Anything(Opcode, State) emulator) {
         return emulator(opcode, state);
+    } else if (is Anything(State, Machine?) emulator) {
+        return emulator(state, machine);
     } else {
         return emulator(state);
     }
@@ -757,16 +759,6 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateInput(State state) {
-    // TODO: Hook into system hardware.
-    return [
-        state.with {
-            `State.programCounter`->state.programCounter + input.size
-        },
-        10
-    ];
-}
-
 [State, Integer] emulateJumpIf(Boolean(State) condition)
         (Opcode opcode, State state) {
     value programCounter = condition(state)
@@ -979,16 +971,6 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + opcode.size
         },
         4
-    ];
-}
-
-[State, Integer] emulateOutput(State state) {
-    // TODO: Hook into system hardware.
-    return [
-        state.with {
-            `State.programCounter`->state.programCounter + output.size
-        },
-        10
     ];
 }
 
