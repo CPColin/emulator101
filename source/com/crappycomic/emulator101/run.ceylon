@@ -53,7 +53,7 @@ shared void runDisassembler() {
     }
 }
 
-"Runs the CPU diagnostic code." // TODO: Move to test module, once everything passes?
+"Runs the CPU diagnostic code." // TODO: Move to test module?
 shared void runCpuDiagnostic() {
     value code = Array<Byte>(FileIterable("resource/com/crappycomic/emulator101/cpudiag.bin"));
     value memory = Array<Byte>.ofSize(#1000, 0.byte);
@@ -64,19 +64,45 @@ shared void runCpuDiagnostic() {
         destinationPosition = initialProgramCounter;
     };
     
-    variable value state = initialState(memory, initialProgramCounter);
+    variable value state = initialState(memory, initialProgramCounter).with {
+        5->\ireturn.byte // Return from system call
+    };
     
     while (true) {
         disassemble(state.memory, state.programCounter);
         
-        value result = emulate(state);
+        value [result, cycles] = emulate(state);
         
-        state = result[0];
-        
-        //print("A:``format(state.registerA, 2)``, B:``format(state.registerB, 2)``, C:``format(state.registerC, 2)``, D:``format(state.registerD, 2)``, E:``format(state.registerE, 2)``, H:``format(state.registerH, 2)``, L:``format(state.registerL, 2)``, PC:``format(state.programCounter, 4)``, SP:``format(state.stackPointer, 4)``, ``state.carry then "C" else "c"````state.parity then "P" else "p"````state.zero then "Z" else "z"````state.sign then "S" else "s"``");
+        state = result;
         
         if (state.programCounter < initialProgramCounter) {
-            throw Exception("TODO");
+            value programCounter = state.programCounter;
+            
+            if (programCounter == 0) {
+                print("Exiting");
+                
+                break;
+            } else if (programCounter == 5) {
+                value systemCall = state.registerC;
+                
+                if (systemCall == 2.byte) {
+                    process.write(state.registerE.unsigned.character.string);
+                } else if (systemCall == 9.byte) {
+                    value output = StringBuilder();
+                    variable value address = word(state.registerD, state.registerE) + 3;
+                    
+                    while (exists data = state.memory[address]?.unsigned?.character, data != '$') {
+                        output.appendCharacter(data);
+                        address++;
+                    }
+                    
+                    print(output.string);
+                } else {
+                    throw Exception("System call ``systemCall`` not implemented");
+                }
+            } else {
+                throw Exception("Jump to system code at ``programCounter`` not implemented");
+            }
         }
     }
 }
