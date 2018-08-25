@@ -5,7 +5,9 @@ import ceylon.test {
 
 import com.crappycomic.emulator101 {
     ByteRegister,
+    IntegerRegister,
     State,
+    bytes,
     emulate,
     word
 }
@@ -129,4 +131,34 @@ shared void testEmulateLoadPairImmediateH() {
 test
 shared void testEmulateLoadPairImmediateStackPointer() {
     testEmulateLoadPairImmediate(#31, `State.stackPointerHigh`, `State.stackPointerLow`);
+}
+
+void testEmulateLoadPairHL(Integer opcode, IntegerRegister register) {
+    value data = #4321;
+    value [high, low] = bytes(data);
+    value startState = testState {
+        opcode = opcode;
+        `State.registerH`->high,
+        `State.registerL`->low
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState, register, `State.programCounter`);
+    assertEquals(register.bind(endState).get(), data);
+    
+    if (register != `State.programCounter`) {
+        assertEquals(endState.programCounter, startState.programCounter + 1);
+    }
+        
+    assertEquals(cycles, 5);
+}
+
+test
+shared void testEmulateLoadProgramCounter() {
+    testEmulateLoadPairHL(#e9, `State.programCounter`);
+}
+
+test
+shared void testEmulateLoadStackPointer() {
+    testEmulateLoadPairHL(#f9, `State.stackPointer`);
 }

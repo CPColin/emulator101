@@ -358,6 +358,34 @@ shared void testEmulateExchangeRegisters() {
     assertEquals(cycles, 5);
 }
 
+test
+shared void testEmulateExchangeStack() {
+    value address = #0156;
+    value hlData = #7654;
+    value [hlHigh, hlLow] = bytes(hlData);
+    value stackData = #face;
+    value [stackHigh, stackLow] = bytes(stackData);
+    value startState = testState {
+        opcode = #e3;
+        `State.stackPointer`->address,
+        `State.registerH`->hlHigh,
+        `State.registerL`->hlLow,
+        address->stackLow,
+        address + 1->stackHigh
+    };
+    value [endState, cycles] = emulate(startState);
+    
+    assertStatesEqual(startState, endState,
+        `State.registerH`, `State.registerL`, `State.memory`, `State.programCounter`);
+    assertEquals(endState.registerH, stackHigh);
+    assertEquals(endState.registerL, stackLow);
+    assertEquals(endState.memory[address + 1], hlHigh);
+    assertEquals(endState.memory[address], hlLow);
+    assertEquals(endState.programCounter, startState.programCounter + 1);
+    
+    assertEquals(cycles, 18);
+}
+
 void testEmulateJumpIf(Integer opcode, BitFlag flag, Boolean flagValue, Boolean(Boolean) taken) {
     value high = #43.byte;
     value low = #21.byte;

@@ -84,7 +84,7 @@ shared [State, Integer] emulate(State state) {
             emulateDoubleAdd(`State.stackPointerHigh`, `State.stackPointerLow`)
         case (enableInterrupts) emulateEnableInterrupts
         case (exchangeRegisters) emulateExchangeRegisters
-        case (exchangeStack) nothing
+        case (exchangeStack) emulateExchangeStack
         case (halt) emulateHalt
         case (incrementA) emulateIncrementRegister(`State.registerA`)
         case (incrementB) emulateIncrementRegister(`State.registerB`)
@@ -97,7 +97,8 @@ shared [State, Integer] emulate(State state) {
         case (incrementPairB) emulateIncrementPair(`State.registerB`, `State.registerC`)
         case (incrementPairD) emulateIncrementPair(`State.registerD`, `State.registerE`)
         case (incrementPairH) emulateIncrementPair(`State.registerH`, `State.registerL`)
-        case (incrementPairStackPointer) nothing
+        case (incrementPairStackPointer)
+            emulateIncrementPair(`State.stackPointerHigh`, `State.stackPointerLow`)
         case (input) emulateInput
         case (jump) emulateJumpIf((state) => true)
         case (jumpIfCarry) emulateJumpIf(State.carry)
@@ -117,8 +118,8 @@ shared [State, Integer] emulate(State state) {
         case (loadPairImmediateH) emulateLoadPairImmediate(`State.registerH`, `State.registerL`)
         case (loadPairImmediateStackPointer)
             emulateLoadPairImmediate(`State.stackPointerHigh`, `State.stackPointerLow`)
-        case (loadProgramCounter) nothing
-        case (loadStackPointer) nothing
+        case (loadProgramCounter) emulateLoadProgramCounter
+        case (loadStackPointer) emulateLoadStackPointer
         case (moveImmediateA) emulateMoveImmediate(`State.registerA`)
         case (moveImmediateB) emulateMoveImmediate(`State.registerB`)
         case (moveImmediateC) emulateMoveImmediate(`State.registerC`)
@@ -680,6 +681,21 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
+[State, Integer] emulateExchangeStack(State state) {
+    value address = state.stackPointer;
+    
+    return [
+        state.with {
+            `State.registerH`->(state.memory[address + 1] else 0.byte),
+            `State.registerL`->(state.memory[address] else 0.byte),
+            address + 1->state.registerH,
+            address->state.registerL,
+            `State.programCounter`->state.programCounter + exchangeStack.size
+        },
+        18
+    ];
+}
+
 [State, Integer] emulateHalt(State state) {
     return [
         state.with {
@@ -814,6 +830,29 @@ shared Boolean flagZero(Byte val) => val.zero;
             `State.programCounter`->state.programCounter + opcode.size
         },
         10
+    ];
+}
+
+[State, Integer] emulateLoadProgramCounter(State state) {
+    value data = word(state.registerH, state.registerL);
+    
+    return [
+        state.with {
+            `State.programCounter`->data
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateLoadStackPointer(State state) {
+    value data = word(state.registerH, state.registerL);
+    
+    return [
+        state.with {
+            `State.stackPointer`->data,
+            `State.programCounter`->state.programCounter + loadStackPointer.size
+        },
+        5
     ];
 }
 

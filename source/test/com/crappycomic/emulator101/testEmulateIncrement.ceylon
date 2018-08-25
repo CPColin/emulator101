@@ -260,3 +260,18 @@ shared void testEmulateIncrementPairH(Integer start1, Integer start2,
         expected2 = expected2;
     };
 }
+
+test
+parameters(`value testEmulateIncrementPairParameters`)
+shared void testEmulateIncrementPairStackPointer(Integer start1, Integer start2,
+        Integer expected1, Integer expected2) {
+    testEmulateIncrementPair {
+        opcode = #33;
+        register1 = `State.stackPointerHigh`;
+        register2 = `State.stackPointerLow`;
+        start1 = start1;
+        start2 = start2;
+        expected1 = expected1;
+        expected2 = expected2;
+    };
+}
