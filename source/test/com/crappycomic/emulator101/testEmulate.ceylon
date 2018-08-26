@@ -51,8 +51,15 @@ Integer testStateProgramCounter = #120;
 Integer testStateStackPointer = #100;
 
 State testState(Integer opcode,
-        {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates)
-    => State {
+        {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates) {
+    value integerRegisterUpdates = map(updates.narrow<IntegerRegisterUpdate>());
+    value programCounter
+            = if (exists item = integerRegisterUpdates.find(
+                    (key->item) => key == `State.programCounter`)?.item)
+                then item
+                else testStateProgramCounter;
+    
+    return State {
         registerA = #f0.byte;
         registerB = #f1.byte;
         registerC = #f2.byte;
@@ -68,15 +75,17 @@ State testState(Integer opcode,
             sign = true;
         };
         stackPointer = testStateStackPointer;
-        programCounter = testStateProgramCounter;
+        programCounter = programCounter;
         memory = Array<Byte>.ofSize(testStateMemorySize, #ff.byte);
         interruptsEnabled = false;
         stopped = false;
         interrupt = null;
     }.with {
-        testStateProgramCounter->opcode.byte, // TODO: could cause a bug if stack pointer is updated
+        `State.programCounter`->programCounter, // Set again here to avoid auto-advance
+        programCounter->opcode.byte,
         *updates
     };
+}
 
 abstract class DoNotCheck() of doNotCheck {}
 

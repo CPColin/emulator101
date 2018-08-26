@@ -6,7 +6,7 @@ shared class Interrupt(Byte+ data) {
     shared Byte? dataByte => data[1];
     
     shared Byte[2]? dataBytes
-            => if (exists high = data[1], exists low = data[2])
+            => if (exists high = data[2], exists low = data[1])
                 then [high, low]
                 else null;
     

@@ -26,8 +26,10 @@ shared class State {
         value newMemory = Array<Byte>(memory);
         
         for (address->val in memoryUpdates) {
-            // TODO: Handle attempts to write to ROM.
-            newMemory[address] = val;
+            if (address >= 0 && address < memory.size) {
+                // TODO: Handle attempts to write to ROM.
+                newMemory[address] = val;
+            }
         }
         
         return newMemory;
@@ -88,16 +90,29 @@ shared class State {
     shared Byte stackPointerHigh => stackPointer.rightLogicalShift(8).byte;
     shared Byte stackPointerLow => stackPointer.byte;
     
-    shared Byte? opcode => memory[programCounter];
-    shared Byte dataByte => memory[programCounter + 1] else 0.byte;
+    shared Opcode opcode {
+        value val = interrupt?.opcode else memory[programCounter];
+        
+        assert (exists val);
+        
+        value opcode = opcodes[val];
+        
+        assert (exists opcode);
+        
+        return opcode;
+    }
+    
+    shared Byte dataByte => interrupt?.dataByte else memory[programCounter + 1] else 0.byte;
     shared Byte[2] dataBytes
-            => if (exists high = memory[programCounter + 2],
+            => interrupt?.dataBytes else (
+                if (exists high = memory[programCounter + 2],
                     exists low = memory[programCounter + 1])
                 then [high, low]
-                else [0.byte, 0.byte];
+                else [0.byte, 0.byte]);
     shared Integer dataWord
-            => let ([high, low] = dataBytes)
-                word(high, low);
+            => interrupt?.dataWord else (
+                let ([high, low] = dataBytes)
+                    word(high, low));
     
     "Returns a copy of this object with the given updates applied."
     shared State with(
@@ -106,6 +121,11 @@ shared class State {
         value byteRegisterUpdates = map(updates.narrow<ByteRegisterUpdate>());
         value integerRegisterUpdates = map(updates.narrow<IntegerRegisterUpdate>());
         value memoryUpdates = updates.narrow<MemoryUpdate>();
+        
+        value programCounter = integerRegisterUpdates[`State.programCounter`]
+            else (if (exists interrupt)
+                then this.programCounter
+                else this.programCounter + opcode.size);
         
         return State {
             registerA = byteRegisterUpdates[`State.registerA`] else registerA;
@@ -126,7 +146,7 @@ shared class State {
                 high = byteRegisterUpdates[`State.stackPointerHigh`] else stackPointerHigh;
                 low = byteRegisterUpdates[`State.stackPointerLow`] else stackPointerLow;
             };
-            programCounter = integerRegisterUpdates[`State.programCounter`] else programCounter;
+            programCounter = programCounter;
             memory = if (!memoryUpdates.empty)
                     then updateMemory(memory, *memoryUpdates)
                     else memory;

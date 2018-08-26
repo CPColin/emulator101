@@ -34,6 +34,19 @@ shared void testStateDataByteOutOfRange() {
 }
 
 test
+shared void testStateDataByteWithInterrupt() {
+    value interruptData = #25.byte;
+    value stateData = #36.byte;
+    value interrupt = Interrupt(0.byte, interruptData);
+    value state = testState {
+        opcode = 0;
+        testStateProgramCounter + 1->stateData
+    }.withInterrupt(interrupt);
+    
+    assertEquals(state.dataByte, interruptData);
+}
+
+test
 shared void testStateDataBytes() {
     value high = #36.byte;
     value low = #df.byte;
@@ -54,6 +67,22 @@ shared void testStateDataBytesOutOfRange() {
     };
     
     assertEquals(state.dataBytes, [0.byte, 0.byte]);
+}
+
+test
+shared void testStateDataBytesWithInterrupt() {
+    value interruptHigh = #25.byte;
+    value interruptLow = #d1.byte;
+    value stateHigh = #36.byte;
+    value stateLow = #e0.byte;
+    value interrupt = Interrupt(0.byte, interruptLow, interruptHigh);
+    value state = testState {
+        opcode = 0;
+        testStateProgramCounter + 1->stateLow,
+        testStateProgramCounter + 2->stateHigh
+    }.withInterrupt(interrupt);
+    
+    assertEquals(state.dataBytes, [interruptHigh, interruptLow]);
 }
 
 test
@@ -80,23 +109,41 @@ shared void testStateDataWordOutOfRange() {
 }
 
 test
+shared void testStateDataWordWithInterrupt() {
+    value interruptHigh = #25.byte;
+    value interruptLow = #d1.byte;
+    value stateHigh = #36.byte;
+    value stateLow = #e0.byte;
+    value interrupt = Interrupt(0.byte, interruptLow, interruptHigh);
+    value state = testState {
+        opcode = 0;
+        testStateProgramCounter + 1->stateLow,
+        testStateProgramCounter + 2->stateHigh
+    }.withInterrupt(interrupt);
+    
+    assertEquals(state.dataWord, #25d1);
+}
+
+test
 shared void testStateOpcode() {
     value opcode = #4b;
     value state = testState {
         opcode = opcode;
     };
     
-    assertEquals(state.opcode, opcode.byte);
+    assertEquals(state.opcode.byte, opcode.byte);
 }
 
 test
-shared void testStateOpcodeOutOfRange() {
+shared void testStateOpcodeWithInterrupt() {
+    value interruptOpcode = #79.byte;
+    value stateOpcode = #4b;
+    value interrupt = Interrupt(interruptOpcode);
     value state = testState {
-        opcode = 0;
-        `State.programCounter`->testStateMemorySize
-    };
+        opcode = stateOpcode;
+    }.withInterrupt(interrupt);
     
-    assertNull(state.opcode);
+    assertEquals(state.opcode.byte, interruptOpcode);
 }
 
 {[Boolean, Boolean, Boolean, Boolean, Boolean, Integer]*} testStatePackFlagsParameters = {
@@ -182,6 +229,50 @@ shared void testStateWithoutInterrupt() {
 }
 
 test
+shared void testStateWithProgramCounterExplicit() {
+    value address = #1234;
+    value startState = testState {
+        opcode = 0;
+    };
+    value endState = startState.with {
+        `State.programCounter`->address
+    };
+    
+    assertStatesEqual(startState, endState, `State.programCounter`);
+    assertEquals(endState.programCounter, address);
+}
+
+{[Integer, Integer]*} testStateWithProgramCounterImplicitParameters = {
+    [#00, 1],
+    [#06, 2],
+    [#01, 3]
+};
+
+test
+parameters(`value testStateWithProgramCounterImplicitParameters`)
+shared void testStateWithProgramCounterImplicit(Integer opcode, Integer size) {
+    value startState = testState {
+        opcode = opcode;
+    };
+    value endState = startState.with {};
+    
+    assertStatesEqual(startState, endState, `State.programCounter`);
+    assertEquals(endState.programCounter, startState.programCounter + size);
+}
+
+test
+shared void testStateWithProgramCounterInterrupt() {
+    value interrupt = Interrupt(0.byte);
+    value startState = testState {
+        opcode = 0;
+    }.withInterrupt(interrupt);
+    value endState = startState.with {};
+    
+    assertStatesEqual(startState, endState, `State.interrupt`);
+    assertNull(endState.interrupt);
+}
+
+test
 shared void testStateWithStackPointerBytes() {
     value val = #1234;
     value [high, low] = bytes(val);
@@ -191,7 +282,8 @@ shared void testStateWithStackPointerBytes() {
     };
     value endState = startState.with {
         `State.stackPointerHigh`->high,
-        `State.stackPointerLow`->low
+        `State.stackPointerLow`->low,
+        `State.programCounter`->startState.programCounter
     };
     
     assertStatesEqual(startState, endState, `State.stackPointer`);
@@ -209,7 +301,8 @@ shared void testStateWithStackPointerWord() {
         `State.stackPointer`->0
     };
     value endState = startState.with {
-        `State.stackPointer`->val
+        `State.stackPointer`->val,
+        `State.programCounter`->startState.programCounter
     };
     
     assertStatesEqual(startState, endState, `State.stackPointer`);
