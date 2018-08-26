@@ -277,42 +277,60 @@ Opcode loadOpcode(Correspondence<Integer, Byte> bytes, Integer address) {
     return opcode;
 }
 
-Integer disassemble(Correspondence<Integer, Byte> bytes, Integer address) {
-    value opcode = loadOpcode(bytes, address);
-    
-    value output = StringBuilder();
-    
-    output.append(format(address, 4));
-    
-    value [mnemonic, arguments] = mnemonicAndArguments(opcode);
-    
-    output.append(" ``mnemonic``");
-    
-    if (exists arguments) {
-        while (output.size < 12) {
-            output.appendSpace();
+Integer disassemble(Correspondence<Integer, Byte> bytes, Integer address,
+        Interrupt? interrupt = null) {
+    if (exists interrupt) {
+        value output = StringBuilder();
+        
+        output.append(" INT ");
+        output.append(format(interrupt.opcode, 2));
+        
+        if (exists dataWord = interrupt.dataWord) {
+            output.append(" ``format(dataWord, 4)``");
+        } else if (exists dataByte = interrupt.dataByte) {
+            output.append(" ``format(dataByte, 2)``");
         }
         
-        output.append("``arguments``");
+        print(output.string);
         
-        if (opcode.size >= 2) {
-            value argument1 = bytes[address + 1];
-            
-            assert (exists argument1);
-            
-            if (opcode.size == 3) {
-                value argument2 = bytes[address + 2];
-                
-                assert (exists argument2);
-                
-                output.append(format(argument2, 2));
+        return 0;
+    } else {
+        value opcode = loadOpcode(bytes, address);
+        
+        value output = StringBuilder();
+        
+        output.append(format(address, 4));
+        
+        value [mnemonic, arguments] = mnemonicAndArguments(opcode);
+        
+        output.append(" ``mnemonic``");
+        
+        if (exists arguments) {
+            while (output.size < 12) {
+                output.appendSpace();
             }
             
-            output.append(format(argument1, 2));
+            output.append("``arguments``");
+            
+            if (opcode.size >= 2) {
+                value argument1 = bytes[address + 1];
+                
+                assert (exists argument1);
+                
+                if (opcode.size == 3) {
+                    value argument2 = bytes[address + 2];
+                    
+                    assert (exists argument2);
+                    
+                    output.append(format(argument2, 2));
+                }
+                
+                output.append(format(argument1, 2));
+            }
         }
+        
+        print(output.string);
+        
+        return opcode.size;
     }
-    
-    print(output.string);
-    
-    return opcode.size;
 }

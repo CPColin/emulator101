@@ -114,6 +114,14 @@ shared class State {
                 let ([high, low] = dataBytes)
                     word(high, low));
     
+    "The address that should be returned to once a CALL or RST subroutine finishes. This address
+     equals the current program counter, when processing an interrupt, and equals the address of the
+     subsequent operation, when not processing an interrupt."
+    shared Integer returnAddress
+            => if (interrupt exists)
+                then programCounter
+                else programCounter + opcode.size;
+    
     "Returns a copy of this object with the given updates applied."
     shared State with(
             {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates) {

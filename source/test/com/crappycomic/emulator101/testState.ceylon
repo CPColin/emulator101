@@ -12,6 +12,12 @@ import com.crappycomic.emulator101 {
     bytes
 }
 
+{[Integer, Integer]*} testStateOpcodeParameters = {
+    [#00, 1],
+    [#06, 2],
+    [#01, 3]
+};
+
 test
 shared void testStateDataByte() {
     value data = #36.byte;
@@ -195,6 +201,27 @@ shared void testStatePackFlags(Boolean sign, Boolean zero, Boolean auxiliaryCarr
 }
 
 test
+parameters(`value testStateOpcodeParameters`)
+shared void testStateReturnAddress(Integer opcode, Integer size) {
+    value state = testState {
+        opcode = opcode;
+    };
+    
+    assertEquals(state.returnAddress, state.programCounter + size);
+}
+
+test
+parameters(`value testStateOpcodeParameters`)
+shared void testStateReturnAddressWithInterrupt(Integer opcode, Integer size) {
+    value interrupt = Interrupt(opcode.byte);
+    value state = testState {
+        opcode = opcode;
+    }.withInterrupt(interrupt);
+    
+    assertEquals(state.returnAddress, state.programCounter);
+}
+
+test
 shared void testStateWithInterrupt() {
     value opcode = #23.byte;
     value interrupt = Interrupt(opcode);
@@ -242,14 +269,8 @@ shared void testStateWithProgramCounterExplicit() {
     assertEquals(endState.programCounter, address);
 }
 
-{[Integer, Integer]*} testStateWithProgramCounterImplicitParameters = {
-    [#00, 1],
-    [#06, 2],
-    [#01, 3]
-};
-
 test
-parameters(`value testStateWithProgramCounterImplicitParameters`)
+parameters(`value testStateOpcodeParameters`)
 shared void testStateWithProgramCounterImplicit(Integer opcode, Integer size) {
     value startState = testState {
         opcode = opcode;

@@ -413,7 +413,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 
 [State, Integer] emulateCallIf(Boolean(State) condition)(State state) {
     if (condition(state)) {
-        value [high, low] = bytes(state.programCounter);
+        value [high, low] = bytes(state.returnAddress);
         value address = state.dataWord;
         
         return [
@@ -948,18 +948,11 @@ shared Boolean flagZero(Byte val) => val.zero;
             high = state.memory[state.stackPointer + 1];
             low = state.memory[state.stackPointer];
         };
-        value val = state.memory[address];
-        
-        assert (exists val);
-        
-        value returnOpcode = opcodes[val];
-        
-        assert (exists returnOpcode);
         
         return [
             state.with {
                 `State.stackPointer`->state.stackPointer + 2,
-                `State.programCounter`->address + returnOpcode.size
+                `State.programCounter`->address
             },
             returnCycles // RET is 10, others are 11
         ];

@@ -1,8 +1,7 @@
 [State, Integer] emulateInput(State state, Machine? machine) {
     return [
         state.with {
-            `State.registerA`->(machine?.input(state.dataByte) else state.registerA),
-            `State.programCounter`->state.programCounter + input.size
+            `State.registerA`->(machine?.input(state.dataByte) else state.registerA)
         },
         10
     ];
@@ -14,9 +13,7 @@
     }
     
     return [
-        state.with {
-            `State.programCounter`->state.programCounter + output.size
-        },
+        state.with {},
         10
     ];
 }

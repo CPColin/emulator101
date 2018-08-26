@@ -198,91 +198,6 @@ void assertStatesEqual(State startState, State endState, Attribute<State>* excep
     }
 }
 
-void testEmulateCallIf(Integer opcode, BitFlag flag, Boolean flagValue, Boolean(Boolean) taken) {
-    value addressHigh = #33.byte;
-    value addressLow = #44.byte;
-    value address = word(addressHigh, addressLow);
-    value [startProgramCounterHigh, startProgramCounterLow] = bytes(testStateProgramCounter);
-    value startState = testState {
-        opcode = opcode;
-        flag->flagValue,
-        testStateProgramCounter + 1->addressLow,
-        testStateProgramCounter + 2->addressHigh
-    };
-    value [endState, cycles] = emulate(startState);
-    
-    if (taken(flagValue)) {
-        assertStatesEqual(startState, endState,
-            `State.stackPointer`, `State.programCounter`, `State.memory`);
-        assertEquals(endState.stackPointer, startState.stackPointer - 2);
-        assertEquals(endState.programCounter, address);
-        assertMemoriesEqual(startState, endState,
-            endState.stackPointer->startProgramCounterLow,
-            endState.stackPointer + 1->startProgramCounterHigh);
-        
-        assertEquals(cycles, 17);
-    } else {
-        assertStatesEqual(startState, endState, `State.programCounter`);
-        assertEquals(endState.programCounter, startState.programCounter + 3);
-        
-        assertEquals(cycles, 11);
-    }
-}
-
-test
-parameters(`value testTakenParameters`)
-shared void testEmulateCall(BitFlag flag, Boolean flagValue) {
-    testEmulateCallIf(#cd, flag, flagValue, isAlwaysTaken);
-}
-
-test
-parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfNotZero(Boolean flagValue) {
-    testEmulateCallIf(#c4, `State.zero`, flagValue, isNotTaken);
-}
-
-test
-parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfZero(Boolean flagValue) {
-    testEmulateCallIf(#cc, `State.zero`, flagValue, isTaken);
-}
-
-test
-parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfNoCarry(Boolean flagValue) {
-    testEmulateCallIf(#d4, `State.carry`, flagValue, isNotTaken);
-}
-
-test
-parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfCarry(Boolean flagValue) {
-    testEmulateCallIf(#dc, `State.carry`, flagValue, isTaken);
-}
-
-test
-parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfParityOdd(Boolean flagValue) {
-    testEmulateCallIf(#e4, `State.parity`, flagValue, isNotTaken);
-}
-
-test
-parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfParityEven(Boolean flagValue) {
-    testEmulateCallIf(#ec, `State.parity`, flagValue, isTaken);
-}
-
-test
-parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfPlus(Boolean flagValue) {
-    testEmulateCallIf(#f4, `State.sign`, flagValue, isNotTaken);
-}
-
-test
-parameters(`value testBooleanParameters`)
-shared void testEmulateCallIfMinus(Boolean flagValue) {
-    testEmulateCallIf(#fc, `State.sign`, flagValue, isTaken);
-}
-
 test
 parameters(`value testRegisterParameters`)
 shared void testEmulateComplementAccumulator(Byte registerValue) {
@@ -1032,7 +947,7 @@ void testEmulateReturnIf(Integer opcode, BitFlag flag, Boolean flagValue, Boolea
     if (taken(flagValue)) {
         assertStatesEqual(startState, endState, `State.stackPointer`, `State.programCounter`);
         assertEquals(endState.stackPointer, startState.stackPointer + 2);
-        assertEquals(endState.programCounter, address + 3);
+        assertEquals(endState.programCounter, address);
         
         assertEquals(cycles, takenCycles);
     } else {

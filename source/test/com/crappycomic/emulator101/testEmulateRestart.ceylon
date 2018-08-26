@@ -1,10 +1,12 @@
 import ceylon.test {
     assertEquals,
+    assertNull,
     parameters,
     test
 }
 
 import com.crappycomic.emulator101 {
+    Interrupt,
     State,
     bytes,
     emulate,
@@ -46,19 +48,36 @@ shared void testRestartIndex(Integer opcode, Integer expected) {
     assertEquals(restartIndex(opcode.byte), expected);
 }
 
-void testEmulateRestart(Integer opcode) {
-    value startState = testState {
+void testEmulateRestart(Integer opcode, Boolean withInterrupt) {
+    value testState = package.testState {
         opcode = opcode;
     };
-    value [programCounterHigh, programCounterLow]
-            = bytes(startState.programCounter);
+    State startState;
+    Integer returnAddress;
+    
+    if (withInterrupt) {
+        startState = testState.withInterrupt(Interrupt(opcode.byte));
+        returnAddress = startState.programCounter;
+    } else {
+        startState = testState;
+        returnAddress = startState.programCounter + 1;
+    }
+    
+    value [returnAddressHigh, returnAddressLow] = bytes(returnAddress);
     value [endState, cycles] = emulate(startState);
     
-    assertStatesEqual(startState, endState,
-        `State.memory`, `State.stackPointer`, `State.programCounter`);
+    if (withInterrupt) {
+        assertStatesEqual(startState, endState,
+            `State.memory`, `State.stackPointer`, `State.programCounter`, `State.interrupt`);
+        assertNull(endState.interrupt);
+    } else {
+        assertStatesEqual(startState, endState,
+            `State.memory`, `State.stackPointer`, `State.programCounter`);
+    }
+    
     assertMemoriesEqual(startState, endState,
-        endState.stackPointer + 1->programCounterLow,
-        endState.stackPointer + 2->programCounterHigh);
+        endState.stackPointer->returnAddressLow,
+        endState.stackPointer + 1->returnAddressHigh);
     assertEquals(endState.stackPointer, startState.stackPointer - 2);
     assertEquals(endState.programCounter, restartAddress(restartIndex(opcode.byte)));
     
@@ -66,41 +85,49 @@ void testEmulateRestart(Integer opcode) {
 }
 
 test
-shared void testEmulateRestart0() {
-    testEmulateRestart(#c7);
+parameters(`value testBooleanParameters`)
+shared void testEmulateRestart0(Boolean withInterrupt) {
+    testEmulateRestart(#c7, withInterrupt);
 }
 
 test
-shared void testEmulateRestart1() {
-    testEmulateRestart(#cf);
+parameters(`value testBooleanParameters`)
+shared void testEmulateRestart1(Boolean withInterrupt) {
+    testEmulateRestart(#cf, withInterrupt);
 }
 
 test
-shared void testEmulateRestart2() {
-    testEmulateRestart(#d7);
+parameters(`value testBooleanParameters`)
+shared void testEmulateRestart2(Boolean withInterrupt) {
+    testEmulateRestart(#d7, withInterrupt);
 }
 
 test
-shared void testEmulateRestart3() {
-    testEmulateRestart(#df);
+parameters(`value testBooleanParameters`)
+shared void testEmulateRestart3(Boolean withInterrupt) {
+    testEmulateRestart(#df, withInterrupt);
 }
 
 test
-shared void testEmulateRestart4() {
-    testEmulateRestart(#e7);
+parameters(`value testBooleanParameters`)
+shared void testEmulateRestart4(Boolean withInterrupt) {
+    testEmulateRestart(#e7, withInterrupt);
 }
 
 test
-shared void testEmulateRestart5() {
-    testEmulateRestart(#ef);
+parameters(`value testBooleanParameters`)
+shared void testEmulateRestart5(Boolean withInterrupt) {
+    testEmulateRestart(#ef, withInterrupt);
 }
 
 test
-shared void testEmulateRestart6() {
-    testEmulateRestart(#f7);
+parameters(`value testBooleanParameters`)
+shared void testEmulateRestart6(Boolean withInterrupt) {
+    testEmulateRestart(#f7, withInterrupt);
 }
 
 test
-shared void testEmulateRestart7() {
-    testEmulateRestart(#ff);
+parameters(`value testBooleanParameters`)
+shared void testEmulateRestart7(Boolean withInterrupt) {
+    testEmulateRestart(#ff, withInterrupt);
 }

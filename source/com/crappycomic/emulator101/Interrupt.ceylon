@@ -1,3 +1,8 @@
+import java.util.concurrent {
+    ArrayBlockingQueue,
+    BlockingQueue
+}
+
 "Encapsulates one or more bytes of interrupt data on the system bus. The first byte is required and
  is the opcode for the operation to be executed. The next two bytes are optional data."
 shared class Interrupt(Byte+ data) {
@@ -15,3 +20,5 @@ shared class Interrupt(Byte+ data) {
                 then word(high, low)
                 else null;
 }
+
+BlockingQueue<Interrupt> interrupt = ArrayBlockingQueue<Interrupt>(1);

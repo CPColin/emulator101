@@ -9,13 +9,13 @@ shared Integer restartIndex(Byte opcode) {
 }
 
 [State, Integer] emulateRestart(State state) {
-    value [high, low] = bytes(state.programCounter);
+    value [high, low] = bytes(state.returnAddress);
     value address = restartAddress(restartIndex(state.opcode.byte));
     
     return [
         state.with {
-            state.stackPointer->high,
-            state.stackPointer - 1->low,
+            state.stackPointer - 1->high,
+            state.stackPointer - 2->low,
             `State.programCounter`->address,
             `State.stackPointer`->state.stackPointer - 2
         },
