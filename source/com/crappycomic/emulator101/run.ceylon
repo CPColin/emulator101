@@ -123,9 +123,7 @@ shared void runInvaders() {
     
     code.copyTo(memory);
     
-    variable value state = initialState(memory).with {
-        `State.programCounter`->#0af2
-    };
+    variable value state = initialState(memory);
     
     Timer(true).scheduleAtFixedRate(object extends TimerTask() {
         variable value which = false;
