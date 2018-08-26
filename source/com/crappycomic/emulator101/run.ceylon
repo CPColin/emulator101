@@ -21,7 +21,7 @@ class FileIterable(String path) satisfies Iterable<Byte> {
     };
 }
 
-State initialState(Array<Byte> memory, Integer initialProgramCounter) => State {
+State initialState(Array<Byte> memory) => State {
         registerA = 0.byte;
         registerB = 0.byte;
         registerC = 0.byte;
@@ -31,7 +31,7 @@ State initialState(Array<Byte> memory, Integer initialProgramCounter) => State {
         registerL = 0.byte;
         flags = State.packFlags(false, false, false, false, false);
         stackPointer = 0;
-        programCounter = initialProgramCounter;
+        programCounter = 0;
         memory = memory;
         interruptsEnabled = false;
         stopped = false;
@@ -65,7 +65,8 @@ shared void runCpuDiagnostic() {
         destinationPosition = initialProgramCounter;
     };
     
-    variable value state = initialState(memory, initialProgramCounter).with {
+    variable value state = initialState(memory).with {
+        `State.programCounter`->initialProgramCounter,
         5->\ireturn.byte // Return from system call
     };
     
@@ -118,7 +119,7 @@ shared void runInvaders() {
     
     code.copyTo(memory);
     
-    variable value state = initialState(memory, 0);
+    variable value state = initialState(memory);
     
     while (true) {
         disassemble(state.memory, state.programCounter);

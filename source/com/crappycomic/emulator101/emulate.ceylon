@@ -259,10 +259,7 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (xorImmediate) emulateXorImmediate
         ;
     
-    // TODO: get opcode from state and stop passing it
-    if (is Anything(Opcode, State) emulator) {
-        return emulator(opcode, state);
-    } else if (is Anything(State, Machine?) emulator) {
+    if (is Anything(State, Machine?) emulator) {
         return emulator(state, machine);
     } else {
         return emulator(state);
@@ -310,7 +307,7 @@ shared Boolean flagSign(Byte val) => val.get(7);
 shared Boolean flagZero(Byte val) => val.zero;
 
 [State, Integer] emulateAddImmediate(Boolean withCarry)
-        (Opcode opcode, State state) {
+        (State state) {
     value left = state.registerA;
     value right = state.dataByte;
     value result = left.unsigned + right.unsigned + (withCarry && state.carry then 1 else 0);
@@ -329,8 +326,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateAddMemory(Boolean withCarry)
-        (Opcode opcode, State state) {
+[State, Integer] emulateAddMemory(Boolean withCarry)(State state) {
     value left = state.registerA;
     value address = word(state.registerH, state.registerL);
     value right = state.memory[address] else 0.byte;
@@ -350,8 +346,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateAddRegister(ByteRegister register, Boolean withCarry)
-        (Opcode opcode, State state) {
+[State, Integer] emulateAddRegister(ByteRegister register, Boolean withCarry)(State state) {
     value left = state.registerA;
     value right = register.bind(state).get();
     value result = left.unsigned + right.unsigned + (withCarry && state.carry then 1 else 0);
@@ -401,8 +396,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateAndRegister(ByteRegister register)
-        (Opcode opcode, State state) {
+[State, Integer] emulateAndRegister(ByteRegister register)(State state) {
     value result = state.registerA.and(register.bind(state).get());
     
     return [
@@ -417,8 +411,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateCallIf(Boolean(State) condition)
-        (Opcode opcode, State state) {
+[State, Integer] emulateCallIf(Boolean(State) condition)(State state) {
     if (condition(state)) {
         value [high, low] = bytes(state.programCounter);
         value address = state.dataWord;
@@ -495,8 +488,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateCompareRegister(ByteRegister register)
-        (Opcode opcode, State state) {
+[State, Integer] emulateCompareRegister(ByteRegister register)(State state) {
     value left = state.registerA;
     value right = register.bind(state).get();
     value result = left.unsigned - right.unsigned;
@@ -565,8 +557,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateDecrementPair(ByteRegister highRegister, ByteRegister lowRegister)
-        (Opcode opcode, State state) {
+[State, Integer] emulateDecrementPair(ByteRegister highRegister, ByteRegister lowRegister)(State state) {
     value pair = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
     value [high, low] = bytes(pair - 1);
     
@@ -579,8 +570,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateDecrementRegister(ByteRegister register)
-        (Opcode opcode, State state) {
+[State, Integer] emulateDecrementRegister(ByteRegister register)(State state) {
     value initial = register.bind(state).get();
     value val = initial.predecessor;
     
@@ -605,8 +595,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateDoubleAdd(ByteRegister highRegister, ByteRegister lowRegister)
-        (Opcode opcode, State state) {
+[State, Integer] emulateDoubleAdd(ByteRegister highRegister, ByteRegister lowRegister)(State state) {
     value registerHL = word(state.registerH, state.registerL);
     value addend = word {
         high = highRegister.bind(state).get();
@@ -669,8 +658,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateIncrementPair(ByteRegister highRegister, ByteRegister lowRegister)
-        (Opcode opcode, State state) {
+[State, Integer] emulateIncrementPair(ByteRegister highRegister, ByteRegister lowRegister)(State state) {
     value pair = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
     value [high, low] = bytes(pair + 1);
     
@@ -701,7 +689,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateIncrementRegister(ByteRegister register)
-        (Opcode opcode, State state) {
+        (State state) {
     value initial = register.bind(state).get();
     value val = initial.successor;
     
@@ -718,7 +706,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateJumpIf(Boolean(State) condition)
-        (Opcode opcode, State state) {
+        (State state) {
     if (condition(state)) {
         return [
             state.with {
@@ -736,7 +724,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateLoadAccumulator(ByteRegister highRegister, ByteRegister lowRegister)
-        (Opcode opcode, State state) {
+        (State state) {
     value address = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
     
     return [
@@ -771,7 +759,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateLoadPairImmediate(ByteRegister highRegister, ByteRegister lowRegister)
-        (Opcode opcode, State state) {
+        (State state) {
     value [high, low] = state.dataBytes;
     
     return [
@@ -806,7 +794,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateMoveImmediate(ByteRegister register)
-        (Opcode opcode, State state) {
+        (State state) {
     return [
         state.with {
             register->state.dataByte
@@ -829,7 +817,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateMoveMemoryRegister(ByteRegister register)
-        (Opcode opcode, State state) {
+        (State state) {
     value address = word(state.registerH, state.registerL);
     
     return [
@@ -841,7 +829,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateMoveRegisters(ByteRegister destinationRegister, ByteRegister sourceRegister)
-        (Opcode opcode, State state) {
+        (State state) {
     return [
         state.with {
             destinationRegister->sourceRegister.bind(state).get()
@@ -851,7 +839,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateMoveRegisterMemory(ByteRegister register)
-        (Opcode opcode, State state) {
+        (State state) {
     value high = state.registerH;
     value low = state.registerL;
     value address = word(high, low);
@@ -906,7 +894,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateOrRegister(ByteRegister register)
-        (Opcode opcode, State state) {
+        (State state) {
     value result = state.registerA.or(register.bind(state).get());
     
     return [
@@ -922,7 +910,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulatePop(ByteRegister highRegister, ByteRegister lowRegister)
-        (Opcode opcode, State state) {
+        (State state) {
     value high = state.memory[state.stackPointer + 1];
     value low = state.memory[state.stackPointer];
     
@@ -939,7 +927,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulatePush(ByteRegister highAttribute, ByteRegister lowAttribute)
-        (Opcode opcode, State state) {
+        (State state) {
     value high = highAttribute.bind(state).get();
     value low = lowAttribute.bind(state).get();
     
@@ -954,7 +942,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateReturnIf(Boolean(State) condition, Integer returnCycles = 11)
-        (Opcode opcode, State state) {
+        (State state) {
     if (condition(state)) {
         value address = word {
             high = state.memory[state.stackPointer + 1];
@@ -1045,7 +1033,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateStoreAccumulator(ByteRegister registerHigh, ByteRegister registerLow)
-        (Opcode opcode, State state) {
+        (State state) {
     value address = word(registerHigh.bind(state).get(), registerLow.bind(state).get());
     
     return [
@@ -1080,7 +1068,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateSubtractImmediate(Boolean withBorrow)
-        (Opcode opcode, State state) {
+        (State state) {
     value left = state.registerA;
     value right = state.dataByte;
     value result = left.unsigned - right.unsigned - (withBorrow && state.carry then 1 else 0);
@@ -1100,7 +1088,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateSubtractMemory(Boolean withBorrow)
-        (Opcode opcode, State state) {
+        (State state) {
     value left = state.registerA;
     value address = word(state.registerH, state.registerL);
     value right = state.memory[address] else 0.byte;
@@ -1121,7 +1109,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 }
 
 [State, Integer] emulateSubtractRegister(ByteRegister register, Boolean withBorrow)
-        (Opcode opcode, State state) {
+        (State state) {
     value left = state.registerA;
     value right = register.bind(state).get();
     value result = left.unsigned - right.unsigned - (withBorrow && state.carry then 1 else 0);
@@ -1171,7 +1159,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateXorRegister(ByteRegister register)(Opcode opcode, State state) {
+[State, Integer] emulateXorRegister(ByteRegister register)(State state) {
     value result = state.registerA.xor(register.bind(state).get());
     
     return [

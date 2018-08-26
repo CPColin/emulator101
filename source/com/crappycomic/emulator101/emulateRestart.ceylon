@@ -8,9 +8,9 @@ shared Integer restartIndex(Byte opcode) {
     return opcode.and($00111000.byte).rightLogicalShift(3).unsigned;
 }
 
-[State, Integer] emulateRestart(Opcode opcode, State state) {
+[State, Integer] emulateRestart(State state) {
     value [high, low] = bytes(state.programCounter);
-    value address = restartAddress(restartIndex(opcode.byte));
+    value address = restartAddress(restartIndex(state.opcode.byte));
     
     return [
         state.with {
