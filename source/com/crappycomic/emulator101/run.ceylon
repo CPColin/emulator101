@@ -70,7 +70,7 @@ shared void runCpuDiagnostic() {
     };
     
     variable value state = initialState(memory).with {
-        `State.programCounter`->initialProgramCounter,
+        stateProgramCounter->initialProgramCounter,
         5->\ireturn.byte // Return from system call
     };
     

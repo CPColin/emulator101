@@ -130,36 +130,36 @@ shared class State {
         value integerRegisterUpdates = map(updates.narrow<IntegerRegisterUpdate>());
         value memoryUpdates = updates.narrow<MemoryUpdate>();
         
-        value programCounter = integerRegisterUpdates[`State.programCounter`]
+        value programCounter = integerRegisterUpdates[stateProgramCounter]
             else (if (exists interrupt)
                 then this.programCounter
                 else this.programCounter + opcode.size);
         
         return State {
-            registerA = byteRegisterUpdates[`State.registerA`] else registerA;
-            registerB = byteRegisterUpdates[`State.registerB`] else registerB;
-            registerC = byteRegisterUpdates[`State.registerC`] else registerC;
-            registerD = byteRegisterUpdates[`State.registerD`] else registerD;
-            registerE = byteRegisterUpdates[`State.registerE`] else registerE;
-            registerH = byteRegisterUpdates[`State.registerH`] else registerH;
-            registerL = byteRegisterUpdates[`State.registerL`] else registerL;
-            flags = byteRegisterUpdates[`State.flags`] else packFlags {
-                carry = bitFlagUpdates[`State.carry`] else carry;
-                parity = bitFlagUpdates[`State.parity`] else parity;
-                auxiliaryCarry = bitFlagUpdates[`State.auxiliaryCarry`] else auxiliaryCarry;
-                zero = bitFlagUpdates[`State.zero`] else zero;
-                sign = bitFlagUpdates[`State.sign`] else sign;
+            registerA = byteRegisterUpdates[stateRegisterA] else registerA;
+            registerB = byteRegisterUpdates[stateRegisterB] else registerB;
+            registerC = byteRegisterUpdates[stateRegisterC] else registerC;
+            registerD = byteRegisterUpdates[stateRegisterD] else registerD;
+            registerE = byteRegisterUpdates[stateRegisterE] else registerE;
+            registerH = byteRegisterUpdates[stateRegisterH] else registerH;
+            registerL = byteRegisterUpdates[stateRegisterL] else registerL;
+            flags = byteRegisterUpdates[stateFlags] else packFlags {
+                carry = bitFlagUpdates[stateCarry] else carry;
+                parity = bitFlagUpdates[stateParity] else parity;
+                auxiliaryCarry = bitFlagUpdates[stateAuxiliaryCarry] else auxiliaryCarry;
+                zero = bitFlagUpdates[stateZero] else zero;
+                sign = bitFlagUpdates[stateSign] else sign;
             };
-            stackPointer = integerRegisterUpdates[`State.stackPointer`] else word {
-                high = byteRegisterUpdates[`State.stackPointerHigh`] else stackPointerHigh;
-                low = byteRegisterUpdates[`State.stackPointerLow`] else stackPointerLow;
+            stackPointer = integerRegisterUpdates[stateStackPointer] else word {
+                high = byteRegisterUpdates[stateStackPointerHigh] else stackPointerHigh;
+                low = byteRegisterUpdates[stateStackPointerLow] else stackPointerLow;
             };
             programCounter = programCounter;
             memory = if (!memoryUpdates.empty)
                     then updateMemory(memory, *memoryUpdates)
                     else memory;
-            interruptsEnabled = bitFlagUpdates[`State.interruptsEnabled`] else interruptsEnabled;
-            stopped = bitFlagUpdates[`State.stopped`] else stopped;
+            interruptsEnabled = bitFlagUpdates[stateInterruptsEnabled] else interruptsEnabled;
+            stopped = bitFlagUpdates[stateStopped] else stopped;
             interrupt = null;
         };
     }

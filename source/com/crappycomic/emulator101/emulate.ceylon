@@ -9,31 +9,31 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
     // TODO: Break up into smaller files, so my laptop doesn't melt.
     
     value emulator = switch (opcode)
-        case (addA) emulateAddRegister(`State.registerA`, false)
-        case (addB) emulateAddRegister(`State.registerB`, false)
-        case (addC) emulateAddRegister(`State.registerC`, false)
-        case (addD) emulateAddRegister(`State.registerD`, false)
-        case (addE) emulateAddRegister(`State.registerE`, false)
-        case (addH) emulateAddRegister(`State.registerH`, false)
-        case (addL) emulateAddRegister(`State.registerL`, false)
+        case (addA) emulateAddRegister(stateRegisterA, false)
+        case (addB) emulateAddRegister(stateRegisterB, false)
+        case (addC) emulateAddRegister(stateRegisterC, false)
+        case (addD) emulateAddRegister(stateRegisterD, false)
+        case (addE) emulateAddRegister(stateRegisterE, false)
+        case (addH) emulateAddRegister(stateRegisterH, false)
+        case (addL) emulateAddRegister(stateRegisterL, false)
         case (addMemory) emulateAddMemory(false)
         case (addImmediate) emulateAddImmediate(false)
-        case (addAWithCarry) emulateAddRegister(`State.registerA`, true)
-        case (addBWithCarry) emulateAddRegister(`State.registerB`, true)
-        case (addCWithCarry) emulateAddRegister(`State.registerC`, true)
-        case (addDWithCarry) emulateAddRegister(`State.registerD`, true)
-        case (addEWithCarry) emulateAddRegister(`State.registerE`, true)
-        case (addHWithCarry) emulateAddRegister(`State.registerH`, true)
-        case (addLWithCarry) emulateAddRegister(`State.registerL`, true)
+        case (addAWithCarry) emulateAddRegister(stateRegisterA, true)
+        case (addBWithCarry) emulateAddRegister(stateRegisterB, true)
+        case (addCWithCarry) emulateAddRegister(stateRegisterC, true)
+        case (addDWithCarry) emulateAddRegister(stateRegisterD, true)
+        case (addEWithCarry) emulateAddRegister(stateRegisterE, true)
+        case (addHWithCarry) emulateAddRegister(stateRegisterH, true)
+        case (addLWithCarry) emulateAddRegister(stateRegisterL, true)
         case (addMemoryWithCarry) emulateAddMemory(true)
         case (addImmediateWithCarry) emulateAddImmediate(true)
-        case (andA) emulateAndRegister(`State.registerA`)
-        case (andB) emulateAndRegister(`State.registerB`)
-        case (andC) emulateAndRegister(`State.registerC`)
-        case (andD) emulateAndRegister(`State.registerD`)
-        case (andE) emulateAndRegister(`State.registerE`)
-        case (andH) emulateAndRegister(`State.registerH`)
-        case (andL) emulateAndRegister(`State.registerL`)
+        case (andA) emulateAndRegister(stateRegisterA)
+        case (andB) emulateAndRegister(stateRegisterB)
+        case (andC) emulateAndRegister(stateRegisterC)
+        case (andD) emulateAndRegister(stateRegisterD)
+        case (andE) emulateAndRegister(stateRegisterE)
+        case (andH) emulateAndRegister(stateRegisterH)
+        case (andL) emulateAndRegister(stateRegisterL)
         case (andImmediate) emulateAndImmediate
         case (andMemory) emulateAndMemory
         case (call) emulateCallIf((state) => true)
@@ -45,54 +45,54 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (callIfParityOdd) emulateCallIf(not(State.parity))
         case (callIfPlus) emulateCallIf(not(State.sign))
         case (callIfZero) emulateCallIf(State.zero)
-        case (compareA) emulateCompareRegister(`State.registerA`)
-        case (compareB) emulateCompareRegister(`State.registerB`)
-        case (compareC) emulateCompareRegister(`State.registerC`)
-        case (compareD) emulateCompareRegister(`State.registerD`)
-        case (compareE) emulateCompareRegister(`State.registerE`)
-        case (compareH) emulateCompareRegister(`State.registerH`)
-        case (compareL) emulateCompareRegister(`State.registerL`)
+        case (compareA) emulateCompareRegister(stateRegisterA)
+        case (compareB) emulateCompareRegister(stateRegisterB)
+        case (compareC) emulateCompareRegister(stateRegisterC)
+        case (compareD) emulateCompareRegister(stateRegisterD)
+        case (compareE) emulateCompareRegister(stateRegisterE)
+        case (compareH) emulateCompareRegister(stateRegisterH)
+        case (compareL) emulateCompareRegister(stateRegisterL)
         case (compareMemory) emulateCompareMemory
         case (compareImmediate) emulateCompareImmediate
         case (complementAccumulator) emulateComplementAccumulator
         case (complementCarry) emulateComplementCarry
         case (decimalAdjust) emulateDecimalAdjust
-        case (decrementA) emulateDecrementRegister(`State.registerA`)
-        case (decrementB) emulateDecrementRegister(`State.registerB`)
-        case (decrementC) emulateDecrementRegister(`State.registerC`)
-        case (decrementD) emulateDecrementRegister(`State.registerD`)
-        case (decrementE) emulateDecrementRegister(`State.registerE`)
-        case (decrementH) emulateDecrementRegister(`State.registerH`)
-        case (decrementL) emulateDecrementRegister(`State.registerL`)
+        case (decrementA) emulateDecrementRegister(stateRegisterA)
+        case (decrementB) emulateDecrementRegister(stateRegisterB)
+        case (decrementC) emulateDecrementRegister(stateRegisterC)
+        case (decrementD) emulateDecrementRegister(stateRegisterD)
+        case (decrementE) emulateDecrementRegister(stateRegisterE)
+        case (decrementH) emulateDecrementRegister(stateRegisterH)
+        case (decrementL) emulateDecrementRegister(stateRegisterL)
         case (decrementMemory) emulateDecrementMemory
-        case (decrementPairB) emulateDecrementPair(`State.registerB`, `State.registerC`)
-        case (decrementPairD) emulateDecrementPair(`State.registerD`, `State.registerE`)
-        case (decrementPairH) emulateDecrementPair(`State.registerH`, `State.registerL`)
+        case (decrementPairB) emulateDecrementPair(stateRegisterB, stateRegisterC)
+        case (decrementPairD) emulateDecrementPair(stateRegisterD, stateRegisterE)
+        case (decrementPairH) emulateDecrementPair(stateRegisterH, stateRegisterL)
         case (decrementPairStackPointer)
-            emulateDecrementPair(`State.stackPointerHigh`, `State.stackPointerLow`)
+            emulateDecrementPair(stateStackPointerHigh, stateStackPointerLow)
         case (disableInterrupts) emulateDisableInterrupts
-        case (doubleAddB) emulateDoubleAdd(`State.registerB`, `State.registerC`)
-        case (doubleAddD) emulateDoubleAdd(`State.registerD`, `State.registerE`)
-        case (doubleAddH) emulateDoubleAdd(`State.registerH`, `State.registerL`)
+        case (doubleAddB) emulateDoubleAdd(stateRegisterB, stateRegisterC)
+        case (doubleAddD) emulateDoubleAdd(stateRegisterD, stateRegisterE)
+        case (doubleAddH) emulateDoubleAdd(stateRegisterH, stateRegisterL)
         case (doubleAddStackPointer)
-            emulateDoubleAdd(`State.stackPointerHigh`, `State.stackPointerLow`)
+            emulateDoubleAdd(stateStackPointerHigh, stateStackPointerLow)
         case (enableInterrupts) emulateEnableInterrupts
         case (exchangeRegisters) emulateExchangeRegisters
         case (exchangeStack) emulateExchangeStack
         case (halt) emulateHalt
-        case (incrementA) emulateIncrementRegister(`State.registerA`)
-        case (incrementB) emulateIncrementRegister(`State.registerB`)
-        case (incrementC) emulateIncrementRegister(`State.registerC`)
-        case (incrementD) emulateIncrementRegister(`State.registerD`)
-        case (incrementE) emulateIncrementRegister(`State.registerE`)
-        case (incrementH) emulateIncrementRegister(`State.registerH`)
-        case (incrementL) emulateIncrementRegister(`State.registerL`)
+        case (incrementA) emulateIncrementRegister(stateRegisterA)
+        case (incrementB) emulateIncrementRegister(stateRegisterB)
+        case (incrementC) emulateIncrementRegister(stateRegisterC)
+        case (incrementD) emulateIncrementRegister(stateRegisterD)
+        case (incrementE) emulateIncrementRegister(stateRegisterE)
+        case (incrementH) emulateIncrementRegister(stateRegisterH)
+        case (incrementL) emulateIncrementRegister(stateRegisterL)
         case (incrementMemory) emulateIncrementMemory
-        case (incrementPairB) emulateIncrementPair(`State.registerB`, `State.registerC`)
-        case (incrementPairD) emulateIncrementPair(`State.registerD`, `State.registerE`)
-        case (incrementPairH) emulateIncrementPair(`State.registerH`, `State.registerL`)
+        case (incrementPairB) emulateIncrementPair(stateRegisterB, stateRegisterC)
+        case (incrementPairD) emulateIncrementPair(stateRegisterD, stateRegisterE)
+        case (incrementPairH) emulateIncrementPair(stateRegisterH, stateRegisterL)
         case (incrementPairStackPointer)
-            emulateIncrementPair(`State.stackPointerHigh`, `State.stackPointerLow`)
+            emulateIncrementPair(stateStackPointerHigh, stateStackPointerLow)
         case (input) emulateInput
         case (jump) emulateJumpIf((state) => true)
         case (jumpIfCarry) emulateJumpIf(State.carry)
@@ -103,107 +103,107 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (jumpIfParityOdd) emulateJumpIf(not(State.parity))
         case (jumpIfPlus) emulateJumpIf(not(State.sign))
         case (jumpIfZero) emulateJumpIf(State.zero)
-        case (loadAccumulatorB) emulateLoadAccumulator(`State.registerB`, `State.registerC`)
-        case (loadAccumulatorD) emulateLoadAccumulator(`State.registerD`, `State.registerE`)
+        case (loadAccumulatorB) emulateLoadAccumulator(stateRegisterB, stateRegisterC)
+        case (loadAccumulatorD) emulateLoadAccumulator(stateRegisterD, stateRegisterE)
         case (loadAccumulatorDirect) emulateLoadAccumulatorDirect
         case (loadHLDirect) emulateLoadHLDirect
-        case (loadPairImmediateB) emulateLoadPairImmediate(`State.registerB`, `State.registerC`)
-        case (loadPairImmediateD) emulateLoadPairImmediate(`State.registerD`, `State.registerE`)
-        case (loadPairImmediateH) emulateLoadPairImmediate(`State.registerH`, `State.registerL`)
+        case (loadPairImmediateB) emulateLoadPairImmediate(stateRegisterB, stateRegisterC)
+        case (loadPairImmediateD) emulateLoadPairImmediate(stateRegisterD, stateRegisterE)
+        case (loadPairImmediateH) emulateLoadPairImmediate(stateRegisterH, stateRegisterL)
         case (loadPairImmediateStackPointer)
-            emulateLoadPairImmediate(`State.stackPointerHigh`, `State.stackPointerLow`)
+            emulateLoadPairImmediate(stateStackPointerHigh, stateStackPointerLow)
         case (loadProgramCounter) emulateLoadProgramCounter
         case (loadStackPointer) emulateLoadStackPointer
-        case (moveImmediateA) emulateMoveImmediate(`State.registerA`)
-        case (moveImmediateB) emulateMoveImmediate(`State.registerB`)
-        case (moveImmediateC) emulateMoveImmediate(`State.registerC`)
-        case (moveImmediateD) emulateMoveImmediate(`State.registerD`)
-        case (moveImmediateE) emulateMoveImmediate(`State.registerE`)
-        case (moveImmediateH) emulateMoveImmediate(`State.registerH`)
-        case (moveImmediateL) emulateMoveImmediate(`State.registerL`)
+        case (moveImmediateA) emulateMoveImmediate(stateRegisterA)
+        case (moveImmediateB) emulateMoveImmediate(stateRegisterB)
+        case (moveImmediateC) emulateMoveImmediate(stateRegisterC)
+        case (moveImmediateD) emulateMoveImmediate(stateRegisterD)
+        case (moveImmediateE) emulateMoveImmediate(stateRegisterE)
+        case (moveImmediateH) emulateMoveImmediate(stateRegisterH)
+        case (moveImmediateL) emulateMoveImmediate(stateRegisterL)
         case (moveImmediateMemory) emulateMoveImmediateMemory
-        case (moveAA) emulateMoveRegisters(`State.registerA`, `State.registerA`)
-        case (moveAB) emulateMoveRegisters(`State.registerA`, `State.registerB`)
-        case (moveAC) emulateMoveRegisters(`State.registerA`, `State.registerC`)
-        case (moveAD) emulateMoveRegisters(`State.registerA`, `State.registerD`)
-        case (moveAE) emulateMoveRegisters(`State.registerA`, `State.registerE`)
-        case (moveAH) emulateMoveRegisters(`State.registerA`, `State.registerH`)
-        case (moveAL) emulateMoveRegisters(`State.registerA`, `State.registerL`)
-        case (moveAMemory) emulateMoveRegisterMemory(`State.registerA`)
-        case (moveBA) emulateMoveRegisters(`State.registerB`, `State.registerA`)
-        case (moveBB) emulateMoveRegisters(`State.registerB`, `State.registerB`)
-        case (moveBC) emulateMoveRegisters(`State.registerB`, `State.registerC`)
-        case (moveBD) emulateMoveRegisters(`State.registerB`, `State.registerD`)
-        case (moveBE) emulateMoveRegisters(`State.registerB`, `State.registerE`)
-        case (moveBH) emulateMoveRegisters(`State.registerB`, `State.registerH`)
-        case (moveBL) emulateMoveRegisters(`State.registerB`, `State.registerL`)
-        case (moveBMemory) emulateMoveRegisterMemory(`State.registerB`)
-        case (moveCA) emulateMoveRegisters(`State.registerC`, `State.registerA`)
-        case (moveCB) emulateMoveRegisters(`State.registerC`, `State.registerB`)
-        case (moveCC) emulateMoveRegisters(`State.registerC`, `State.registerC`)
-        case (moveCD) emulateMoveRegisters(`State.registerC`, `State.registerD`)
-        case (moveCE) emulateMoveRegisters(`State.registerC`, `State.registerE`)
-        case (moveCH) emulateMoveRegisters(`State.registerC`, `State.registerH`)
-        case (moveCL) emulateMoveRegisters(`State.registerC`, `State.registerL`)
-        case (moveCMemory) emulateMoveRegisterMemory(`State.registerC`)
-        case (moveDA) emulateMoveRegisters(`State.registerD`, `State.registerA`)
-        case (moveDB) emulateMoveRegisters(`State.registerD`, `State.registerB`)
-        case (moveDC) emulateMoveRegisters(`State.registerD`, `State.registerC`)
-        case (moveDD) emulateMoveRegisters(`State.registerD`, `State.registerD`)
-        case (moveDE) emulateMoveRegisters(`State.registerD`, `State.registerE`)
-        case (moveDH) emulateMoveRegisters(`State.registerD`, `State.registerH`)
-        case (moveDL) emulateMoveRegisters(`State.registerD`, `State.registerL`)
-        case (moveDMemory) emulateMoveRegisterMemory(`State.registerD`)
-        case (moveEA) emulateMoveRegisters(`State.registerE`, `State.registerA`)
-        case (moveEB) emulateMoveRegisters(`State.registerE`, `State.registerB`)
-        case (moveEC) emulateMoveRegisters(`State.registerE`, `State.registerC`)
-        case (moveED) emulateMoveRegisters(`State.registerE`, `State.registerD`)
-        case (moveEE) emulateMoveRegisters(`State.registerE`, `State.registerE`)
-        case (moveEH) emulateMoveRegisters(`State.registerE`, `State.registerH`)
-        case (moveEL) emulateMoveRegisters(`State.registerE`, `State.registerL`)
-        case (moveEMemory) emulateMoveRegisterMemory(`State.registerE`)
-        case (moveHA) emulateMoveRegisters(`State.registerH`, `State.registerA`)
-        case (moveHB) emulateMoveRegisters(`State.registerH`, `State.registerB`)
-        case (moveHC) emulateMoveRegisters(`State.registerH`, `State.registerC`)
-        case (moveHD) emulateMoveRegisters(`State.registerH`, `State.registerD`)
-        case (moveHE) emulateMoveRegisters(`State.registerH`, `State.registerE`)
-        case (moveHH) emulateMoveRegisters(`State.registerH`, `State.registerH`)
-        case (moveHL) emulateMoveRegisters(`State.registerH`, `State.registerL`)
-        case (moveHMemory) emulateMoveRegisterMemory(`State.registerH`)
-        case (moveLA) emulateMoveRegisters(`State.registerL`, `State.registerA`)
-        case (moveLB) emulateMoveRegisters(`State.registerL`, `State.registerB`)
-        case (moveLC) emulateMoveRegisters(`State.registerL`, `State.registerC`)
-        case (moveLD) emulateMoveRegisters(`State.registerL`, `State.registerD`)
-        case (moveLE) emulateMoveRegisters(`State.registerL`, `State.registerE`)
-        case (moveLH) emulateMoveRegisters(`State.registerL`, `State.registerH`)
-        case (moveLL) emulateMoveRegisters(`State.registerL`, `State.registerL`)
-        case (moveLMemory) emulateMoveRegisterMemory(`State.registerL`)
-        case (moveMemoryA) emulateMoveMemoryRegister(`State.registerA`)
-        case (moveMemoryB) emulateMoveMemoryRegister(`State.registerB`)
-        case (moveMemoryC) emulateMoveMemoryRegister(`State.registerC`)
-        case (moveMemoryD) emulateMoveMemoryRegister(`State.registerD`)
-        case (moveMemoryE) emulateMoveMemoryRegister(`State.registerE`)
-        case (moveMemoryH) emulateMoveMemoryRegister(`State.registerH`)
-        case (moveMemoryL) emulateMoveMemoryRegister(`State.registerL`)
+        case (moveAA) emulateMoveRegisters(stateRegisterA, stateRegisterA)
+        case (moveAB) emulateMoveRegisters(stateRegisterA, stateRegisterB)
+        case (moveAC) emulateMoveRegisters(stateRegisterA, stateRegisterC)
+        case (moveAD) emulateMoveRegisters(stateRegisterA, stateRegisterD)
+        case (moveAE) emulateMoveRegisters(stateRegisterA, stateRegisterE)
+        case (moveAH) emulateMoveRegisters(stateRegisterA, stateRegisterH)
+        case (moveAL) emulateMoveRegisters(stateRegisterA, stateRegisterL)
+        case (moveAMemory) emulateMoveRegisterMemory(stateRegisterA)
+        case (moveBA) emulateMoveRegisters(stateRegisterB, stateRegisterA)
+        case (moveBB) emulateMoveRegisters(stateRegisterB, stateRegisterB)
+        case (moveBC) emulateMoveRegisters(stateRegisterB, stateRegisterC)
+        case (moveBD) emulateMoveRegisters(stateRegisterB, stateRegisterD)
+        case (moveBE) emulateMoveRegisters(stateRegisterB, stateRegisterE)
+        case (moveBH) emulateMoveRegisters(stateRegisterB, stateRegisterH)
+        case (moveBL) emulateMoveRegisters(stateRegisterB, stateRegisterL)
+        case (moveBMemory) emulateMoveRegisterMemory(stateRegisterB)
+        case (moveCA) emulateMoveRegisters(stateRegisterC, stateRegisterA)
+        case (moveCB) emulateMoveRegisters(stateRegisterC, stateRegisterB)
+        case (moveCC) emulateMoveRegisters(stateRegisterC, stateRegisterC)
+        case (moveCD) emulateMoveRegisters(stateRegisterC, stateRegisterD)
+        case (moveCE) emulateMoveRegisters(stateRegisterC, stateRegisterE)
+        case (moveCH) emulateMoveRegisters(stateRegisterC, stateRegisterH)
+        case (moveCL) emulateMoveRegisters(stateRegisterC, stateRegisterL)
+        case (moveCMemory) emulateMoveRegisterMemory(stateRegisterC)
+        case (moveDA) emulateMoveRegisters(stateRegisterD, stateRegisterA)
+        case (moveDB) emulateMoveRegisters(stateRegisterD, stateRegisterB)
+        case (moveDC) emulateMoveRegisters(stateRegisterD, stateRegisterC)
+        case (moveDD) emulateMoveRegisters(stateRegisterD, stateRegisterD)
+        case (moveDE) emulateMoveRegisters(stateRegisterD, stateRegisterE)
+        case (moveDH) emulateMoveRegisters(stateRegisterD, stateRegisterH)
+        case (moveDL) emulateMoveRegisters(stateRegisterD, stateRegisterL)
+        case (moveDMemory) emulateMoveRegisterMemory(stateRegisterD)
+        case (moveEA) emulateMoveRegisters(stateRegisterE, stateRegisterA)
+        case (moveEB) emulateMoveRegisters(stateRegisterE, stateRegisterB)
+        case (moveEC) emulateMoveRegisters(stateRegisterE, stateRegisterC)
+        case (moveED) emulateMoveRegisters(stateRegisterE, stateRegisterD)
+        case (moveEE) emulateMoveRegisters(stateRegisterE, stateRegisterE)
+        case (moveEH) emulateMoveRegisters(stateRegisterE, stateRegisterH)
+        case (moveEL) emulateMoveRegisters(stateRegisterE, stateRegisterL)
+        case (moveEMemory) emulateMoveRegisterMemory(stateRegisterE)
+        case (moveHA) emulateMoveRegisters(stateRegisterH, stateRegisterA)
+        case (moveHB) emulateMoveRegisters(stateRegisterH, stateRegisterB)
+        case (moveHC) emulateMoveRegisters(stateRegisterH, stateRegisterC)
+        case (moveHD) emulateMoveRegisters(stateRegisterH, stateRegisterD)
+        case (moveHE) emulateMoveRegisters(stateRegisterH, stateRegisterE)
+        case (moveHH) emulateMoveRegisters(stateRegisterH, stateRegisterH)
+        case (moveHL) emulateMoveRegisters(stateRegisterH, stateRegisterL)
+        case (moveHMemory) emulateMoveRegisterMemory(stateRegisterH)
+        case (moveLA) emulateMoveRegisters(stateRegisterL, stateRegisterA)
+        case (moveLB) emulateMoveRegisters(stateRegisterL, stateRegisterB)
+        case (moveLC) emulateMoveRegisters(stateRegisterL, stateRegisterC)
+        case (moveLD) emulateMoveRegisters(stateRegisterL, stateRegisterD)
+        case (moveLE) emulateMoveRegisters(stateRegisterL, stateRegisterE)
+        case (moveLH) emulateMoveRegisters(stateRegisterL, stateRegisterH)
+        case (moveLL) emulateMoveRegisters(stateRegisterL, stateRegisterL)
+        case (moveLMemory) emulateMoveRegisterMemory(stateRegisterL)
+        case (moveMemoryA) emulateMoveMemoryRegister(stateRegisterA)
+        case (moveMemoryB) emulateMoveMemoryRegister(stateRegisterB)
+        case (moveMemoryC) emulateMoveMemoryRegister(stateRegisterC)
+        case (moveMemoryD) emulateMoveMemoryRegister(stateRegisterD)
+        case (moveMemoryE) emulateMoveMemoryRegister(stateRegisterE)
+        case (moveMemoryH) emulateMoveMemoryRegister(stateRegisterH)
+        case (moveMemoryL) emulateMoveMemoryRegister(stateRegisterL)
         case (noop) emulateNoop
-        case (orA) emulateOrRegister(`State.registerA`)
-        case (orB) emulateOrRegister(`State.registerB`)
-        case (orC) emulateOrRegister(`State.registerC`)
-        case (orD) emulateOrRegister(`State.registerD`)
-        case (orE) emulateOrRegister(`State.registerE`)
-        case (orH) emulateOrRegister(`State.registerH`)
-        case (orL) emulateOrRegister(`State.registerL`)
+        case (orA) emulateOrRegister(stateRegisterA)
+        case (orB) emulateOrRegister(stateRegisterB)
+        case (orC) emulateOrRegister(stateRegisterC)
+        case (orD) emulateOrRegister(stateRegisterD)
+        case (orE) emulateOrRegister(stateRegisterE)
+        case (orH) emulateOrRegister(stateRegisterH)
+        case (orL) emulateOrRegister(stateRegisterL)
         case (orMemory) emulateOrMemory
         case (orImmediate) emulateOrImmediate
         case (output) emulateOutput
-        case (popB) emulatePop(`State.registerB`, `State.registerC`)
-        case (popD) emulatePop(`State.registerD`, `State.registerE`)
-        case (popH) emulatePop(`State.registerH`, `State.registerL`)
-        case (popStatus) emulatePop(`State.registerA`, `State.flags`)
-        case (pushB) emulatePush(`State.registerB`, `State.registerC`)
-        case (pushD) emulatePush(`State.registerD`, `State.registerE`)
-        case (pushH) emulatePush(`State.registerH`, `State.registerL`)
-        case (pushStatus) emulatePush(`State.registerA`, `State.flags`)
+        case (popB) emulatePop(stateRegisterB, stateRegisterC)
+        case (popD) emulatePop(stateRegisterD, stateRegisterE)
+        case (popH) emulatePop(stateRegisterH, stateRegisterL)
+        case (popStatus) emulatePop(stateRegisterA, stateFlags)
+        case (pushB) emulatePush(stateRegisterB, stateRegisterC)
+        case (pushD) emulatePush(stateRegisterD, stateRegisterE)
+        case (pushH) emulatePush(stateRegisterH, stateRegisterL)
+        case (pushStatus) emulatePush(stateRegisterA, stateFlags)
         case (restart0) emulateRestart
         case (restart1) emulateRestart
         case (restart2) emulateRestart
@@ -226,35 +226,35 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (rotateRight) emulateRotateRight
         case (rotateRightThroughCarry) emulateRotateRightThroughCarry
         case (setCarry) emulateSetCarry
-        case (storeAccumulatorB) emulateStoreAccumulator(`State.registerB`, `State.registerC`)
-        case (storeAccumulatorD) emulateStoreAccumulator(`State.registerD`, `State.registerE`)
+        case (storeAccumulatorB) emulateStoreAccumulator(stateRegisterB, stateRegisterC)
+        case (storeAccumulatorD) emulateStoreAccumulator(stateRegisterD, stateRegisterE)
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) emulateStoreHLDirect
-        case (subtractA) emulateSubtractRegister(`State.registerA`, false)
-        case (subtractB) emulateSubtractRegister(`State.registerB`, false)
-        case (subtractC) emulateSubtractRegister(`State.registerC`, false)
-        case (subtractD) emulateSubtractRegister(`State.registerD`, false)
-        case (subtractE) emulateSubtractRegister(`State.registerE`, false)
-        case (subtractH) emulateSubtractRegister(`State.registerH`, false)
-        case (subtractL) emulateSubtractRegister(`State.registerL`, false)
+        case (subtractA) emulateSubtractRegister(stateRegisterA, false)
+        case (subtractB) emulateSubtractRegister(stateRegisterB, false)
+        case (subtractC) emulateSubtractRegister(stateRegisterC, false)
+        case (subtractD) emulateSubtractRegister(stateRegisterD, false)
+        case (subtractE) emulateSubtractRegister(stateRegisterE, false)
+        case (subtractH) emulateSubtractRegister(stateRegisterH, false)
+        case (subtractL) emulateSubtractRegister(stateRegisterL, false)
         case (subtractMemory) emulateSubtractMemory(false)
         case (subtractImmediate) emulateSubtractImmediate(false)
-        case (subtractAWithBorrow) emulateSubtractRegister(`State.registerA`, true)
-        case (subtractBWithBorrow) emulateSubtractRegister(`State.registerB`, true)
-        case (subtractCWithBorrow) emulateSubtractRegister(`State.registerC`, true)
-        case (subtractDWithBorrow) emulateSubtractRegister(`State.registerD`, true)
-        case (subtractEWithBorrow) emulateSubtractRegister(`State.registerE`, true)
-        case (subtractHWithBorrow) emulateSubtractRegister(`State.registerH`, true)
-        case (subtractLWithBorrow) emulateSubtractRegister(`State.registerL`, true)
+        case (subtractAWithBorrow) emulateSubtractRegister(stateRegisterA, true)
+        case (subtractBWithBorrow) emulateSubtractRegister(stateRegisterB, true)
+        case (subtractCWithBorrow) emulateSubtractRegister(stateRegisterC, true)
+        case (subtractDWithBorrow) emulateSubtractRegister(stateRegisterD, true)
+        case (subtractEWithBorrow) emulateSubtractRegister(stateRegisterE, true)
+        case (subtractHWithBorrow) emulateSubtractRegister(stateRegisterH, true)
+        case (subtractLWithBorrow) emulateSubtractRegister(stateRegisterL, true)
         case (subtractMemoryWithBorrow) emulateSubtractMemory(true)
         case (subtractImmediateWithBorrow) emulateSubtractImmediate(true)
-        case (xorA) emulateXorRegister(`State.registerA`)
-        case (xorB) emulateXorRegister(`State.registerB`)
-        case (xorC) emulateXorRegister(`State.registerC`)
-        case (xorD) emulateXorRegister(`State.registerD`)
-        case (xorE) emulateXorRegister(`State.registerE`)
-        case (xorH) emulateXorRegister(`State.registerH`)
-        case (xorL) emulateXorRegister(`State.registerL`)
+        case (xorA) emulateXorRegister(stateRegisterA)
+        case (xorB) emulateXorRegister(stateRegisterB)
+        case (xorC) emulateXorRegister(stateRegisterC)
+        case (xorD) emulateXorRegister(stateRegisterD)
+        case (xorE) emulateXorRegister(stateRegisterE)
+        case (xorH) emulateXorRegister(stateRegisterH)
+        case (xorL) emulateXorRegister(stateRegisterL)
         case (xorMemory) emulateXorMemory
         case (xorImmediate) emulateXorImmediate
         ;
@@ -315,12 +315,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
     state.with {
-            `State.registerA`->result.byte,
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateRegisterA->result.byte,
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, resultByte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         7
     ];
@@ -335,12 +335,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result.byte,
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateRegisterA->result.byte,
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, resultByte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         7
     ];
@@ -354,12 +354,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result.byte,
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateRegisterA->result.byte,
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, resultByte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         4
     ];
@@ -370,11 +370,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         7
     ];
@@ -386,11 +386,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         7
     ];
@@ -401,11 +401,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         4
     ];
@@ -418,8 +418,8 @@ shared Boolean flagZero(Byte val) => val.zero;
         
         return [
             state.with {
-                `State.programCounter`->address,
-                `State.stackPointer`->state.stackPointer - 2,
+                stateProgramCounter->address,
+                stateStackPointer->state.stackPointer - 2,
                 state.stackPointer - 1->high,
                 state.stackPointer - 2->low
             },
@@ -441,11 +441,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, result.byte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, result.byte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         7
     ];
@@ -454,7 +454,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateComplementAccumulator(State state) {
     return [
         state.with {
-            `State.registerA`->state.registerA.not
+            stateRegisterA->state.registerA.not
         },
         4
     ];
@@ -463,7 +463,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateComplementCarry(State state) {
     return [
         state.with {
-            `State.carry`->(!state.carry)
+            stateCarry->(!state.carry)
         },
         4
     ];
@@ -478,11 +478,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, result.byte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, result.byte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         7
     ];
@@ -496,11 +496,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, result.byte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, result.byte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         4
     ];
@@ -529,12 +529,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->resultByte,
-            `State.carry`->carry,
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->auxiliaryCarry,
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateRegisterA->resultByte,
+            stateCarry->carry,
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->auxiliaryCarry,
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         4
     ];
@@ -548,10 +548,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     return [
         state.with {
             address->val,
-            `State.parity`->flagParity(val),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(initial, -1.byte, val),
-            `State.zero`->flagZero(val),
-            `State.sign`->flagSign(val)
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
         },
         10
     ];
@@ -577,10 +577,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     return [
         state.with {
             register->val,
-            `State.parity`->flagParity(val),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(initial, -1.byte, val),
-            `State.zero`->flagZero(val),
-            `State.sign`->flagSign(val)
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
         },
         5
     ];
@@ -589,7 +589,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateDisableInterrupts(State state) {
     return [
         state.with {
-            `State.interruptsEnabled`->false
+            stateInterruptsEnabled->false
         },
         4
     ];
@@ -606,9 +606,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerH`->resultHigh,
-            `State.registerL`->resultLow,
-            `State.carry`->result.get(16)
+            stateRegisterH->resultHigh,
+            stateRegisterL->resultLow,
+            stateCarry->result.get(16)
         },
         10
     ];
@@ -617,7 +617,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateEnableInterrupts(State state) {
     return [
         state.with {
-            `State.interruptsEnabled`->true
+            stateInterruptsEnabled->true
         },
         4
     ];
@@ -626,10 +626,10 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateExchangeRegisters(State state) {
     return [
         state.with {
-            `State.registerD`->state.registerH,
-            `State.registerE`->state.registerL,
-            `State.registerH`->state.registerD,
-            `State.registerL`->state.registerE
+            stateRegisterD->state.registerH,
+            stateRegisterE->state.registerL,
+            stateRegisterH->state.registerD,
+            stateRegisterL->state.registerE
         },
         5
     ];
@@ -640,8 +640,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerH`->(state.memory[address + 1] else 0.byte),
-            `State.registerL`->(state.memory[address] else 0.byte),
+            stateRegisterH->(state.memory[address + 1] else 0.byte),
+            stateRegisterL->(state.memory[address] else 0.byte),
             address + 1->state.registerH,
             address->state.registerL
         },
@@ -652,7 +652,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateHalt(State state) {
     return [
         state.with {
-            `State.stopped`->true
+            stateStopped->true
         },
         7
     ];
@@ -679,10 +679,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     return [
         state.with {
             address->val,
-            `State.parity`->flagParity(val),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(initial, 1.byte, val),
-            `State.zero`->flagZero(val),
-            `State.sign`->flagSign(val)
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, 1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
         },
         10
     ];
@@ -696,10 +696,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     return [
         state.with {
             register->register.bind(state).get().successor,
-            `State.parity`->flagParity(val),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(initial, 1.byte, val),
-            `State.zero`->flagZero(val),
-            `State.sign`->flagSign(val)
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, 1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
         },
         5
     ];
@@ -710,7 +710,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     if (condition(state)) {
         return [
             state.with {
-                `State.programCounter`->state.dataWord
+                stateProgramCounter->state.dataWord
             },
             10
         ];
@@ -729,7 +729,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->(state.memory[address] else 0.byte)
+            stateRegisterA->(state.memory[address] else 0.byte)
         },
         7
     ];
@@ -740,7 +740,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->(state.memory[address] else 0.byte)
+            stateRegisterA->(state.memory[address] else 0.byte)
         },
         13
     ];
@@ -751,8 +751,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerH`->(state.memory[address + 1] else 0.byte),
-            `State.registerL`->(state.memory[address] else 0.byte)
+            stateRegisterH->(state.memory[address + 1] else 0.byte),
+            stateRegisterL->(state.memory[address] else 0.byte)
         },
         16
     ];
@@ -776,7 +776,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.programCounter`->data
+            stateProgramCounter->data
         },
         5
     ];
@@ -787,7 +787,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.stackPointer`->data
+            stateStackPointer->data
         },
         5
     ];
@@ -867,11 +867,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         7
     ];
@@ -883,11 +883,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         7
     ];
@@ -899,11 +899,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         4
     ];
@@ -920,7 +920,7 @@ shared Boolean flagZero(Byte val) => val.zero;
         state.with {
             highRegister->high,
             lowRegister->low,
-            `State.stackPointer`->state.stackPointer + 2
+            stateStackPointer->state.stackPointer + 2
         },
         10
     ];
@@ -933,7 +933,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.stackPointer`->state.stackPointer - 2,
+            stateStackPointer->state.stackPointer - 2,
             state.stackPointer - 1->high,
             state.stackPointer - 2->low
         },
@@ -951,8 +951,8 @@ shared Boolean flagZero(Byte val) => val.zero;
         
         return [
             state.with {
-                `State.stackPointer`->state.stackPointer + 2,
-                `State.programCounter`->address
+                stateStackPointer->state.stackPointer + 2,
+                stateProgramCounter->address
             },
             returnCycles // RET is 10, others are 11
         ];
@@ -970,8 +970,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->val,
-            `State.carry`->carry
+            stateRegisterA->val,
+            stateCarry->carry
         },
         4
     ];
@@ -983,8 +983,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->val,
-            `State.carry`->carry
+            stateRegisterA->val,
+            stateCarry->carry
         },
         4
     ];
@@ -996,8 +996,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->val,
-            `State.carry`->carry
+            stateRegisterA->val,
+            stateCarry->carry
         },
         4
     ];
@@ -1009,8 +1009,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->val,
-            `State.carry`->carry
+            stateRegisterA->val,
+            stateCarry->carry
         },
         4
     ];
@@ -1019,7 +1019,7 @@ shared Boolean flagZero(Byte val) => val.zero;
 [State, Integer] emulateSetCarry(State state) {
     return [
         state.with {
-            `State.carry`->true
+            stateCarry->true
         },
         4
     ];
@@ -1069,12 +1069,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result.byte,
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateRegisterA->result.byte,
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, resultByte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         7
     ];
@@ -1090,12 +1090,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result.byte,
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateRegisterA->result.byte,
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, resultByte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         7
     ];
@@ -1110,12 +1110,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result.byte,
-            `State.carry`->flagCarry(result),
-            `State.parity`->flagParity(resultByte),
-            `State.auxiliaryCarry`->flagAuxiliaryCarry(left, right, resultByte),
-            `State.zero`->flagZero(resultByte),
-            `State.sign`->flagSign(resultByte)
+            stateRegisterA->result.byte,
+            stateCarry->flagCarry(result),
+            stateParity->flagParity(resultByte),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(left, right, resultByte),
+            stateZero->flagZero(resultByte),
+            stateSign->flagSign(resultByte)
         },
         4
     ];
@@ -1126,11 +1126,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         7
     ];
@@ -1142,11 +1142,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         7
     ];
@@ -1157,12 +1157,12 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            `State.registerA`->result,
-            `State.carry`->false,
-            `State.parity`->flagParity(result),
-            `State.auxiliaryCarry`->false,
-            `State.zero`->flagZero(result),
-            `State.sign`->flagSign(result)
+            stateRegisterA->result,
+            stateCarry->false,
+            stateParity->flagParity(result),
+            stateAuxiliaryCarry->false,
+            stateZero->flagZero(result),
+            stateSign->flagSign(result)
         },
         4
     ];

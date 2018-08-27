@@ -16,8 +16,8 @@ shared Integer restartIndex(Byte opcode) {
         state.with {
             state.stackPointer - 1->high,
             state.stackPointer - 2->low,
-            `State.programCounter`->address,
-            `State.stackPointer`->state.stackPointer - 2
+            stateProgramCounter->address,
+            stateStackPointer->state.stackPointer - 2
         },
         11
     ];
