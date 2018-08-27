@@ -10,6 +10,7 @@ shared void runInvaders() {
             .chain(FileIterable("resource/com/crappycomic/emulator101/invaders.f"))
             .chain(FileIterable("resource/com/crappycomic/emulator101/invaders.e")));
     value memory = Array<Byte>.ofSize(#10000, 0.byte);
+    value machine = InvadersMachine();
     
     code.copyTo(memory);
     
@@ -28,19 +29,20 @@ shared void runInvaders() {
                 opcode = restart1;
             } else {
                 opcode = restart2;
+                panel.drawFrame(state);
             }
             
             interrupt.offer(Interrupt(opcode.byte));
+            
             which = !which;
             
-            panel.drawFrame(state);
         }
-    }, 2500, 500);
+    }, 2500, 10);
     
     while (true) {
         //disassemble(state.memory, state.programCounter, state.interrupt);
         
-        value [result, cycles] = emulate(state);
+        value [result, cycles] = emulate(state, machine);
         
         state = result;
         
