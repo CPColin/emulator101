@@ -3,37 +3,34 @@
 shared [State, Integer] emulate(State state, Machine? machine = null) {
     value opcode = state.opcode;
     
-    // TODO: Idea: In places where we only read from a register, we could use Byte(State),
-    // instead of ByteRegister, and maybe be a littler cleaner/faster.
-    
     // TODO: Break up into smaller files, so my laptop doesn't melt.
     
     value emulator = switch (opcode)
-        case (addA) emulateAddRegister(stateRegisterA, false)
-        case (addB) emulateAddRegister(stateRegisterB, false)
-        case (addC) emulateAddRegister(stateRegisterC, false)
-        case (addD) emulateAddRegister(stateRegisterD, false)
-        case (addE) emulateAddRegister(stateRegisterE, false)
-        case (addH) emulateAddRegister(stateRegisterH, false)
-        case (addL) emulateAddRegister(stateRegisterL, false)
+        case (addA) emulateAddRegister(State.registerA, false)
+        case (addB) emulateAddRegister(State.registerB, false)
+        case (addC) emulateAddRegister(State.registerC, false)
+        case (addD) emulateAddRegister(State.registerD, false)
+        case (addE) emulateAddRegister(State.registerE, false)
+        case (addH) emulateAddRegister(State.registerH, false)
+        case (addL) emulateAddRegister(State.registerL, false)
         case (addMemory) emulateAddMemory(false)
         case (addImmediate) emulateAddImmediate(false)
-        case (addAWithCarry) emulateAddRegister(stateRegisterA, true)
-        case (addBWithCarry) emulateAddRegister(stateRegisterB, true)
-        case (addCWithCarry) emulateAddRegister(stateRegisterC, true)
-        case (addDWithCarry) emulateAddRegister(stateRegisterD, true)
-        case (addEWithCarry) emulateAddRegister(stateRegisterE, true)
-        case (addHWithCarry) emulateAddRegister(stateRegisterH, true)
-        case (addLWithCarry) emulateAddRegister(stateRegisterL, true)
+        case (addAWithCarry) emulateAddRegister(State.registerA, true)
+        case (addBWithCarry) emulateAddRegister(State.registerB, true)
+        case (addCWithCarry) emulateAddRegister(State.registerC, true)
+        case (addDWithCarry) emulateAddRegister(State.registerD, true)
+        case (addEWithCarry) emulateAddRegister(State.registerE, true)
+        case (addHWithCarry) emulateAddRegister(State.registerH, true)
+        case (addLWithCarry) emulateAddRegister(State.registerL, true)
         case (addMemoryWithCarry) emulateAddMemory(true)
         case (addImmediateWithCarry) emulateAddImmediate(true)
-        case (andA) emulateAndRegister(stateRegisterA)
-        case (andB) emulateAndRegister(stateRegisterB)
-        case (andC) emulateAndRegister(stateRegisterC)
-        case (andD) emulateAndRegister(stateRegisterD)
-        case (andE) emulateAndRegister(stateRegisterE)
-        case (andH) emulateAndRegister(stateRegisterH)
-        case (andL) emulateAndRegister(stateRegisterL)
+        case (andA) emulateAndRegister(State.registerA)
+        case (andB) emulateAndRegister(State.registerB)
+        case (andC) emulateAndRegister(State.registerC)
+        case (andD) emulateAndRegister(State.registerD)
+        case (andE) emulateAndRegister(State.registerE)
+        case (andH) emulateAndRegister(State.registerH)
+        case (andL) emulateAndRegister(State.registerL)
         case (andImmediate) emulateAndImmediate
         case (andMemory) emulateAndMemory
         case (call) emulateCallIf((state) => true)
@@ -45,13 +42,13 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (callIfParityOdd) emulateCallIf(not(State.parity))
         case (callIfPlus) emulateCallIf(not(State.sign))
         case (callIfZero) emulateCallIf(State.zero)
-        case (compareA) emulateCompareRegister(stateRegisterA)
-        case (compareB) emulateCompareRegister(stateRegisterB)
-        case (compareC) emulateCompareRegister(stateRegisterC)
-        case (compareD) emulateCompareRegister(stateRegisterD)
-        case (compareE) emulateCompareRegister(stateRegisterE)
-        case (compareH) emulateCompareRegister(stateRegisterH)
-        case (compareL) emulateCompareRegister(stateRegisterL)
+        case (compareA) emulateCompareRegister(State.registerA)
+        case (compareB) emulateCompareRegister(State.registerB)
+        case (compareC) emulateCompareRegister(State.registerC)
+        case (compareD) emulateCompareRegister(State.registerD)
+        case (compareE) emulateCompareRegister(State.registerE)
+        case (compareH) emulateCompareRegister(State.registerH)
+        case (compareL) emulateCompareRegister(State.registerL)
         case (compareMemory) emulateCompareMemory
         case (compareImmediate) emulateCompareImmediate
         case (complementAccumulator) emulateComplementAccumulator
@@ -71,11 +68,11 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (decrementPairStackPointer)
             emulateDecrementPair(stateStackPointerHigh, stateStackPointerLow)
         case (disableInterrupts) emulateDisableInterrupts
-        case (doubleAddB) emulateDoubleAdd(stateRegisterB, stateRegisterC)
-        case (doubleAddD) emulateDoubleAdd(stateRegisterD, stateRegisterE)
-        case (doubleAddH) emulateDoubleAdd(stateRegisterH, stateRegisterL)
+        case (doubleAddB) emulateDoubleAdd(State.registerB, State.registerC)
+        case (doubleAddD) emulateDoubleAdd(State.registerD, State.registerE)
+        case (doubleAddH) emulateDoubleAdd(State.registerH, State.registerL)
         case (doubleAddStackPointer)
-            emulateDoubleAdd(stateStackPointerHigh, stateStackPointerLow)
+            emulateDoubleAdd(State.stackPointerHigh, State.stackPointerLow)
         case (enableInterrupts) emulateEnableInterrupts
         case (exchangeRegisters) emulateExchangeRegisters
         case (exchangeStack) emulateExchangeStack
@@ -103,8 +100,8 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (jumpIfParityOdd) emulateJumpIf(not(State.parity))
         case (jumpIfPlus) emulateJumpIf(not(State.sign))
         case (jumpIfZero) emulateJumpIf(State.zero)
-        case (loadAccumulatorB) emulateLoadAccumulator(stateRegisterB, stateRegisterC)
-        case (loadAccumulatorD) emulateLoadAccumulator(stateRegisterD, stateRegisterE)
+        case (loadAccumulatorB) emulateLoadAccumulator(State.registerB, State.registerC)
+        case (loadAccumulatorD) emulateLoadAccumulator(State.registerD, State.registerE)
         case (loadAccumulatorDirect) emulateLoadAccumulatorDirect
         case (loadHLDirect) emulateLoadHLDirect
         case (loadPairImmediateB) emulateLoadPairImmediate(stateRegisterB, stateRegisterC)
@@ -122,77 +119,77 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (moveImmediateH) emulateMoveImmediate(stateRegisterH)
         case (moveImmediateL) emulateMoveImmediate(stateRegisterL)
         case (moveImmediateMemory) emulateMoveImmediateMemory
-        case (moveAA) emulateMoveRegisters(stateRegisterA, stateRegisterA)
-        case (moveAB) emulateMoveRegisters(stateRegisterA, stateRegisterB)
-        case (moveAC) emulateMoveRegisters(stateRegisterA, stateRegisterC)
-        case (moveAD) emulateMoveRegisters(stateRegisterA, stateRegisterD)
-        case (moveAE) emulateMoveRegisters(stateRegisterA, stateRegisterE)
-        case (moveAH) emulateMoveRegisters(stateRegisterA, stateRegisterH)
-        case (moveAL) emulateMoveRegisters(stateRegisterA, stateRegisterL)
+        case (moveAA) emulateMoveRegisters(stateRegisterA, State.registerA)
+        case (moveAB) emulateMoveRegisters(stateRegisterA, State.registerB)
+        case (moveAC) emulateMoveRegisters(stateRegisterA, State.registerC)
+        case (moveAD) emulateMoveRegisters(stateRegisterA, State.registerD)
+        case (moveAE) emulateMoveRegisters(stateRegisterA, State.registerE)
+        case (moveAH) emulateMoveRegisters(stateRegisterA, State.registerH)
+        case (moveAL) emulateMoveRegisters(stateRegisterA, State.registerL)
         case (moveAMemory) emulateMoveRegisterMemory(stateRegisterA)
-        case (moveBA) emulateMoveRegisters(stateRegisterB, stateRegisterA)
-        case (moveBB) emulateMoveRegisters(stateRegisterB, stateRegisterB)
-        case (moveBC) emulateMoveRegisters(stateRegisterB, stateRegisterC)
-        case (moveBD) emulateMoveRegisters(stateRegisterB, stateRegisterD)
-        case (moveBE) emulateMoveRegisters(stateRegisterB, stateRegisterE)
-        case (moveBH) emulateMoveRegisters(stateRegisterB, stateRegisterH)
-        case (moveBL) emulateMoveRegisters(stateRegisterB, stateRegisterL)
+        case (moveBA) emulateMoveRegisters(stateRegisterB, State.registerA)
+        case (moveBB) emulateMoveRegisters(stateRegisterB, State.registerB)
+        case (moveBC) emulateMoveRegisters(stateRegisterB, State.registerC)
+        case (moveBD) emulateMoveRegisters(stateRegisterB, State.registerD)
+        case (moveBE) emulateMoveRegisters(stateRegisterB, State.registerE)
+        case (moveBH) emulateMoveRegisters(stateRegisterB, State.registerH)
+        case (moveBL) emulateMoveRegisters(stateRegisterB, State.registerL)
         case (moveBMemory) emulateMoveRegisterMemory(stateRegisterB)
-        case (moveCA) emulateMoveRegisters(stateRegisterC, stateRegisterA)
-        case (moveCB) emulateMoveRegisters(stateRegisterC, stateRegisterB)
-        case (moveCC) emulateMoveRegisters(stateRegisterC, stateRegisterC)
-        case (moveCD) emulateMoveRegisters(stateRegisterC, stateRegisterD)
-        case (moveCE) emulateMoveRegisters(stateRegisterC, stateRegisterE)
-        case (moveCH) emulateMoveRegisters(stateRegisterC, stateRegisterH)
-        case (moveCL) emulateMoveRegisters(stateRegisterC, stateRegisterL)
+        case (moveCA) emulateMoveRegisters(stateRegisterC, State.registerA)
+        case (moveCB) emulateMoveRegisters(stateRegisterC, State.registerB)
+        case (moveCC) emulateMoveRegisters(stateRegisterC, State.registerC)
+        case (moveCD) emulateMoveRegisters(stateRegisterC, State.registerD)
+        case (moveCE) emulateMoveRegisters(stateRegisterC, State.registerE)
+        case (moveCH) emulateMoveRegisters(stateRegisterC, State.registerH)
+        case (moveCL) emulateMoveRegisters(stateRegisterC, State.registerL)
         case (moveCMemory) emulateMoveRegisterMemory(stateRegisterC)
-        case (moveDA) emulateMoveRegisters(stateRegisterD, stateRegisterA)
-        case (moveDB) emulateMoveRegisters(stateRegisterD, stateRegisterB)
-        case (moveDC) emulateMoveRegisters(stateRegisterD, stateRegisterC)
-        case (moveDD) emulateMoveRegisters(stateRegisterD, stateRegisterD)
-        case (moveDE) emulateMoveRegisters(stateRegisterD, stateRegisterE)
-        case (moveDH) emulateMoveRegisters(stateRegisterD, stateRegisterH)
-        case (moveDL) emulateMoveRegisters(stateRegisterD, stateRegisterL)
+        case (moveDA) emulateMoveRegisters(stateRegisterD, State.registerA)
+        case (moveDB) emulateMoveRegisters(stateRegisterD, State.registerB)
+        case (moveDC) emulateMoveRegisters(stateRegisterD, State.registerC)
+        case (moveDD) emulateMoveRegisters(stateRegisterD, State.registerD)
+        case (moveDE) emulateMoveRegisters(stateRegisterD, State.registerE)
+        case (moveDH) emulateMoveRegisters(stateRegisterD, State.registerH)
+        case (moveDL) emulateMoveRegisters(stateRegisterD, State.registerL)
         case (moveDMemory) emulateMoveRegisterMemory(stateRegisterD)
-        case (moveEA) emulateMoveRegisters(stateRegisterE, stateRegisterA)
-        case (moveEB) emulateMoveRegisters(stateRegisterE, stateRegisterB)
-        case (moveEC) emulateMoveRegisters(stateRegisterE, stateRegisterC)
-        case (moveED) emulateMoveRegisters(stateRegisterE, stateRegisterD)
-        case (moveEE) emulateMoveRegisters(stateRegisterE, stateRegisterE)
-        case (moveEH) emulateMoveRegisters(stateRegisterE, stateRegisterH)
-        case (moveEL) emulateMoveRegisters(stateRegisterE, stateRegisterL)
+        case (moveEA) emulateMoveRegisters(stateRegisterE, State.registerA)
+        case (moveEB) emulateMoveRegisters(stateRegisterE, State.registerB)
+        case (moveEC) emulateMoveRegisters(stateRegisterE, State.registerC)
+        case (moveED) emulateMoveRegisters(stateRegisterE, State.registerD)
+        case (moveEE) emulateMoveRegisters(stateRegisterE, State.registerE)
+        case (moveEH) emulateMoveRegisters(stateRegisterE, State.registerH)
+        case (moveEL) emulateMoveRegisters(stateRegisterE, State.registerL)
         case (moveEMemory) emulateMoveRegisterMemory(stateRegisterE)
-        case (moveHA) emulateMoveRegisters(stateRegisterH, stateRegisterA)
-        case (moveHB) emulateMoveRegisters(stateRegisterH, stateRegisterB)
-        case (moveHC) emulateMoveRegisters(stateRegisterH, stateRegisterC)
-        case (moveHD) emulateMoveRegisters(stateRegisterH, stateRegisterD)
-        case (moveHE) emulateMoveRegisters(stateRegisterH, stateRegisterE)
-        case (moveHH) emulateMoveRegisters(stateRegisterH, stateRegisterH)
-        case (moveHL) emulateMoveRegisters(stateRegisterH, stateRegisterL)
+        case (moveHA) emulateMoveRegisters(stateRegisterH, State.registerA)
+        case (moveHB) emulateMoveRegisters(stateRegisterH, State.registerB)
+        case (moveHC) emulateMoveRegisters(stateRegisterH, State.registerC)
+        case (moveHD) emulateMoveRegisters(stateRegisterH, State.registerD)
+        case (moveHE) emulateMoveRegisters(stateRegisterH, State.registerE)
+        case (moveHH) emulateMoveRegisters(stateRegisterH, State.registerH)
+        case (moveHL) emulateMoveRegisters(stateRegisterH, State.registerL)
         case (moveHMemory) emulateMoveRegisterMemory(stateRegisterH)
-        case (moveLA) emulateMoveRegisters(stateRegisterL, stateRegisterA)
-        case (moveLB) emulateMoveRegisters(stateRegisterL, stateRegisterB)
-        case (moveLC) emulateMoveRegisters(stateRegisterL, stateRegisterC)
-        case (moveLD) emulateMoveRegisters(stateRegisterL, stateRegisterD)
-        case (moveLE) emulateMoveRegisters(stateRegisterL, stateRegisterE)
-        case (moveLH) emulateMoveRegisters(stateRegisterL, stateRegisterH)
-        case (moveLL) emulateMoveRegisters(stateRegisterL, stateRegisterL)
+        case (moveLA) emulateMoveRegisters(stateRegisterL, State.registerA)
+        case (moveLB) emulateMoveRegisters(stateRegisterL, State.registerB)
+        case (moveLC) emulateMoveRegisters(stateRegisterL, State.registerC)
+        case (moveLD) emulateMoveRegisters(stateRegisterL, State.registerD)
+        case (moveLE) emulateMoveRegisters(stateRegisterL, State.registerE)
+        case (moveLH) emulateMoveRegisters(stateRegisterL, State.registerH)
+        case (moveLL) emulateMoveRegisters(stateRegisterL, State.registerL)
         case (moveLMemory) emulateMoveRegisterMemory(stateRegisterL)
-        case (moveMemoryA) emulateMoveMemoryRegister(stateRegisterA)
-        case (moveMemoryB) emulateMoveMemoryRegister(stateRegisterB)
-        case (moveMemoryC) emulateMoveMemoryRegister(stateRegisterC)
-        case (moveMemoryD) emulateMoveMemoryRegister(stateRegisterD)
-        case (moveMemoryE) emulateMoveMemoryRegister(stateRegisterE)
-        case (moveMemoryH) emulateMoveMemoryRegister(stateRegisterH)
-        case (moveMemoryL) emulateMoveMemoryRegister(stateRegisterL)
+        case (moveMemoryA) emulateMoveMemoryRegister(State.registerA)
+        case (moveMemoryB) emulateMoveMemoryRegister(State.registerB)
+        case (moveMemoryC) emulateMoveMemoryRegister(State.registerC)
+        case (moveMemoryD) emulateMoveMemoryRegister(State.registerD)
+        case (moveMemoryE) emulateMoveMemoryRegister(State.registerE)
+        case (moveMemoryH) emulateMoveMemoryRegister(State.registerH)
+        case (moveMemoryL) emulateMoveMemoryRegister(State.registerL)
         case (noop) emulateNoop
-        case (orA) emulateOrRegister(stateRegisterA)
-        case (orB) emulateOrRegister(stateRegisterB)
-        case (orC) emulateOrRegister(stateRegisterC)
-        case (orD) emulateOrRegister(stateRegisterD)
-        case (orE) emulateOrRegister(stateRegisterE)
-        case (orH) emulateOrRegister(stateRegisterH)
-        case (orL) emulateOrRegister(stateRegisterL)
+        case (orA) emulateOrRegister(State.registerA)
+        case (orB) emulateOrRegister(State.registerB)
+        case (orC) emulateOrRegister(State.registerC)
+        case (orD) emulateOrRegister(State.registerD)
+        case (orE) emulateOrRegister(State.registerE)
+        case (orH) emulateOrRegister(State.registerH)
+        case (orL) emulateOrRegister(State.registerL)
         case (orMemory) emulateOrMemory
         case (orImmediate) emulateOrImmediate
         case (output) emulateOutput
@@ -200,10 +197,10 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (popD) emulatePop(stateRegisterD, stateRegisterE)
         case (popH) emulatePop(stateRegisterH, stateRegisterL)
         case (popStatus) emulatePop(stateRegisterA, stateFlags)
-        case (pushB) emulatePush(stateRegisterB, stateRegisterC)
-        case (pushD) emulatePush(stateRegisterD, stateRegisterE)
-        case (pushH) emulatePush(stateRegisterH, stateRegisterL)
-        case (pushStatus) emulatePush(stateRegisterA, stateFlags)
+        case (pushB) emulatePush(State.registerB, State.registerC)
+        case (pushD) emulatePush(State.registerD, State.registerE)
+        case (pushH) emulatePush(State.registerH, State.registerL)
+        case (pushStatus) emulatePush(State.registerA, State.flags)
         case (restart0) emulateRestart
         case (restart1) emulateRestart
         case (restart2) emulateRestart
@@ -226,35 +223,35 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (rotateRight) emulateRotateRight
         case (rotateRightThroughCarry) emulateRotateRightThroughCarry
         case (setCarry) emulateSetCarry
-        case (storeAccumulatorB) emulateStoreAccumulator(stateRegisterB, stateRegisterC)
-        case (storeAccumulatorD) emulateStoreAccumulator(stateRegisterD, stateRegisterE)
+        case (storeAccumulatorB) emulateStoreAccumulator(State.registerB, State.registerC)
+        case (storeAccumulatorD) emulateStoreAccumulator(State.registerD, State.registerE)
         case (storeAccumulatorDirect) emulateStoreAccumulatorDirect
         case (storeHLDirect) emulateStoreHLDirect
-        case (subtractA) emulateSubtractRegister(stateRegisterA, false)
-        case (subtractB) emulateSubtractRegister(stateRegisterB, false)
-        case (subtractC) emulateSubtractRegister(stateRegisterC, false)
-        case (subtractD) emulateSubtractRegister(stateRegisterD, false)
-        case (subtractE) emulateSubtractRegister(stateRegisterE, false)
-        case (subtractH) emulateSubtractRegister(stateRegisterH, false)
-        case (subtractL) emulateSubtractRegister(stateRegisterL, false)
+        case (subtractA) emulateSubtractRegister(State.registerA, false)
+        case (subtractB) emulateSubtractRegister(State.registerB, false)
+        case (subtractC) emulateSubtractRegister(State.registerC, false)
+        case (subtractD) emulateSubtractRegister(State.registerD, false)
+        case (subtractE) emulateSubtractRegister(State.registerE, false)
+        case (subtractH) emulateSubtractRegister(State.registerH, false)
+        case (subtractL) emulateSubtractRegister(State.registerL, false)
         case (subtractMemory) emulateSubtractMemory(false)
         case (subtractImmediate) emulateSubtractImmediate(false)
-        case (subtractAWithBorrow) emulateSubtractRegister(stateRegisterA, true)
-        case (subtractBWithBorrow) emulateSubtractRegister(stateRegisterB, true)
-        case (subtractCWithBorrow) emulateSubtractRegister(stateRegisterC, true)
-        case (subtractDWithBorrow) emulateSubtractRegister(stateRegisterD, true)
-        case (subtractEWithBorrow) emulateSubtractRegister(stateRegisterE, true)
-        case (subtractHWithBorrow) emulateSubtractRegister(stateRegisterH, true)
-        case (subtractLWithBorrow) emulateSubtractRegister(stateRegisterL, true)
+        case (subtractAWithBorrow) emulateSubtractRegister(State.registerA, true)
+        case (subtractBWithBorrow) emulateSubtractRegister(State.registerB, true)
+        case (subtractCWithBorrow) emulateSubtractRegister(State.registerC, true)
+        case (subtractDWithBorrow) emulateSubtractRegister(State.registerD, true)
+        case (subtractEWithBorrow) emulateSubtractRegister(State.registerE, true)
+        case (subtractHWithBorrow) emulateSubtractRegister(State.registerH, true)
+        case (subtractLWithBorrow) emulateSubtractRegister(State.registerL, true)
         case (subtractMemoryWithBorrow) emulateSubtractMemory(true)
         case (subtractImmediateWithBorrow) emulateSubtractImmediate(true)
-        case (xorA) emulateXorRegister(stateRegisterA)
-        case (xorB) emulateXorRegister(stateRegisterB)
-        case (xorC) emulateXorRegister(stateRegisterC)
-        case (xorD) emulateXorRegister(stateRegisterD)
-        case (xorE) emulateXorRegister(stateRegisterE)
-        case (xorH) emulateXorRegister(stateRegisterH)
-        case (xorL) emulateXorRegister(stateRegisterL)
+        case (xorA) emulateXorRegister(State.registerA)
+        case (xorB) emulateXorRegister(State.registerB)
+        case (xorC) emulateXorRegister(State.registerC)
+        case (xorD) emulateXorRegister(State.registerD)
+        case (xorE) emulateXorRegister(State.registerE)
+        case (xorH) emulateXorRegister(State.registerH)
+        case (xorL) emulateXorRegister(State.registerL)
         case (xorMemory) emulateXorMemory
         case (xorImmediate) emulateXorImmediate
         ;
@@ -346,9 +343,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateAddRegister(ByteRegister register, Boolean withCarry)(State state) {
+[State, Integer] emulateAddRegister(Byte(State) register, Boolean withCarry)(State state) {
     value left = state.registerA;
-    value right = register.bind(state).get();
+    value right = register(state);
     value result = left.unsigned + right.unsigned + (withCarry && state.carry then 1 else 0);
     value resultByte = result.byte;
     
@@ -396,8 +393,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateAndRegister(ByteRegister register)(State state) {
-    value result = state.registerA.and(register.bind(state).get());
+[State, Integer] emulateAndRegister(Byte(State) register)(State state) {
+    value result = state.registerA.and(register(state));
     
     return [
         state.with {
@@ -488,9 +485,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateCompareRegister(ByteRegister register)(State state) {
+[State, Integer] emulateCompareRegister(Byte(State) register)(State state) {
     value left = state.registerA;
-    value right = register.bind(state).get();
+    value right = register(state);
     value result = left.unsigned - right.unsigned;
     value resultByte = result.byte;
     
@@ -557,7 +554,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateDecrementPair(ByteRegister highRegister, ByteRegister lowRegister)(State state) {
+[State, Integer] emulateDecrementPair(ByteRegister highRegister, ByteRegister lowRegister)
+        (State state) {
     value pair = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
     value [high, low] = bytes(pair - 1);
     
@@ -595,11 +593,11 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateDoubleAdd(ByteRegister highRegister, ByteRegister lowRegister)(State state) {
+[State, Integer] emulateDoubleAdd(Byte(State) highRegister, Byte(State) lowRegister)(State state) {
     value registerHL = word(state.registerH, state.registerL);
     value addend = word {
-        high = highRegister.bind(state).get();
-        low = lowRegister.bind(state).get();
+        high = highRegister(state);
+        low = lowRegister(state);
     };
     value result = registerHL + addend;
     value [resultHigh, resultLow] = bytes(result);
@@ -658,7 +656,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateIncrementPair(ByteRegister highRegister, ByteRegister lowRegister)(State state) {
+[State, Integer] emulateIncrementPair(ByteRegister highRegister, ByteRegister lowRegister)
+        (State state) {
     value pair = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
     value [high, low] = bytes(pair + 1);
     
@@ -695,7 +694,7 @@ shared Boolean flagZero(Byte val) => val.zero;
     
     return [
         state.with {
-            register->register.bind(state).get().successor,
+            register->val,
             stateParity->flagParity(val),
             stateAuxiliaryCarry->flagAuxiliaryCarry(initial, 1.byte, val),
             stateZero->flagZero(val),
@@ -723,9 +722,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     }
 }
 
-[State, Integer] emulateLoadAccumulator(ByteRegister highRegister, ByteRegister lowRegister)
+[State, Integer] emulateLoadAccumulator(Byte(State) highRegister, Byte(State) lowRegister)
         (State state) {
-    value address = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
+    value address = word(highRegister(state), lowRegister(state));
     
     return [
         state.with {
@@ -816,23 +815,23 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateMoveMemoryRegister(ByteRegister register)
+[State, Integer] emulateMoveMemoryRegister(Byte(State) register)
         (State state) {
     value address = word(state.registerH, state.registerL);
     
     return [
         state.with {
-            address->register.bind(state).get()
+            address->register(state)
         },
         7
     ];
 }
 
-[State, Integer] emulateMoveRegisters(ByteRegister destinationRegister, ByteRegister sourceRegister)
+[State, Integer] emulateMoveRegisters(ByteRegister destinationRegister, Byte(State) sourceRegister)
         (State state) {
     return [
         state.with {
-            destinationRegister->sourceRegister.bind(state).get()
+            destinationRegister->sourceRegister(state)
         },
         5
     ];
@@ -893,9 +892,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateOrRegister(ByteRegister register)
+[State, Integer] emulateOrRegister(Byte(State) register)
         (State state) {
-    value result = state.registerA.or(register.bind(state).get());
+    value result = state.registerA.or(register(state));
     
     return [
         state.with {
@@ -926,10 +925,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulatePush(ByteRegister highAttribute, ByteRegister lowAttribute)
+[State, Integer] emulatePush(Byte(State) highAttribute, Byte(State) lowAttribute)
         (State state) {
-    value high = highAttribute.bind(state).get();
-    value low = lowAttribute.bind(state).get();
+    value high = highAttribute(state);
+    value low = lowAttribute(state);
     
     return [
         state.with {
@@ -1025,9 +1024,9 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateStoreAccumulator(ByteRegister registerHigh, ByteRegister registerLow)
+[State, Integer] emulateStoreAccumulator(Byte(State) registerHigh, Byte(State) registerLow)
         (State state) {
-    value address = word(registerHigh.bind(state).get(), registerLow.bind(state).get());
+    value address = word(registerHigh(state), registerLow(state));
     
     return [
         state.with {
@@ -1101,10 +1100,10 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateSubtractRegister(ByteRegister register, Boolean withBorrow)
+[State, Integer] emulateSubtractRegister(Byte(State) register, Boolean withBorrow)
         (State state) {
     value left = state.registerA;
-    value right = register.bind(state).get();
+    value right = register(state);
     value result = left.unsigned - right.unsigned - (withBorrow && state.carry then 1 else 0);
     value resultByte = result.byte;
     
@@ -1152,8 +1151,8 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateXorRegister(ByteRegister register)(State state) {
-    value result = state.registerA.xor(register.bind(state).get());
+[State, Integer] emulateXorRegister(Byte(State) register)(State state) {
+    value result = state.registerA.xor(register(state));
     
     return [
         state.with {
