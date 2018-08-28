@@ -6,11 +6,6 @@ import java.awt {
 import java.awt.geom {
     AffineTransform
 }
-import java.awt.image {
-    DataBufferByte,
-    BufferedImage,
-    Raster
-}
 
 import javax.swing {
     JFrame,
@@ -32,26 +27,18 @@ class InvadersPanel() extends JPanel() {
     value rasterWidth = 256;
     value rasterHeight = 224;
     value videoRamOffset = #2400;
-    value rasterSize = rasterWidth * rasterHeight / 8;
     
-    value image = BufferedImage(rasterWidth, rasterHeight, BufferedImage.typeByteBinary);
+    value [image, videoRam] = invadersVideo(rasterWidth, rasterHeight);
     
     value transform = AffineTransform();
     
-    transform.scale(-1.0, 1.0);
-    transform.quadrantRotate(1);
+    transform.translate(0.0, rasterWidth.float);
+    transform.quadrantRotate(-1);
     
     preferredSize = Dimension(rasterHeight, rasterWidth);
     
     shared void drawFrame(State state) {
-        value videoRam = Array<Byte>.ofSize(rasterSize, 0.byte);
-        
-        state.memory.copyTo(videoRam, videoRamOffset, 0, rasterSize);
-        
-        value dataBuffer = DataBufferByte(videoRam, rasterSize);
-        value raster = Raster.createPackedRaster(dataBuffer, rasterWidth, rasterHeight, 1, null);
-        
-        image.setData(raster);
+        state.memory.copyTo(videoRam, videoRamOffset, 0, videoRam.size);
         
         repaint();
     }

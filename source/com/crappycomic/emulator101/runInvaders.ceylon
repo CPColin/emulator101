@@ -18,8 +18,9 @@ shared void runInvaders() {
     
     value frame = InvadersFrame();
     value panel = frame.panel;
+    value timer = Timer(true);
     
-    Timer(true).scheduleAtFixedRate(object extends TimerTask() {
+    timer.scheduleAtFixedRate(object extends TimerTask() {
         variable value which = false;
         
         shared actual void run() {
@@ -29,15 +30,19 @@ shared void runInvaders() {
                 opcode = restart1;
             } else {
                 opcode = restart2;
-                panel.drawFrame(state);
             }
             
             interrupt.offer(Interrupt(opcode.byte));
             
             which = !which;
-            
         }
     }, 2500, 10);
+    
+    timer.scheduleAtFixedRate(object extends TimerTask() {
+        shared actual void run() {
+            panel.drawFrame(state);
+        }
+    }, 2500, 100);
     
     while (true) {
         //disassemble(state.memory, state.programCounter, state.interrupt);
