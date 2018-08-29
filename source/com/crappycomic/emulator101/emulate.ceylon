@@ -1,6 +1,6 @@
 "Emulates execution of the next instruction, given the current [[state]] of the CPU and memory.
  Returns the new state and the number of cycles the instruction took."
-shared [State, Integer] emulate(State state, Machine? machine = null) {
+shared [State, Integer] emulate(State state) {
     value opcode = state.opcode;
     
     // TODO: Break up into smaller files, so my laptop doesn't melt.
@@ -256,11 +256,7 @@ shared [State, Integer] emulate(State state, Machine? machine = null) {
         case (xorImmediate) emulateXorImmediate
         ;
     
-    if (is Anything(State, Machine?) emulator) {
-        return emulator(state, machine);
-    } else {
-        return emulator(state);
-    }
+    return emulator(state);
 }
 
 """Returns the appropriate value for the Auxiliary Carry flag, which is set when a carry comes out

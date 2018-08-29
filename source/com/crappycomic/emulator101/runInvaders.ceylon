@@ -14,7 +14,7 @@ shared void runInvaders() {
     
     code.copyTo(memory);
     
-    variable value state = initialState(memory);
+    variable value state = initialState(memory, machine);
     
     value frame = InvadersFrame();
     value panel = frame.panel;
@@ -47,7 +47,7 @@ shared void runInvaders() {
     while (true) {
         //disassemble(state.memory, state.programCounter, state.interrupt);
         
-        value [result, cycles] = emulate(state, machine);
+        value [result, cycles] = emulate(state);
         
         state = result;
         

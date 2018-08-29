@@ -14,6 +14,10 @@ shared alias IntegerRegister => Attribute<State, Integer>;
 
 shared alias IntegerRegisterUpdate => IntegerRegister->Integer;
 
+shared alias MachineAttribute => Attribute<State, Machine>;
+
+shared alias MachineUpdate => MachineAttribute->Machine;
+
 shared alias Memory => Array<Byte>;
 
 shared alias MemoryUpdate => Integer->Byte;

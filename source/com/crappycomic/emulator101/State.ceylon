@@ -1,3 +1,6 @@
+import java.util {
+    ArrayList
+}
 "The state of the Intel 8080 CPU and its attached memory."
 shared class State {
     static Integer flagBitCarry = 0;
@@ -49,6 +52,7 @@ shared class State {
     shared Boolean interruptsEnabled;
     shared Boolean stopped;
     shared Interrupt? interrupt;
+    shared Machine machine;
     
     shared new (
             Byte registerA,
@@ -64,7 +68,8 @@ shared class State {
             Memory memory,
             Boolean interruptsEnabled,
             Boolean stopped,
-            Interrupt? interrupt) {
+            Interrupt? interrupt,
+            Machine machine) {
         this.registerA = registerA;
         this.registerB = registerB;
         this.registerC = registerC;
@@ -79,6 +84,7 @@ shared class State {
         this.interruptsEnabled = interruptsEnabled;
         this.stopped = stopped;
         this.interrupt = interrupt;
+        this.machine = machine;
     }
     
     shared Boolean carry => flags.get(flagBitCarry);
@@ -124,44 +130,161 @@ shared class State {
     
     "Returns a copy of this object with the given updates applied."
     shared State with(
-            {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates) {
-        value bitFlagUpdates = map(updates.narrow<BitFlagUpdate>());
-        value byteRegisterUpdates = map(updates.narrow<ByteRegisterUpdate>());
-        value integerRegisterUpdates = map(updates.narrow<IntegerRegisterUpdate>());
-        value memoryUpdates = updates.narrow<MemoryUpdate>();
+            {BitFlagUpdate
+                |ByteRegisterUpdate
+                |IntegerRegisterUpdate
+                |MachineUpdate
+                |MemoryUpdate*} updates) {
+        variable Byte? registerA = null;
+        variable Byte? registerB = null;
+        variable Byte? registerC = null;
+        variable Byte? registerD = null;
+        variable Byte? registerE = null;
+        variable Byte? registerH = null;
+        variable Byte? registerL = null;
+        variable Byte? flags = null;
+        variable Boolean? carry = null;
+        variable Boolean? parity = null;
+        variable Boolean? auxiliaryCarry = null;
+        variable Boolean? zero = null;
+        variable Boolean? sign = null;
+        variable Integer? stackPointer = null;
+        variable Byte? stackPointerHigh = null;
+        variable Byte? stackPointerLow = null;
+        variable Integer? programCounter = null;
+        value memoryUpdates = ArrayList<Integer->Byte>();
+        variable Boolean? interruptsEnabled = null;
+        variable Boolean? stopped = null;
+        variable Machine? machine = null;
         
-        value programCounter = integerRegisterUpdates[stateProgramCounter]
-            else (if (exists interrupt)
-                then this.programCounter
-                else this.programCounter + opcode.size);
+        for (key->val in updates) {
+            switch (val)
+            case (is Boolean) {
+                if (key == stateCarry) {
+                    carry = val;
+                } else if (key == stateParity) {
+                    parity = val;
+                } else if (key == stateAuxiliaryCarry) {
+                    auxiliaryCarry = val;
+                } else if (key == stateZero) {
+                    zero = val;
+                } else if (key == stateSign) {
+                    sign = val;
+                } else if (key == stateInterruptsEnabled) {
+                    interruptsEnabled = val;
+                } else if (key == stateStopped) {
+                    stopped = val;
+                }
+            }
+            case (is Byte) {
+                if (key == stateRegisterA) {
+                    registerA = val;
+                } else if (key == stateRegisterB) {
+                    registerB = val;
+                } else if (key == stateRegisterC) {
+                    registerC = val;
+                } else if (key == stateRegisterD) {
+                    registerD = val;
+                } else if (key == stateRegisterE) {
+                    registerE = val;
+                } else if (key == stateRegisterH) {
+                    registerH = val;
+                } else if (key == stateRegisterL) {
+                    registerL = val;
+                } else if (key == stateFlags) {
+                    flags = val;
+                } else if (key == stateStackPointerHigh) {
+                    stackPointerHigh = val;
+                } else if (key == stateStackPointerLow) {
+                    stackPointerLow = val;
+                } else if (is Integer key) {
+                    memoryUpdates.add(key->val);
+                }
+            }
+            case (is Integer) {
+                if (key == stateStackPointer) {
+                    stackPointer = val;
+                } else if (key == stateProgramCounter) {
+                    programCounter = val;
+                }
+            }
+            case (is Machine?) {
+                if (key == stateMachine) {
+                    machine = val;
+                }
+            }
+        }
         
         return State {
-            registerA = byteRegisterUpdates[stateRegisterA] else registerA;
-            registerB = byteRegisterUpdates[stateRegisterB] else registerB;
-            registerC = byteRegisterUpdates[stateRegisterC] else registerC;
-            registerD = byteRegisterUpdates[stateRegisterD] else registerD;
-            registerE = byteRegisterUpdates[stateRegisterE] else registerE;
-            registerH = byteRegisterUpdates[stateRegisterH] else registerH;
-            registerL = byteRegisterUpdates[stateRegisterL] else registerL;
-            flags = byteRegisterUpdates[stateFlags] else packFlags {
-                carry = bitFlagUpdates[stateCarry] else carry;
-                parity = bitFlagUpdates[stateParity] else parity;
-                auxiliaryCarry = bitFlagUpdates[stateAuxiliaryCarry] else auxiliaryCarry;
-                zero = bitFlagUpdates[stateZero] else zero;
-                sign = bitFlagUpdates[stateSign] else sign;
+            registerA = registerA else this.registerA;
+            registerB = registerB else this.registerB;
+            registerC = registerC else this.registerC;
+            registerD = registerD else this.registerD;
+            registerE = registerE else this.registerE;
+            registerH = registerH else this.registerH;
+            registerL = registerL else this.registerL;
+            flags = flags else packFlags {
+                carry = carry else this.carry;
+                parity = parity else this.parity;
+                auxiliaryCarry = auxiliaryCarry else this.auxiliaryCarry;
+                zero = zero else this.zero;
+                sign = sign else this.sign;
             };
-            stackPointer = integerRegisterUpdates[stateStackPointer] else word {
-                high = byteRegisterUpdates[stateStackPointerHigh] else stackPointerHigh;
-                low = byteRegisterUpdates[stateStackPointerLow] else stackPointerLow;
+            stackPointer = stackPointer else word {
+                high = stackPointerHigh else this.stackPointerHigh;
+                low = stackPointerLow else this.stackPointerLow;
             };
-            programCounter = programCounter;
+            programCounter = programCounter
+                else (if (exists interrupt)
+                    then this.programCounter
+                    else this.programCounter + opcode.size);
             memory = if (!memoryUpdates.empty)
-                    then updateMemory(memory, *memoryUpdates)
-                    else memory;
-            interruptsEnabled = bitFlagUpdates[stateInterruptsEnabled] else interruptsEnabled;
-            stopped = bitFlagUpdates[stateStopped] else stopped;
+                then updateMemory(this.memory, *memoryUpdates)
+                else this.memory;
+            interruptsEnabled = interruptsEnabled else this.interruptsEnabled;
+            stopped = stopped else this.stopped;
             interrupt = null;
+            machine = machine else this.machine;
         };
+        
+        //value bitFlagUpdates = map(updates.narrow<BitFlagUpdate>());
+        //value byteRegisterUpdates = map(updates.narrow<ByteRegisterUpdate>());
+        //value integerRegisterUpdates = map(updates.narrow<IntegerRegisterUpdate>());
+        //value memoryUpdates = updates.narrow<MemoryUpdate>();
+        //
+        //value programCounter = integerRegisterUpdates[stateProgramCounter]
+        //    else (if (exists interrupt)
+        //        then this.programCounter
+        //        else this.programCounter + opcode.size);
+        //
+        //return State {
+        //    registerA = byteRegisterUpdates[stateRegisterA] else registerA;
+        //    registerB = byteRegisterUpdates[stateRegisterB] else registerB;
+        //    registerC = byteRegisterUpdates[stateRegisterC] else registerC;
+        //    registerD = byteRegisterUpdates[stateRegisterD] else registerD;
+        //    registerE = byteRegisterUpdates[stateRegisterE] else registerE;
+        //    registerH = byteRegisterUpdates[stateRegisterH] else registerH;
+        //    registerL = byteRegisterUpdates[stateRegisterL] else registerL;
+        //    flags = byteRegisterUpdates[stateFlags] else packFlags {
+        //        carry = bitFlagUpdates[stateCarry] else carry;
+        //        parity = bitFlagUpdates[stateParity] else parity;
+        //        auxiliaryCarry = bitFlagUpdates[stateAuxiliaryCarry] else auxiliaryCarry;
+        //        zero = bitFlagUpdates[stateZero] else zero;
+        //        sign = bitFlagUpdates[stateSign] else sign;
+        //    };
+        //    stackPointer = integerRegisterUpdates[stateStackPointer] else word {
+        //        high = byteRegisterUpdates[stateStackPointerHigh] else stackPointerHigh;
+        //        low = byteRegisterUpdates[stateStackPointerLow] else stackPointerLow;
+        //    };
+        //    programCounter = programCounter;
+        //    memory = if (!memoryUpdates.empty)
+        //            then updateMemory(memory, *memoryUpdates)
+        //            else memory;
+        //    interruptsEnabled = bitFlagUpdates[stateInterruptsEnabled] else interruptsEnabled;
+        //    stopped = bitFlagUpdates[stateStopped] else stopped;
+        //    interrupt = null;
+        //    machine = machine;
+        //};
     }
     
     "Returns a copy of this object with the given [[interrupt]] ready to execute."
@@ -181,6 +304,7 @@ shared class State {
             interruptsEnabled = false;
             stopped = false;
             interrupt = interrupt;
+            machine = machine;
         };
     }
 }

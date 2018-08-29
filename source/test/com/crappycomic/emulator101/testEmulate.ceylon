@@ -13,6 +13,7 @@ import com.crappycomic.emulator101 {
     ByteRegister,
     ByteRegisterUpdate,
     IntegerRegisterUpdate,
+    MachineUpdate,
     MemoryUpdate,
     State,
     bytes,
@@ -22,6 +23,7 @@ import com.crappycomic.emulator101 {
     flagParity,
     flagSign,
     flagZero,
+    noopMachine,
     word
 }
 
@@ -51,7 +53,11 @@ Integer testStateProgramCounter = #120;
 Integer testStateStackPointer = #100;
 
 State testState(Integer opcode,
-        {BitFlagUpdate|ByteRegisterUpdate|IntegerRegisterUpdate|MemoryUpdate*} updates) {
+        {BitFlagUpdate
+            |ByteRegisterUpdate
+            |IntegerRegisterUpdate
+            |MachineUpdate
+            |MemoryUpdate*} updates) {
     value integerRegisterUpdates = map(updates.narrow<IntegerRegisterUpdate>());
     value programCounter
             = if (exists item = integerRegisterUpdates.find(
@@ -80,6 +86,7 @@ State testState(Integer opcode,
         interruptsEnabled = false;
         stopped = false;
         interrupt = null;
+        machine = noopMachine;
     }.with {
         `State.programCounter`->programCounter, // Set again here to avoid auto-advance
         programCounter->opcode.byte,

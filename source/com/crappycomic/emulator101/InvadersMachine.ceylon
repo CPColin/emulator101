@@ -1,9 +1,28 @@
-// TODO: Has internal state, so should be part of State (after all!)
-// also needs tests
-class InvadersMachine() satisfies Machine {
-    variable value shiftHigh = 0.byte;
-    variable value shiftLow = 0.byte;
-    variable value shiftOffset = 0;
+// TODO: Needs tests
+class InvadersMachine satisfies Machine {
+    Byte shiftHigh;
+    Byte shiftLow;
+    Integer shiftOffset;
+    
+    shared new(
+            Byte shiftHigh = 0.byte,
+            Byte shiftLow = 0.byte,
+            Integer shiftOffset = 0) {
+        this.shiftHigh = shiftHigh;
+        this.shiftLow = shiftLow;
+        this.shiftOffset = shiftOffset;
+    }
+    
+    shared Machine with(
+            Byte shiftHigh = this.shiftHigh,
+            Byte shiftLow = this.shiftLow,
+            Integer shiftOffset = this.shiftOffset) {
+        return InvadersMachine {
+            shiftHigh = shiftHigh;
+            shiftLow = shiftLow;
+            shiftOffset = shiftOffset;
+        };
+    }
     
     shared actual Byte input(Byte device) {
         if (device == 3.byte) {
@@ -15,12 +34,18 @@ class InvadersMachine() satisfies Machine {
         }
     }
     
-    shared actual void output(Byte device, Byte data) {
+    shared actual Machine output(Byte device, Byte data) {
         if (device == 2.byte) {
-            shiftOffset = data.unsigned.and(#07);
+            return with {
+                shiftOffset = data.unsigned.and(#07);
+            };
         } else if (device == 4.byte) {
-            shiftLow = shiftHigh;
-            shiftHigh = data;
+            return with {
+                shiftLow = shiftHigh;
+                shiftHigh = data;
+            };
+        } else {
+            return this;
         }
     }
     

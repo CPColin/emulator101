@@ -21,3 +21,5 @@ shared IntegerRegister stateProgramCounter = `State.programCounter`;
 
 shared BitFlag stateStopped = `State.stopped`;
 shared BitFlag stateInterruptsEnabled = `State.interruptsEnabled`;
+
+shared MachineAttribute stateMachine = `State.machine`;

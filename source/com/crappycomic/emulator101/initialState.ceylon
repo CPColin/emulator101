@@ -1,4 +1,4 @@
-State initialState(Array<Byte> memory) => State {
+State initialState(Array<Byte> memory, Machine machine = noopMachine) => State {
     registerA = 0.byte;
     registerB = 0.byte;
     registerC = 0.byte;
@@ -13,4 +13,5 @@ State initialState(Array<Byte> memory) => State {
     interruptsEnabled = false;
     stopped = false;
     interrupt = null;
+    machine = machine;
 };

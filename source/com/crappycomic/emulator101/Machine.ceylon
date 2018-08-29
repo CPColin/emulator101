@@ -3,6 +3,12 @@ shared interface Machine {
     "Reads a byte from the specified [[device]] and returns it."
     shared formal Byte input(Byte device);
     
-    "Write the given byte of [[data]] to the specified [[device]]."
-    shared formal void output(Byte device, Byte data);
+    "Return a new instance with the given byte of [[data]] written to the specified [[device]]."
+    shared formal Machine output(Byte device, Byte data);
+}
+
+shared object noopMachine satisfies Machine {
+    shared actual Byte input(Byte device) => 0.byte;
+    
+    shared actual Machine output(Byte device, Byte data) => this;
 }
