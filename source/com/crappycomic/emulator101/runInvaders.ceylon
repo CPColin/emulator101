@@ -15,6 +15,8 @@ shared void runInvaders() {
     code.copyTo(memory);
     
     variable value state = initialState(memory, machine);
+    variable value totalCycles = 0;
+    variable value seconds = 0;
     
     value frame = InvadersFrame();
     value panel = frame.panel;
@@ -36,13 +38,20 @@ shared void runInvaders() {
             
             which = !which;
         }
-    }, 2500, 10);
+    }, 2500, 1000 / 60);
     
     timer.scheduleAtFixedRate(object extends TimerTask() {
         shared actual void run() {
             panel.drawFrame(state);
         }
-    }, 2500, 100);
+    }, 2500, 1000 / 30);
+    
+    timer.scheduleAtFixedRate(object extends TimerTask() {
+        shared actual void run() {
+            seconds++;
+            print("``totalCycles / seconds`` / sec");
+        }
+    }, 10000, 1000);
     
     while (true) {
         //disassemble(state.memory, state.programCounter, state.interrupt);
@@ -50,6 +59,7 @@ shared void runInvaders() {
         value [result, cycles] = emulate(state);
         
         state = result;
+        totalCycles += cycles;
         
         if (state.interruptsEnabled) {
             Interrupt? interrupt;

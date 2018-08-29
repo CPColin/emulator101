@@ -54,13 +54,13 @@ shared [State, Integer] emulate(State state) {
         case (complementAccumulator) emulateComplementAccumulator
         case (complementCarry) emulateComplementCarry
         case (decimalAdjust) emulateDecimalAdjust
-        case (decrementA) emulateDecrementRegister(stateRegisterA)
-        case (decrementB) emulateDecrementRegister(stateRegisterB)
-        case (decrementC) emulateDecrementRegister(stateRegisterC)
-        case (decrementD) emulateDecrementRegister(stateRegisterD)
-        case (decrementE) emulateDecrementRegister(stateRegisterE)
-        case (decrementH) emulateDecrementRegister(stateRegisterH)
-        case (decrementL) emulateDecrementRegister(stateRegisterL)
+        case (decrementA) emulateDecrementRegisterA
+        case (decrementB) emulateDecrementRegisterB
+        case (decrementC) emulateDecrementRegisterC
+        case (decrementD) emulateDecrementRegisterD
+        case (decrementE) emulateDecrementRegisterE
+        case (decrementH) emulateDecrementRegisterH
+        case (decrementL) emulateDecrementRegisterL
         case (decrementMemory) emulateDecrementMemory
         case (decrementPairB) emulateDecrementPair(stateRegisterB, stateRegisterC)
         case (decrementPairD) emulateDecrementPair(stateRegisterD, stateRegisterE)
@@ -85,11 +85,10 @@ shared [State, Integer] emulate(State state) {
         case (incrementH) emulateIncrementRegister(stateRegisterH)
         case (incrementL) emulateIncrementRegister(stateRegisterL)
         case (incrementMemory) emulateIncrementMemory
-        case (incrementPairB) emulateIncrementPair(stateRegisterB, stateRegisterC)
-        case (incrementPairD) emulateIncrementPair(stateRegisterD, stateRegisterE)
-        case (incrementPairH) emulateIncrementPair(stateRegisterH, stateRegisterL)
-        case (incrementPairStackPointer)
-            emulateIncrementPair(stateStackPointerHigh, stateStackPointerLow)
+        case (incrementPairB) emulateIncrementPairBC
+        case (incrementPairD) emulateIncrementPairDE
+        case (incrementPairH) emulateIncrementPairHL
+        case (incrementPairStackPointer) emulateIncrementPairStackPointer
         case (input) emulateInput
         case (jump) emulateJumpIf((state) => true)
         case (jumpIfCarry) emulateJumpIf(State.carry)
@@ -564,13 +563,109 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateDecrementRegister(ByteRegister register)(State state) {
-    value initial = register.bind(state).get();
+[State, Integer] emulateDecrementRegisterA(State state) {
+    value initial = state.registerA;
     value val = initial.predecessor;
     
     return [
         state.with {
-            register->val,
+            stateRegisterA->val,
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateDecrementRegisterB(State state) {
+    value initial = state.registerB;
+    value val = initial.predecessor;
+    
+    return [
+        state.with {
+            stateRegisterB->val,
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateDecrementRegisterC(State state) {
+    value initial = state.registerC;
+    value val = initial.predecessor;
+    
+    return [
+        state.with {
+            stateRegisterC->val,
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateDecrementRegisterD(State state) {
+    value initial = state.registerD;
+    value val = initial.predecessor;
+    
+    return [
+        state.with {
+            stateRegisterD->val,
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateDecrementRegisterE(State state) {
+    value initial = state.registerE;
+    value val = initial.predecessor;
+    
+    return [
+        state.with {
+            stateRegisterE->val,
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateDecrementRegisterH(State state) {
+    value initial = state.registerH;
+    value val = initial.predecessor;
+    
+    return [
+        state.with {
+            stateRegisterH->val,
+            stateParity->flagParity(val),
+            stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
+            stateZero->flagZero(val),
+            stateSign->flagSign(val)
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateDecrementRegisterL(State state) {
+    value initial = state.registerL;
+    value val = initial.predecessor;
+    
+    return [
+        state.with {
+            stateRegisterL->val,
             stateParity->flagParity(val),
             stateAuxiliaryCarry->flagAuxiliaryCarry(initial, -1.byte, val),
             stateZero->flagZero(val),
@@ -652,15 +747,49 @@ shared Boolean flagZero(Byte val) => val.zero;
     ];
 }
 
-[State, Integer] emulateIncrementPair(ByteRegister highRegister, ByteRegister lowRegister)
-        (State state) {
-    value pair = word(highRegister.bind(state).get(), lowRegister.bind(state).get());
+[State, Integer] emulateIncrementPairBC(State state) {
+    value pair = word(state.registerB, state.registerC);
     value [high, low] = bytes(pair + 1);
     
     return [
         state.with {
-            highRegister->high,
-            lowRegister->low
+            stateRegisterB->high,
+            stateRegisterC->low
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateIncrementPairDE(State state) {
+    value pair = word(state.registerD, state.registerE);
+    value [high, low] = bytes(pair + 1);
+    
+    return [
+        state.with {
+            stateRegisterD->high,
+            stateRegisterE->low
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateIncrementPairHL(State state) {
+    value pair = word(state.registerH, state.registerL);
+    value [high, low] = bytes(pair + 1);
+    
+    return [
+        state.with {
+            stateRegisterH->high,
+            stateRegisterL->low
+        },
+        5
+    ];
+}
+
+[State, Integer] emulateIncrementPairStackPointer(State state) {
+    return [
+        state.with {
+            stateStackPointer->state.stackPointer + 1
         },
         5
     ];
