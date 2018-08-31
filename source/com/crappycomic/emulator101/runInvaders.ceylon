@@ -1,3 +1,7 @@
+import java.lang {
+    System,
+    Thread
+}
 import java.util {
     Timer,
     TimerTask
@@ -14,35 +18,37 @@ shared void runInvaders() {
     
     code.copyTo(memory);
     
+    "Clock divider for slower machines (my laptop) to get consistent emulation speed."
+    value throttle = 1;
+    value cyclesPerSecond = 2_000_000 / throttle;
+    value framesPerSecond = 60 / throttle;
+    value interruptsPerSecond = framesPerSecond * 2;
+    value millisecondsPerSecond = 1_000;
+    value millisecondsPerInterrupt = millisecondsPerSecond / interruptsPerSecond;
+    value cyclesPerInterrupt = cyclesPerSecond / interruptsPerSecond;
+    
     variable value state = initialState(memory, machine);
+    variable value totalCycles = 0;
+    variable value lastInterrupt = System.currentTimeMillis();
     
     value frame = InvadersFrame();
     value panel = frame.panel;
     value timer = Timer(true);
     
     timer.scheduleAtFixedRate(object extends TimerTask() {
-        variable value which = false;
+        variable Opcode nextInterrupt = restart1;
         
         shared actual void run() {
-            Opcode opcode;
+            interrupt.offer(Interrupt(nextInterrupt.byte));
             
-            if (which) {
-                opcode = restart1;
+            if (nextInterrupt == restart1) {
+                nextInterrupt = restart2;
             } else {
-                opcode = restart2;
+                nextInterrupt = restart1;
+                panel.drawFrame(state);
             }
-            
-            interrupt.offer(Interrupt(opcode.byte));
-            
-            which = !which;
         }
-    }, 2500, 10);
-    
-    timer.scheduleAtFixedRate(object extends TimerTask() {
-        shared actual void run() {
-            panel.drawFrame(state);
-        }
-    }, 2500, 100);
+    }, 1000, millisecondsPerInterrupt);
     
     while (true) {
         //disassemble(state.memory, state.programCounter, state.interrupt);
@@ -50,6 +56,7 @@ shared void runInvaders() {
         value [result, cycles] = emulate(state);
         
         state = result;
+        totalCycles += cycles;
         
         if (state.interruptsEnabled) {
             Interrupt? interrupt;
@@ -73,6 +80,17 @@ shared void runInvaders() {
             } else {
                 package.interrupt.clear();
             }
+        }
+        
+        if (totalCycles >= cyclesPerInterrupt) {
+            value sleep = System.currentTimeMillis() - lastInterrupt - millisecondsPerInterrupt;
+            
+            if (sleep > 0) {
+                Thread.sleep(sleep);
+            }
+            
+            totalCycles = 0;
+            lastInterrupt = System.currentTimeMillis();
         }
     }
 }
