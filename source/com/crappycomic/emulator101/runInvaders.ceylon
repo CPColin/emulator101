@@ -1,3 +1,7 @@
+import java.awt.event {
+    KeyAdapter,
+    KeyEvent
+}
 import java.lang {
     System,
     Thread
@@ -14,12 +18,13 @@ shared void runInvaders() {
             .chain(FileIterable("resource/com/crappycomic/emulator101/invaders.f"))
             .chain(FileIterable("resource/com/crappycomic/emulator101/invaders.e")));
     value memory = Array<Byte>.ofSize(#10000, 0.byte);
-    value machine = InvadersMachine();
+    value cabinet = InvadersCabinet();
+    value machine = InvadersMachine(cabinet);
     
     code.copyTo(memory);
     
     "Clock divider for slower machines (my laptop) to get consistent emulation speed."
-    value throttle = 1;
+    value throttle = 3;
     value cyclesPerSecond = 2_000_000 / throttle;
     value framesPerSecond = 60 / throttle;
     value interruptsPerSecond = framesPerSecond * 2;
@@ -33,6 +38,57 @@ shared void runInvaders() {
     
     value frame = InvadersFrame();
     value panel = frame.panel;
+    
+    frame.addKeyListener(object extends KeyAdapter() {
+        shared actual void keyPressed(KeyEvent event) {
+            value keyCode = event.keyCode;
+            
+            if (keyCode == KeyEvent.vk1) {
+                cabinet.player1Start = true;
+            } else if (keyCode == KeyEvent.vkLeft) {
+                cabinet.player1Left = true;
+            } else if (keyCode == KeyEvent.vkRight) {
+                cabinet.player1Right = true;
+            } else if (keyCode == KeyEvent.vkUp) {
+                cabinet.player1Fire = true;
+            } else if (keyCode == KeyEvent.vk2) {
+                cabinet.player2Start = true;
+            } else if (keyCode == KeyEvent.vkA) {
+                cabinet.player2Left = true;
+            } else if (keyCode == KeyEvent.vkS) {
+                cabinet.player2Right = true;
+            } else if (keyCode == KeyEvent.vkZ) {
+                cabinet.player2Fire = true;
+            } else if (keyCode == KeyEvent.vkC) {
+                cabinet.coin = false;
+            }
+        }
+        
+        shared actual void keyReleased(KeyEvent event) {
+            value keyCode = event.keyCode;
+            
+            if (keyCode == KeyEvent.vk1) {
+                cabinet.player1Start = false;
+            } else if (keyCode == KeyEvent.vkLeft) {
+                cabinet.player1Left = false;
+            } else if (keyCode == KeyEvent.vkRight) {
+                cabinet.player1Right = false;
+            } else if (keyCode == KeyEvent.vkUp) {
+                cabinet.player1Fire = false;
+            } else if (keyCode == KeyEvent.vk2) {
+                cabinet.player2Start = false;
+            } else if (keyCode == KeyEvent.vkA) {
+                cabinet.player2Left = false;
+            } else if (keyCode == KeyEvent.vkS) {
+                cabinet.player2Right = false;
+            } else if (keyCode == KeyEvent.vkZ) {
+                cabinet.player2Fire = false;
+            } else if (keyCode == KeyEvent.vkC) {
+                cabinet.coin = true;
+            }
+        }
+    });
+    
     value timer = Timer(true);
     
     timer.scheduleAtFixedRate(object extends TimerTask() {
