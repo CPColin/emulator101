@@ -1,6 +1,10 @@
 "Emulates execution of the next instruction, given the current [[state]] of the CPU and memory.
  Returns the new state and the number of cycles the instruction took."
 shared [State, Integer] emulate(State state) {
+    import com.crappycomic.emulator101 {
+        Opcode { ... }
+    }
+    
     value opcode = state.opcode;
     
     // TODO: Break up into smaller files, so my laptop doesn't melt.

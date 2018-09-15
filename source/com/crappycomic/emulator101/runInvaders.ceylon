@@ -92,6 +92,13 @@ shared void runInvaders() {
     value timer = Timer(true);
     
     timer.scheduleAtFixedRate(object extends TimerTask() {
+        import com.crappycomic.emulator101 {
+            Opcode {
+                restart1,
+                restart2
+            }
+        }
+        
         variable Opcode nextInterrupt = restart1;
         
         shared actual void run() {

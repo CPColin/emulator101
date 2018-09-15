@@ -7,7 +7,7 @@ import ceylon.language.meta {
  The only data that belongs in this class is what's necessary for turning a stream of bytes into a
  stream of opcodes. Data relating to disassembly belongs in the disassembler and data relating to
  execution belongs in the emulator."
-shared abstract class Opcode
+shared class Opcode
         of noop // 00
         | loadPairImmediateB // 01
         | storeAccumulatorB // 02
@@ -257,257 +257,257 @@ shared abstract class Opcode
     
     shared Integer size;
     
-    shared new (Integer byte, Integer size = 1) {
+    abstract new opcode(Integer byte, Integer size = 1) {
         this.byte = byte.byte;
         this.size = size;
     }
     
+    shared new addA extends opcode(#87) {}
+    shared new addB extends opcode(#80) {}
+    shared new addC extends opcode(#81) {}
+    shared new addD extends opcode(#82) {}
+    shared new addE extends opcode(#83) {}
+    shared new addH extends opcode(#84) {}
+    shared new addL extends opcode(#85) {}
+    shared new addImmediate extends opcode(#c6, 2) {}
+    shared new addMemory extends opcode(#86) {}
+    shared new addAWithCarry extends opcode(#8f) {}
+    shared new addBWithCarry extends opcode(#88) {}
+    shared new addCWithCarry extends opcode(#89) {}
+    shared new addDWithCarry extends opcode(#8a) {}
+    shared new addEWithCarry extends opcode(#8b) {}
+    shared new addHWithCarry extends opcode(#8c) {}
+    shared new addLWithCarry extends opcode(#8d) {}
+    shared new addImmediateWithCarry extends opcode(#ce, 2) {}
+    shared new addMemoryWithCarry extends opcode(#8e) {}
+    shared new andA extends opcode(#a7) {}
+    shared new andB extends opcode(#a0) {}
+    shared new andC extends opcode(#a1) {}
+    shared new andD extends opcode(#a2) {}
+    shared new andE extends opcode(#a3) {}
+    shared new andH extends opcode(#a4) {}
+    shared new andL extends opcode(#a5) {}
+    shared new andImmediate extends opcode(#e6, 2) {}
+    shared new andMemory extends opcode(#a6) {}
+    shared new call extends opcode(#cd, 3) {}
+    shared new callIfCarry extends opcode(#dc, 3) {}
+    shared new callIfMinus extends opcode(#fc, 3) {}
+    shared new callIfNoCarry extends opcode(#d4, 3) {}
+    shared new callIfNotZero extends opcode(#c4, 3) {}
+    shared new callIfParityEven extends opcode(#ec, 3) {}
+    shared new callIfParityOdd extends opcode(#e4, 3) {}
+    shared new callIfPlus extends opcode(#f4, 3) {}
+    shared new callIfZero extends opcode(#cc, 3) {}
+    shared new compareA extends opcode(#bf) {}
+    shared new compareB extends opcode(#b8) {}
+    shared new compareC extends opcode(#b9) {}
+    shared new compareD extends opcode(#ba) {}
+    shared new compareE extends opcode(#bb) {}
+    shared new compareH extends opcode(#bc) {}
+    shared new compareL extends opcode(#bd) {}
+    shared new compareImmediate extends opcode(#fe, 2) {}
+    shared new compareMemory extends opcode(#be) {}
+    shared new complementAccumulator extends opcode(#2f) {}
+    shared new complementCarry extends opcode(#3f) {}
+    shared new decimalAdjust extends opcode(#27) {}
+    shared new decrementA extends opcode(#3d) {}
+    shared new decrementB extends opcode(#05) {}
+    shared new decrementC extends opcode(#0d) {}
+    shared new decrementD extends opcode(#15) {}
+    shared new decrementE extends opcode(#1d) {}
+    shared new decrementH extends opcode(#25) {}
+    shared new decrementL extends opcode(#2d) {}
+    shared new decrementMemory extends opcode(#35) {}
+    shared new decrementPairB extends opcode(#0b) {}
+    shared new decrementPairD extends opcode(#1b) {}
+    shared new decrementPairH extends opcode(#2b) {}
+    shared new decrementPairStackPointer extends opcode(#3b) {}
+    shared new disableInterrupts extends opcode(#f3) {}
+    shared new doubleAddB extends opcode(#09) {}
+    shared new doubleAddD extends opcode(#19) {}
+    shared new doubleAddH extends opcode(#29) {}
+    shared new doubleAddStackPointer extends opcode(#39) {}
+    shared new enableInterrupts extends opcode(#fb) {}
+    shared new exchangeRegisters extends opcode(#eb) {}
+    shared new exchangeStack extends opcode(#e3) {}
+    shared new halt extends opcode(#76) {}
+    shared new incrementA extends opcode(#3c) {}
+    shared new incrementB extends opcode(#04) {}
+    shared new incrementC extends opcode(#0c) {}
+    shared new incrementD extends opcode(#14) {}
+    shared new incrementE extends opcode(#1c) {}
+    shared new incrementH extends opcode(#24) {}
+    shared new incrementL extends opcode(#2c) {}
+    shared new incrementMemory extends opcode(#34) {}
+    shared new incrementPairB extends opcode(#03) {}
+    shared new incrementPairD extends opcode(#13) {}
+    shared new incrementPairH extends opcode(#23) {}
+    shared new incrementPairStackPointer extends opcode(#33) {}
+    shared new input extends opcode(#db, 2) {}
+    shared new jump extends opcode(#c3, 3) {}
+    shared new jumpIfCarry extends opcode(#da, 3) {}
+    shared new jumpIfNoCarry extends opcode(#d2, 3) {}
+    shared new jumpIfNotZero extends opcode(#c2, 3) {}
+    shared new jumpIfMinus extends opcode(#fa, 3) {}
+    shared new jumpIfParityEven extends opcode(#ea, 3) {}
+    shared new jumpIfParityOdd extends opcode(#e2, 3) {}
+    shared new jumpIfPlus extends opcode(#f2, 3) {}
+    shared new jumpIfZero extends opcode(#ca, 3) {}
+    shared new loadAccumulatorB extends opcode(#0a) {}
+    shared new loadAccumulatorD extends opcode(#1a) {}
+    shared new loadAccumulatorDirect extends opcode(#3a, 3) {}
+    shared new loadHLDirect extends opcode(#2a, 3) {}
+    shared new loadPairImmediateB extends opcode(#01, 3) {}
+    shared new loadPairImmediateD extends opcode(#11, 3) {}
+    shared new loadPairImmediateH extends opcode(#21, 3) {}
+    shared new loadPairImmediateStackPointer extends opcode(#31, 3) {}
+    shared new loadProgramCounter extends opcode(#e9) {}
+    shared new loadStackPointer extends opcode(#f9) {}
+    shared new moveAA extends opcode(#7f) {}
+    shared new moveAB extends opcode(#78) {}
+    shared new moveAC extends opcode(#79) {}
+    shared new moveAD extends opcode(#7a) {}
+    shared new moveAE extends opcode(#7b) {}
+    shared new moveAH extends opcode(#7c) {}
+    shared new moveAL extends opcode(#7d) {}
+    shared new moveAMemory extends opcode(#7e) {}
+    shared new moveBA extends opcode(#47) {}
+    shared new moveBB extends opcode(#40) {}
+    shared new moveBC extends opcode(#41) {}
+    shared new moveBD extends opcode(#42) {}
+    shared new moveBE extends opcode(#43) {}
+    shared new moveBH extends opcode(#44) {}
+    shared new moveBL extends opcode(#45) {}
+    shared new moveBMemory extends opcode(#46) {}
+    shared new moveCA extends opcode(#4f) {}
+    shared new moveCB extends opcode(#48) {}
+    shared new moveCC extends opcode(#49) {}
+    shared new moveCD extends opcode(#4a) {}
+    shared new moveCE extends opcode(#4b) {}
+    shared new moveCH extends opcode(#4c) {}
+    shared new moveCL extends opcode(#4d) {}
+    shared new moveCMemory extends opcode(#4e) {}
+    shared new moveDA extends opcode(#57) {}
+    shared new moveDB extends opcode(#50) {}
+    shared new moveDC extends opcode(#51) {}
+    shared new moveDD extends opcode(#52) {}
+    shared new moveDE extends opcode(#53) {}
+    shared new moveDH extends opcode(#54) {}
+    shared new moveDL extends opcode(#55) {}
+    shared new moveDMemory extends opcode(#56) {}
+    shared new moveEA extends opcode(#5f) {}
+    shared new moveEB extends opcode(#58) {}
+    shared new moveEC extends opcode(#59) {}
+    shared new moveED extends opcode(#5a) {}
+    shared new moveEE extends opcode(#5b) {}
+    shared new moveEH extends opcode(#5c) {}
+    shared new moveEL extends opcode(#5d) {}
+    shared new moveEMemory extends opcode(#5e) {}
+    shared new moveHA extends opcode(#67) {}
+    shared new moveHB extends opcode(#60) {}
+    shared new moveHC extends opcode(#61) {}
+    shared new moveHD extends opcode(#62) {}
+    shared new moveHE extends opcode(#63) {}
+    shared new moveHH extends opcode(#64) {}
+    shared new moveHL extends opcode(#65) {}
+    shared new moveHMemory extends opcode(#66) {}
+    shared new moveLA extends opcode(#6f) {}
+    shared new moveLB extends opcode(#68) {}
+    shared new moveLC extends opcode(#69) {}
+    shared new moveLD extends opcode(#6a) {}
+    shared new moveLE extends opcode(#6b) {}
+    shared new moveLH extends opcode(#6c) {}
+    shared new moveLL extends opcode(#6d) {}
+    shared new moveLMemory extends opcode(#6e) {}
+    shared new moveImmediateA extends opcode(#3e, 2) {}
+    shared new moveImmediateB extends opcode(#06, 2) {}
+    shared new moveImmediateC extends opcode(#0e, 2) {}
+    shared new moveImmediateD extends opcode(#16, 2) {}
+    shared new moveImmediateE extends opcode(#1e, 2) {}
+    shared new moveImmediateH extends opcode(#26, 2) {}
+    shared new moveImmediateL extends opcode(#2e, 2) {}
+    shared new moveImmediateMemory extends opcode(#36, 2) {}
+    shared new moveMemoryA extends opcode(#77) {}
+    shared new moveMemoryB extends opcode(#70) {}
+    shared new moveMemoryC extends opcode(#71) {}
+    shared new moveMemoryD extends opcode(#72) {}
+    shared new moveMemoryE extends opcode(#73) {}
+    shared new moveMemoryH extends opcode(#74) {}
+    shared new moveMemoryL extends opcode(#75) {}
+    shared new noop extends opcode(#00) {}
+    shared new orA extends opcode(#b7) {}
+    shared new orB extends opcode(#b0) {}
+    shared new orC extends opcode(#b1) {}
+    shared new orD extends opcode(#b2) {}
+    shared new orE extends opcode(#b3) {}
+    shared new orH extends opcode(#b4) {}
+    shared new orL extends opcode(#b5) {}
+    shared new orImmediate extends opcode(#f6, 2) {}
+    shared new orMemory extends opcode(#b6) {}
+    shared new output extends opcode(#d3, 2) {}
+    shared new popB extends opcode(#c1) {}
+    shared new popD extends opcode(#d1) {}
+    shared new popH extends opcode(#e1) {}
+    shared new popStatus extends opcode(#f1) {}
+    shared new pushB extends opcode(#c5) {}
+    shared new pushD extends opcode(#d5) {}
+    shared new pushH extends opcode(#e5) {}
+    shared new pushStatus extends opcode(#f5) {}
+    shared new restart0 extends opcode(#c7) {}
+    shared new restart1 extends opcode(#cf) {}
+    shared new restart2 extends opcode(#d7) {}
+    shared new restart3 extends opcode(#df) {}
+    shared new restart4 extends opcode(#e7) {}
+    shared new restart5 extends opcode(#ef) {}
+    shared new restart6 extends opcode(#f7) {}
+    shared new restart7 extends opcode(#ff) {}
+    shared new \ireturn extends opcode(#c9) {}
+    shared new returnIfCarry extends opcode(#d8) {}
+    shared new returnIfMinus extends opcode(#f8) {}
+    shared new returnIfNoCarry extends opcode(#d0) {}
+    shared new returnIfNotZero extends opcode(#c0) {}
+    shared new returnIfParityEven extends opcode(#e8) {}
+    shared new returnIfParityOdd extends opcode(#e0) {}
+    shared new returnIfPlus extends opcode(#f0) {}
+    shared new returnIfZero extends opcode(#c8) {}
+    shared new rotateLeft extends opcode(#07) {}
+    shared new rotateLeftThroughCarry extends opcode(#17) {}
+    shared new rotateRight extends opcode(#0f) {}
+    shared new rotateRightThroughCarry extends opcode(#1f) {}
+    shared new setCarry extends opcode(#37) {}
+    shared new storeAccumulatorB extends opcode(#02) {}
+    shared new storeAccumulatorD extends opcode(#12) {}
+    shared new storeAccumulatorDirect extends opcode(#32, 3) {}
+    shared new storeHLDirect extends opcode(#22, 3) {}
+    shared new subtractA extends opcode(#97) {}
+    shared new subtractB extends opcode(#90) {}
+    shared new subtractC extends opcode(#91) {}
+    shared new subtractD extends opcode(#92) {}
+    shared new subtractE extends opcode(#93) {}
+    shared new subtractH extends opcode(#94) {}
+    shared new subtractL extends opcode(#95) {}
+    shared new subtractImmediate extends opcode(#d6, 2) {}
+    shared new subtractMemory extends opcode(#96) {}
+    shared new subtractAWithBorrow extends opcode(#9f) {}
+    shared new subtractBWithBorrow extends opcode(#98) {}
+    shared new subtractCWithBorrow extends opcode(#99) {}
+    shared new subtractDWithBorrow extends opcode(#9a) {}
+    shared new subtractEWithBorrow extends opcode(#9b) {}
+    shared new subtractHWithBorrow extends opcode(#9c) {}
+    shared new subtractLWithBorrow extends opcode(#9d) {}
+    shared new subtractImmediateWithBorrow extends opcode(#de, 2) {}
+    shared new subtractMemoryWithBorrow extends opcode(#9e) {}
+    shared new xorA extends opcode(#af) {}
+    shared new xorB extends opcode(#a8) {}
+    shared new xorC extends opcode(#a9) {}
+    shared new xorD extends opcode(#aa) {}
+    shared new xorE extends opcode(#ab) {}
+    shared new xorH extends opcode(#ac) {}
+    shared new xorL extends opcode(#ad) {}
+    shared new xorImmediate extends opcode(#ee, 2) {}
+    shared new xorMemory extends opcode(#ae) {}
+    
     shared actual String string => classDeclaration(this).name;
 }
-
-object addA extends Opcode(#87) {}
-object addB extends Opcode(#80) {}
-object addC extends Opcode(#81) {}
-object addD extends Opcode(#82) {}
-object addE extends Opcode(#83) {}
-object addH extends Opcode(#84) {}
-object addL extends Opcode(#85) {}
-object addImmediate extends Opcode(#c6, 2) {}
-object addMemory extends Opcode(#86) {}
-object addAWithCarry extends Opcode(#8f) {}
-object addBWithCarry extends Opcode(#88) {}
-object addCWithCarry extends Opcode(#89) {}
-object addDWithCarry extends Opcode(#8a) {}
-object addEWithCarry extends Opcode(#8b) {}
-object addHWithCarry extends Opcode(#8c) {}
-object addLWithCarry extends Opcode(#8d) {}
-object addImmediateWithCarry extends Opcode(#ce, 2) {}
-object addMemoryWithCarry extends Opcode(#8e) {}
-object andA extends Opcode(#a7) {}
-object andB extends Opcode(#a0) {}
-object andC extends Opcode(#a1) {}
-object andD extends Opcode(#a2) {}
-object andE extends Opcode(#a3) {}
-object andH extends Opcode(#a4) {}
-object andL extends Opcode(#a5) {}
-object andImmediate extends Opcode(#e6, 2) {}
-object andMemory extends Opcode(#a6) {}
-object call extends Opcode(#cd, 3) {}
-object callIfCarry extends Opcode(#dc, 3) {}
-object callIfMinus extends Opcode(#fc, 3) {}
-object callIfNoCarry extends Opcode(#d4, 3) {}
-object callIfNotZero extends Opcode(#c4, 3) {}
-object callIfParityEven extends Opcode(#ec, 3) {}
-object callIfParityOdd extends Opcode(#e4, 3) {}
-object callIfPlus extends Opcode(#f4, 3) {}
-object callIfZero extends Opcode(#cc, 3) {}
-object compareA extends Opcode(#bf) {}
-object compareB extends Opcode(#b8) {}
-object compareC extends Opcode(#b9) {}
-object compareD extends Opcode(#ba) {}
-object compareE extends Opcode(#bb) {}
-object compareH extends Opcode(#bc) {}
-object compareL extends Opcode(#bd) {}
-object compareImmediate extends Opcode(#fe, 2) {}
-object compareMemory extends Opcode(#be) {}
-object complementAccumulator extends Opcode(#2f) {}
-object complementCarry extends Opcode(#3f) {}
-object decimalAdjust extends Opcode(#27) {}
-object decrementA extends Opcode(#3d) {}
-object decrementB extends Opcode(#05) {}
-object decrementC extends Opcode(#0d) {}
-object decrementD extends Opcode(#15) {}
-object decrementE extends Opcode(#1d) {}
-object decrementH extends Opcode(#25) {}
-object decrementL extends Opcode(#2d) {}
-object decrementMemory extends Opcode(#35) {}
-object decrementPairB extends Opcode(#0b) {}
-object decrementPairD extends Opcode(#1b) {}
-object decrementPairH extends Opcode(#2b) {}
-object decrementPairStackPointer extends Opcode(#3b) {}
-object disableInterrupts extends Opcode(#f3) {}
-object doubleAddB extends Opcode(#09) {}
-object doubleAddD extends Opcode(#19) {}
-object doubleAddH extends Opcode(#29) {}
-object doubleAddStackPointer extends Opcode(#39) {}
-object enableInterrupts extends Opcode(#fb) {}
-object exchangeRegisters extends Opcode(#eb) {}
-object exchangeStack extends Opcode(#e3) {}
-object halt extends Opcode(#76) {}
-object incrementA extends Opcode(#3c) {}
-object incrementB extends Opcode(#04) {}
-object incrementC extends Opcode(#0c) {}
-object incrementD extends Opcode(#14) {}
-object incrementE extends Opcode(#1c) {}
-object incrementH extends Opcode(#24) {}
-object incrementL extends Opcode(#2c) {}
-object incrementMemory extends Opcode(#34) {}
-object incrementPairB extends Opcode(#03) {}
-object incrementPairD extends Opcode(#13) {}
-object incrementPairH extends Opcode(#23) {}
-object incrementPairStackPointer extends Opcode(#33) {}
-object input extends Opcode(#db, 2) {}
-object jump extends Opcode(#c3, 3) {}
-object jumpIfCarry extends Opcode(#da, 3) {}
-object jumpIfNoCarry extends Opcode(#d2, 3) {}
-object jumpIfNotZero extends Opcode(#c2, 3) {}
-object jumpIfMinus extends Opcode(#fa, 3) {}
-object jumpIfParityEven extends Opcode(#ea, 3) {}
-object jumpIfParityOdd extends Opcode(#e2, 3) {}
-object jumpIfPlus extends Opcode(#f2, 3) {}
-object jumpIfZero extends Opcode(#ca, 3) {}
-object loadAccumulatorB extends Opcode(#0a) {}
-object loadAccumulatorD extends Opcode(#1a) {}
-object loadAccumulatorDirect extends Opcode(#3a, 3) {}
-object loadHLDirect extends Opcode(#2a, 3) {}
-object loadPairImmediateB extends Opcode(#01, 3) {}
-object loadPairImmediateD extends Opcode(#11, 3) {}
-object loadPairImmediateH extends Opcode(#21, 3) {}
-object loadPairImmediateStackPointer extends Opcode(#31, 3) {}
-object loadProgramCounter extends Opcode(#e9) {}
-object loadStackPointer extends Opcode(#f9) {}
-object moveAA extends Opcode(#7f) {}
-object moveAB extends Opcode(#78) {}
-object moveAC extends Opcode(#79) {}
-object moveAD extends Opcode(#7a) {}
-object moveAE extends Opcode(#7b) {}
-object moveAH extends Opcode(#7c) {}
-object moveAL extends Opcode(#7d) {}
-object moveAMemory extends Opcode(#7e) {}
-object moveBA extends Opcode(#47) {}
-object moveBB extends Opcode(#40) {}
-object moveBC extends Opcode(#41) {}
-object moveBD extends Opcode(#42) {}
-object moveBE extends Opcode(#43) {}
-object moveBH extends Opcode(#44) {}
-object moveBL extends Opcode(#45) {}
-object moveBMemory extends Opcode(#46) {}
-object moveCA extends Opcode(#4f) {}
-object moveCB extends Opcode(#48) {}
-object moveCC extends Opcode(#49) {}
-object moveCD extends Opcode(#4a) {}
-object moveCE extends Opcode(#4b) {}
-object moveCH extends Opcode(#4c) {}
-object moveCL extends Opcode(#4d) {}
-object moveCMemory extends Opcode(#4e) {}
-object moveDA extends Opcode(#57) {}
-object moveDB extends Opcode(#50) {}
-object moveDC extends Opcode(#51) {}
-object moveDD extends Opcode(#52) {}
-object moveDE extends Opcode(#53) {}
-object moveDH extends Opcode(#54) {}
-object moveDL extends Opcode(#55) {}
-object moveDMemory extends Opcode(#56) {}
-object moveEA extends Opcode(#5f) {}
-object moveEB extends Opcode(#58) {}
-object moveEC extends Opcode(#59) {}
-object moveED extends Opcode(#5a) {}
-object moveEE extends Opcode(#5b) {}
-object moveEH extends Opcode(#5c) {}
-object moveEL extends Opcode(#5d) {}
-object moveEMemory extends Opcode(#5e) {}
-object moveHA extends Opcode(#67) {}
-object moveHB extends Opcode(#60) {}
-object moveHC extends Opcode(#61) {}
-object moveHD extends Opcode(#62) {}
-object moveHE extends Opcode(#63) {}
-object moveHH extends Opcode(#64) {}
-object moveHL extends Opcode(#65) {}
-object moveHMemory extends Opcode(#66) {}
-object moveLA extends Opcode(#6f) {}
-object moveLB extends Opcode(#68) {}
-object moveLC extends Opcode(#69) {}
-object moveLD extends Opcode(#6a) {}
-object moveLE extends Opcode(#6b) {}
-object moveLH extends Opcode(#6c) {}
-object moveLL extends Opcode(#6d) {}
-object moveLMemory extends Opcode(#6e) {}
-object moveImmediateA extends Opcode(#3e, 2) {}
-object moveImmediateB extends Opcode(#06, 2) {}
-object moveImmediateC extends Opcode(#0e, 2) {}
-object moveImmediateD extends Opcode(#16, 2) {}
-object moveImmediateE extends Opcode(#1e, 2) {}
-object moveImmediateH extends Opcode(#26, 2) {}
-object moveImmediateL extends Opcode(#2e, 2) {}
-object moveImmediateMemory extends Opcode(#36, 2) {}
-object moveMemoryA extends Opcode(#77) {}
-object moveMemoryB extends Opcode(#70) {}
-object moveMemoryC extends Opcode(#71) {}
-object moveMemoryD extends Opcode(#72) {}
-object moveMemoryE extends Opcode(#73) {}
-object moveMemoryH extends Opcode(#74) {}
-object moveMemoryL extends Opcode(#75) {}
-object noop extends Opcode(#00) {}
-object orA extends Opcode(#b7) {}
-object orB extends Opcode(#b0) {}
-object orC extends Opcode(#b1) {}
-object orD extends Opcode(#b2) {}
-object orE extends Opcode(#b3) {}
-object orH extends Opcode(#b4) {}
-object orL extends Opcode(#b5) {}
-object orImmediate extends Opcode(#f6, 2) {}
-object orMemory extends Opcode(#b6) {}
-object output extends Opcode(#d3, 2) {}
-object popB extends Opcode(#c1) {}
-object popD extends Opcode(#d1) {}
-object popH extends Opcode(#e1) {}
-object popStatus extends Opcode(#f1) {}
-object pushB extends Opcode(#c5) {}
-object pushD extends Opcode(#d5) {}
-object pushH extends Opcode(#e5) {}
-object pushStatus extends Opcode(#f5) {}
-object restart0 extends Opcode(#c7) {}
-object restart1 extends Opcode(#cf) {}
-object restart2 extends Opcode(#d7) {}
-object restart3 extends Opcode(#df) {}
-object restart4 extends Opcode(#e7) {}
-object restart5 extends Opcode(#ef) {}
-object restart6 extends Opcode(#f7) {}
-object restart7 extends Opcode(#ff) {}
-object \ireturn extends Opcode(#c9) {}
-object returnIfCarry extends Opcode(#d8) {}
-object returnIfMinus extends Opcode(#f8) {}
-object returnIfNoCarry extends Opcode(#d0) {}
-object returnIfNotZero extends Opcode(#c0) {}
-object returnIfParityEven extends Opcode(#e8) {}
-object returnIfParityOdd extends Opcode(#e0) {}
-object returnIfPlus extends Opcode(#f0) {}
-object returnIfZero extends Opcode(#c8) {}
-object rotateLeft extends Opcode(#07) {}
-object rotateLeftThroughCarry extends Opcode(#17) {}
-object rotateRight extends Opcode(#0f) {}
-object rotateRightThroughCarry extends Opcode(#1f) {}
-object setCarry extends Opcode(#37) {}
-object storeAccumulatorB extends Opcode(#02) {}
-object storeAccumulatorD extends Opcode(#12) {}
-object storeAccumulatorDirect extends Opcode(#32, 3) {}
-object storeHLDirect extends Opcode(#22, 3) {}
-object subtractA extends Opcode(#97) {}
-object subtractB extends Opcode(#90) {}
-object subtractC extends Opcode(#91) {}
-object subtractD extends Opcode(#92) {}
-object subtractE extends Opcode(#93) {}
-object subtractH extends Opcode(#94) {}
-object subtractL extends Opcode(#95) {}
-object subtractImmediate extends Opcode(#d6, 2) {}
-object subtractMemory extends Opcode(#96) {}
-object subtractAWithBorrow extends Opcode(#9f) {}
-object subtractBWithBorrow extends Opcode(#98) {}
-object subtractCWithBorrow extends Opcode(#99) {}
-object subtractDWithBorrow extends Opcode(#9a) {}
-object subtractEWithBorrow extends Opcode(#9b) {}
-object subtractHWithBorrow extends Opcode(#9c) {}
-object subtractLWithBorrow extends Opcode(#9d) {}
-object subtractImmediateWithBorrow extends Opcode(#de, 2) {}
-object subtractMemoryWithBorrow extends Opcode(#9e) {}
-object xorA extends Opcode(#af) {}
-object xorB extends Opcode(#a8) {}
-object xorC extends Opcode(#a9) {}
-object xorD extends Opcode(#aa) {}
-object xorE extends Opcode(#ab) {}
-object xorH extends Opcode(#ac) {}
-object xorL extends Opcode(#ad) {}
-object xorImmediate extends Opcode(#ee, 2) {}
-object xorMemory extends Opcode(#ae) {}
 
 shared Map<Byte,Opcode> opcodes = map(`Opcode`.caseValues.collect((opcode) => opcode.byte->opcode));
