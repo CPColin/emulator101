@@ -1,3 +1,7 @@
+import com.crappycomic.emulator101 {
+    Opcode { ... }
+}
+
 import java.lang {
     JInteger=Integer,
     JString=String

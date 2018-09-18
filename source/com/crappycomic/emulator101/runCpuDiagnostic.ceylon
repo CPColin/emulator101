@@ -11,7 +11,7 @@ shared void runCpuDiagnostic() {
     
     variable value state = initialState(memory).with {
         stateProgramCounter->initialProgramCounter,
-        5->\ireturn.byte // Return from system call
+        5->Opcode.\ireturn.byte // Return from system call
     };
     
     while (true) {

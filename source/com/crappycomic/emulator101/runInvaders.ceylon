@@ -24,7 +24,7 @@ shared void runInvaders() {
     code.copyTo(memory);
     
     "Clock divider for slower machines (my laptop) to get consistent emulation speed."
-    value throttle = 3;
+    value throttle = 1;
     value cyclesPerSecond = 2_000_000 / throttle;
     value framesPerSecond = 60 / throttle;
     value interruptsPerSecond = framesPerSecond * 2;
@@ -92,6 +92,13 @@ shared void runInvaders() {
     value timer = Timer(true);
     
     timer.scheduleAtFixedRate(object extends TimerTask() {
+        import com.crappycomic.emulator101 {
+            Opcode {
+                restart1,
+                restart2
+            }
+        }
+        
         variable Opcode nextInterrupt = restart1;
         
         shared actual void run() {
