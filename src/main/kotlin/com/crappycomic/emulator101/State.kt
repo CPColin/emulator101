@@ -11,6 +11,8 @@ data class State(
 
     val flagZero: Boolean = false,
 
+    val interruptsEnabled: Boolean = false,
+
     val memory: Memory,
 
     val programCounter: UShort = 0.toUShort(),

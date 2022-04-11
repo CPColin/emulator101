@@ -69,10 +69,12 @@ fun disassemble(state: State) {
         Opcode.DECREMENT_PAIR_D -> "DCX" to "D"
         Opcode.DECREMENT_PAIR_H -> "DCX" to "H"
         Opcode.DECREMENT_PAIR_STACK_POINTER -> "DCX" to "SP"
+        Opcode.DISABLE_INTERRUPTS -> "DI" to null
         Opcode.DOUBLE_ADD_B -> "DAD" to "B"
         Opcode.DOUBLE_ADD_D -> "DAD" to "D"
         Opcode.DOUBLE_ADD_H -> "DAD" to "H"
         Opcode.DOUBLE_ADD_STACK_POINTER -> "DAD" to "SP"
+        Opcode.ENABLE_INTERRUPTS -> "EI" to null
         Opcode.EXCHANGE_REGISTERS -> "XCHG" to null
         Opcode.EXCHANGE_STACK -> "XTHL" to null
         Opcode.HALT -> "HLT" to null

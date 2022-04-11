@@ -72,11 +72,13 @@ fun emulate(state: State): EmulationResult {
         Opcode.DECREMENT_PAIR_D -> ::emulateDecrementPairD
         Opcode.DECREMENT_PAIR_H -> ::emulateDecrementPairH
         Opcode.DECREMENT_PAIR_STACK_POINTER -> ::emulateDecrementPairStackPointer
+        Opcode.DISABLE_INTERRUPTS -> ::emulateDisableInterrupts
         Opcode.DOUBLE_ADD_B -> emulateDoubleAdd(State::registerB, State::registerC)
         Opcode.DOUBLE_ADD_D -> emulateDoubleAdd(State::registerD, State::registerE)
         Opcode.DOUBLE_ADD_H -> emulateDoubleAdd(State::registerH, State::registerL)
         Opcode.DOUBLE_ADD_STACK_POINTER ->
             emulateDoubleAdd(State::stackPointerHigh, State::stackPointerLow)
+        Opcode.ENABLE_INTERRUPTS -> ::emulateEnableInterrupts
         Opcode.EXCHANGE_REGISTERS -> ::emulateExchangeRegisters
         Opcode.EXCHANGE_STACK -> ::emulateExchangeStack
         Opcode.HALT -> ::emulateHalt
@@ -595,6 +597,12 @@ fun emulateDecrementPairStackPointer(state: State) =
         stackPointer = state.stackPointer sub 1
     ) to 5
 
+fun emulateDisableInterrupts(state: State) =
+    state.copy(
+        interruptsEnabled = false,
+        programCounter = state.nextProgramCounter
+    ) to 4
+
 fun emulateDoubleAdd(highRegister: Register, lowRegister: Register) = { state: State ->
     val result =
         word(state.registerH, state.registerL) + word(highRegister(state), lowRegister(state))
@@ -607,6 +615,12 @@ fun emulateDoubleAdd(highRegister: Register, lowRegister: Register) = { state: S
         registerL = resultLow
     ) to 10
 }
+
+fun emulateEnableInterrupts(state: State) =
+    state.copy(
+        interruptsEnabled = true,
+        programCounter = state.nextProgramCounter
+    ) to 4
 
 fun emulateExchangeRegisters(state: State) =
     state.copy(
