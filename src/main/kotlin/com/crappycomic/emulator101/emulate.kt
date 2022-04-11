@@ -71,12 +71,14 @@ fun emulate(state: State): EmulationResult {
         Opcode.DECREMENT_PAIR_B -> ::emulateDecrementPairB
         Opcode.DECREMENT_PAIR_D -> ::emulateDecrementPairD
         Opcode.DECREMENT_PAIR_H -> ::emulateDecrementPairH
+        Opcode.DECREMENT_PAIR_STACK_POINTER -> ::emulateDecrementPairStackPointer
         Opcode.DOUBLE_ADD_B -> emulateDoubleAdd(State::registerB, State::registerC)
         Opcode.DOUBLE_ADD_D -> emulateDoubleAdd(State::registerD, State::registerE)
         Opcode.DOUBLE_ADD_H -> emulateDoubleAdd(State::registerH, State::registerL)
         Opcode.DOUBLE_ADD_STACK_POINTER ->
             emulateDoubleAdd(State::stackPointerHigh, State::stackPointerLow)
         Opcode.EXCHANGE_REGISTERS -> ::emulateExchangeRegisters
+        Opcode.EXCHANGE_STACK -> ::emulateExchangeStack
         Opcode.INCREMENT_A -> ::emulateIncrementA
         Opcode.INCREMENT_B -> ::emulateIncrementB
         Opcode.INCREMENT_C -> ::emulateIncrementC
@@ -88,6 +90,7 @@ fun emulate(state: State): EmulationResult {
         Opcode.INCREMENT_PAIR_B -> ::emulateIncrementPairB
         Opcode.INCREMENT_PAIR_D -> ::emulateIncrementPairD
         Opcode.INCREMENT_PAIR_H -> ::emulateIncrementPairH
+        Opcode.INCREMENT_PAIR_STACK_POINTER -> ::emulateIncrementPairStackPointer
         Opcode.JUMP -> emulateJumpIf { true }
         Opcode.JUMP_IF_CARRY -> emulateJumpIf(State::flagCarry)
         Opcode.JUMP_IF_MINUS -> emulateJumpIf(State::flagSignMinus)
@@ -107,6 +110,8 @@ fun emulate(state: State): EmulationResult {
         Opcode.LOAD_PAIR_IMMEDIATE_D -> ::emulateLoadPairImmediateD
         Opcode.LOAD_PAIR_IMMEDIATE_H -> ::emulateLoadPairImmediateH
         Opcode.LOAD_PAIR_IMMEDIATE_STACK_POINTER -> ::emulateLoadPairImmediateStackPointer
+        Opcode.LOAD_PROGRAM_COUNTER -> ::emulateLoadProgramCounter
+        Opcode.LOAD_STACK_POINTER -> ::emulateLoadStackPointer
         Opcode.MOVE_A_A -> emulateMoveA(State::registerA)
         Opcode.MOVE_A_B -> emulateMoveA(State::registerB)
         Opcode.MOVE_A_C -> emulateMoveA(State::registerC)
@@ -583,6 +588,12 @@ fun emulateDecrementPairH(state: State) =
         ) to 5
     }
 
+fun emulateDecrementPairStackPointer(state: State) =
+    state.copy(
+        programCounter = state.nextProgramCounter,
+        stackPointer = state.stackPointer sub 1
+    ) to 5
+
 fun emulateDoubleAdd(highRegister: Register, lowRegister: Register) = { state: State ->
     val result =
         word(state.registerH, state.registerL) + word(highRegister(state), lowRegister(state))
@@ -604,6 +615,17 @@ fun emulateExchangeRegisters(state: State) =
         registerH = state.registerD,
         registerL = state.registerE
     ) to 5
+
+fun emulateExchangeStack(state: State) =
+    state.copy(
+        memory = state.memory.with(
+            state.stackPointer add 1 to state.registerH,
+            state.stackPointer to state.registerL
+        ),
+        programCounter = state.nextProgramCounter,
+        registerH = state.memory[state.stackPointer add 1],
+        registerL = state.memory[state.stackPointer],
+    ) to 18
 
 fun emulateIncrementA(state: State) =
     (state.registerA add 1).let { result ->
@@ -739,6 +761,12 @@ fun emulateIncrementPairH(state: State) =
         ) to 5
     }
 
+fun emulateIncrementPairStackPointer(state: State) =
+    state.copy(
+        programCounter = state.nextProgramCounter,
+        stackPointer = state.stackPointer add 1
+    ) to 5
+
 fun emulateJumpIf(predicate: (State) -> Boolean) = { state: State ->
     if (predicate(state)) {
         state.copy(programCounter = state.dataWord) to 10
@@ -802,6 +830,17 @@ fun emulateLoadPairImmediateStackPointer(state: State) =
         programCounter = state.nextProgramCounter,
         stackPointer = state.dataWord
     ) to 10
+
+fun emulateLoadProgramCounter(state: State) =
+    state.copy(
+        programCounter = word(state.registerH, state.registerL)
+    ) to 5
+
+fun emulateLoadStackPointer(state: State) =
+    state.copy(
+        programCounter = state.nextProgramCounter,
+        stackPointer = word(state.registerH, state.registerL)
+    ) to 5
 
 fun emulateMoveA(register: Register) = { state: State ->
     state.copy(

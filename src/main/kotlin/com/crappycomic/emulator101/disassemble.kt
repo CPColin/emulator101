@@ -68,11 +68,13 @@ fun disassemble(state: State) {
         Opcode.DECREMENT_PAIR_B -> "DCX" to "B"
         Opcode.DECREMENT_PAIR_D -> "DCX" to "D"
         Opcode.DECREMENT_PAIR_H -> "DCX" to "H"
+        Opcode.DECREMENT_PAIR_STACK_POINTER -> "DCX" to "SP"
         Opcode.DOUBLE_ADD_B -> "DAD" to "B"
         Opcode.DOUBLE_ADD_D -> "DAD" to "D"
         Opcode.DOUBLE_ADD_H -> "DAD" to "H"
         Opcode.DOUBLE_ADD_STACK_POINTER -> "DAD" to "SP"
         Opcode.EXCHANGE_REGISTERS -> "XCHG" to null
+        Opcode.EXCHANGE_STACK -> "XTHL" to null
         Opcode.INCREMENT_A -> "INR" to "A"
         Opcode.INCREMENT_B -> "INR" to "B"
         Opcode.INCREMENT_C -> "INR" to "C"
@@ -84,6 +86,7 @@ fun disassemble(state: State) {
         Opcode.INCREMENT_PAIR_B -> "INX" to "B"
         Opcode.INCREMENT_PAIR_D -> "INX" to "D"
         Opcode.INCREMENT_PAIR_H -> "INX" to "H"
+        Opcode.INCREMENT_PAIR_STACK_POINTER -> "INX" to "SP"
         Opcode.JUMP -> "JMP" to "$"
         Opcode.JUMP_IF_CARRY -> "JC" to "$"
         Opcode.JUMP_IF_MINUS -> "JM" to "$"
@@ -101,6 +104,8 @@ fun disassemble(state: State) {
         Opcode.LOAD_PAIR_IMMEDIATE_D -> "LXI" to "D,#"
         Opcode.LOAD_PAIR_IMMEDIATE_H -> "LXI" to "H,#"
         Opcode.LOAD_PAIR_IMMEDIATE_STACK_POINTER -> "LXI" to "SP,#"
+        Opcode.LOAD_PROGRAM_COUNTER -> "PCHL" to null
+        Opcode.LOAD_STACK_POINTER -> "SPHL" to null
         Opcode.MOVE_A_A -> "MOV" to "A,A"
         Opcode.MOVE_A_B -> "MOV" to "A,B"
         Opcode.MOVE_A_C -> "MOV" to "A,C"
