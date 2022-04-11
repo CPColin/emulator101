@@ -29,7 +29,9 @@ data class State(
 
     val registerL: UByte = 0.toUByte(),
 
-    val stackPointer: UShort = 0.toUShort()
+    val stackPointer: UShort = 0.toUShort(),
+
+    val stopped: Boolean = false
 ) {
     val dataByte = memory[programCounter add 1]
 

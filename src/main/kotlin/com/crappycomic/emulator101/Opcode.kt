@@ -111,6 +111,7 @@ enum class Opcode(val byte: UByte, val size: Int = 1) {
     MOVE_MEMORY_E(0x73),
     MOVE_MEMORY_H(0x74),
     MOVE_MEMORY_L(0x75),
+    HALT(0x76),
     MOVE_MEMORY_A(0x77),
     MOVE_A_B(0x78),
     MOVE_A_C(0x79),

@@ -75,6 +75,7 @@ fun disassemble(state: State) {
         Opcode.DOUBLE_ADD_STACK_POINTER -> "DAD" to "SP"
         Opcode.EXCHANGE_REGISTERS -> "XCHG" to null
         Opcode.EXCHANGE_STACK -> "XTHL" to null
+        Opcode.HALT -> "HLT" to null
         Opcode.INCREMENT_A -> "INR" to "A"
         Opcode.INCREMENT_B -> "INR" to "B"
         Opcode.INCREMENT_C -> "INR" to "C"

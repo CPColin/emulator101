@@ -6,7 +6,7 @@ data class Memory(
     val size: UShort
 ) {
     constructor(
-        initialValues: ByteArray,
+        initialValues: ByteArray = ByteArray(0),
         initialValuesOffset: Int = 0,
         size: Int
     ) : this(

@@ -79,6 +79,7 @@ fun emulate(state: State): EmulationResult {
             emulateDoubleAdd(State::stackPointerHigh, State::stackPointerLow)
         Opcode.EXCHANGE_REGISTERS -> ::emulateExchangeRegisters
         Opcode.EXCHANGE_STACK -> ::emulateExchangeStack
+        Opcode.HALT -> ::emulateHalt
         Opcode.INCREMENT_A -> ::emulateIncrementA
         Opcode.INCREMENT_B -> ::emulateIncrementB
         Opcode.INCREMENT_C -> ::emulateIncrementC
@@ -626,6 +627,12 @@ fun emulateExchangeStack(state: State) =
         registerH = state.memory[state.stackPointer add 1],
         registerL = state.memory[state.stackPointer],
     ) to 18
+
+fun emulateHalt(state: State) =
+    state.copy(
+        programCounter = state.nextProgramCounter,
+        stopped = true
+    ) to 7
 
 fun emulateIncrementA(state: State) =
     (state.registerA add 1).let { result ->
