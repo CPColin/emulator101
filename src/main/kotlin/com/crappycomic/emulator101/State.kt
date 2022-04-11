@@ -45,6 +45,14 @@ data class State(
 
     val flagParityOdd = !flagParity
 
+    val flags = 0.toUByte()
+        .set(FLAG_BIT_CARRY, flagCarry)
+        .set(1, true) // Unused, always high (living the dream)
+        .set(FLAG_BIT_PARITY, flagParity)
+        .set(FLAG_BIT_AUXILIARY_CARRY, flagAuxiliaryCarry)
+        .set(FLAG_BIT_ZERO, flagZero)
+        .set(FLAG_BIT_SIGN, flagSign)
+
     val flagSignMinus = flagSign
 
     val flagSignPlus = !flagSign
@@ -59,7 +67,23 @@ data class State(
 
     val stackBytes = memory[stackPointer add 1] to memory[stackPointer]
 
+    val stackPointerHigh = bytes(stackPointer).first
+
+    val stackPointerLow = bytes(stackPointer).second
+
     val stackWord = stackBytes.let { word(it.first, it.second) }
 
     fun withNextProgramCounter() = copy(programCounter = nextProgramCounter)
+
+    companion object {
+        const val FLAG_BIT_CARRY = 0
+
+        const val FLAG_BIT_PARITY = 2
+
+        const val FLAG_BIT_AUXILIARY_CARRY = 4
+
+        const val FLAG_BIT_ZERO = 6
+
+        const val FLAG_BIT_SIGN = 7
+    }
 }

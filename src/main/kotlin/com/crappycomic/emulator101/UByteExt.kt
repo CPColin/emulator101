@@ -17,6 +17,8 @@ fun UByte.set(bit: Int, value: Boolean): UByte =
 
 infix fun UByte.shl(bitCount: Int): UByte = (this.toUInt() shl bitCount).toUByte()
 
+infix fun UByte.shr(bitCount: Int): UByte = (this.toUInt() shr bitCount).toUByte()
+
 infix fun UByte.sub(value: Int): UByte = this sub value.toUByte()
 
 infix fun UByte.sub(value: UByte): UByte = (this - value).toUByte()

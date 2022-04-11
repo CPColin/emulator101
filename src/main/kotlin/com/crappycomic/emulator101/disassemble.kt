@@ -54,6 +54,9 @@ fun disassemble(state: State) {
         Opcode.COMPARE_IMMEDIATE -> "CPI" to "#"
         Opcode.COMPARE_L -> "CMP" to "L"
         Opcode.COMPARE_MEMORY -> "CMP" to "M"
+        Opcode.COMPLEMENT_ACCUMULATOR -> "CMA" to null
+        Opcode.COMPLEMENT_CARRY -> "CMC" to null
+        Opcode.DECIMAL_ADJUST -> "DAA" to null
         Opcode.DECREMENT_A -> "DCR" to "A"
         Opcode.DECREMENT_B -> "DCR" to "B"
         Opcode.DECREMENT_C -> "DCR" to "C"
@@ -65,6 +68,10 @@ fun disassemble(state: State) {
         Opcode.DECREMENT_PAIR_B -> "DCX" to "B"
         Opcode.DECREMENT_PAIR_D -> "DCX" to "D"
         Opcode.DECREMENT_PAIR_H -> "DCX" to "H"
+        Opcode.DOUBLE_ADD_B -> "DAD" to "B"
+        Opcode.DOUBLE_ADD_D -> "DAD" to "D"
+        Opcode.DOUBLE_ADD_H -> "DAD" to "H"
+        Opcode.DOUBLE_ADD_STACK_POINTER -> "DAD" to "SP"
         Opcode.EXCHANGE_REGISTERS -> "XCHG" to null
         Opcode.INCREMENT_A -> "INR" to "A"
         Opcode.INCREMENT_B -> "INR" to "B"
@@ -174,7 +181,14 @@ fun disassemble(state: State) {
         Opcode.OR_IMMEDIATE -> "ORI" to "#"
         Opcode.OR_L -> "ORA" to "L"
         Opcode.OR_MEMORY -> "ORA" to "M"
+        Opcode.POP_B -> "POP" to "B"
+        Opcode.POP_D -> "POP" to "D"
+        Opcode.POP_H -> "POP" to "H"
+        Opcode.POP_STATUS -> "POP" to "PSW"
+        Opcode.PUSH_B -> "PUSH" to "B"
         Opcode.PUSH_D -> "PUSH" to "D"
+        Opcode.PUSH_H -> "PUSH" to "H"
+        Opcode.PUSH_STATUS -> "PUSH" to "PSW"
         Opcode.RETURN -> "RET" to null
         Opcode.RETURN_IF_CARRY -> "RC" to null
         Opcode.RETURN_IF_MINUS -> "RM" to null
@@ -184,7 +198,11 @@ fun disassemble(state: State) {
         Opcode.RETURN_IF_PARITY_ODD -> "RPO" to null
         Opcode.RETURN_IF_PLUS -> "RP" to null
         Opcode.RETURN_IF_ZERO -> "RZ" to null
-        Opcode.ROTATE_LEFT -> "RLC" to null
+        Opcode.ROTATE_LEFT -> "RLC" to null // RLC and RAL feel backwards
+        Opcode.ROTATE_LEFT_THROUGH_CARRY -> "RAL" to null
+        Opcode.ROTATE_RIGHT -> "RRC" to null // RRC and RAR feel backwards
+        Opcode.ROTATE_RIGHT_THROUGH_CARRY -> "RAR" to null
+        Opcode.SET_CARRY -> "STC" to null
         Opcode.STORE_ACCUMULATOR_B -> "STX" to "B"
         Opcode.STORE_ACCUMULATOR_D -> "STX" to "D"
         Opcode.STORE_ACCUMULATOR_DIRECT -> "STA" to "$"
