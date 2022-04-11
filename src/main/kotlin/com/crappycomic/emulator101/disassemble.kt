@@ -197,6 +197,14 @@ fun disassemble(state: State) {
         Opcode.PUSH_D -> "PUSH" to "D"
         Opcode.PUSH_H -> "PUSH" to "H"
         Opcode.PUSH_STATUS -> "PUSH" to "PSW"
+        Opcode.RESTART_0 -> "RST" to "0"
+        Opcode.RESTART_1 -> "RST" to "1"
+        Opcode.RESTART_2 -> "RST" to "2"
+        Opcode.RESTART_3 -> "RST" to "3"
+        Opcode.RESTART_4 -> "RST" to "4"
+        Opcode.RESTART_5 -> "RST" to "5"
+        Opcode.RESTART_6 -> "RST" to "6"
+        Opcode.RESTART_7 -> "RST" to "7"
         Opcode.RETURN -> "RET" to null
         Opcode.RETURN_IF_CARRY -> "RC" to null
         Opcode.RETURN_IF_MINUS -> "RM" to null

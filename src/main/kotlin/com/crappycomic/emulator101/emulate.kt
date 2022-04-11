@@ -203,6 +203,14 @@ fun emulate(state: State): EmulationResult {
         Opcode.PUSH_D -> emulatePush(State::registerD, State::registerE)
         Opcode.PUSH_H -> emulatePush(State::registerH, State::registerL)
         Opcode.PUSH_STATUS -> emulatePush(State::registerA, State::flags)
+        Opcode.RESTART_0 -> emulateRestart(0)
+        Opcode.RESTART_1 -> emulateRestart(1)
+        Opcode.RESTART_2 -> emulateRestart(2)
+        Opcode.RESTART_3 -> emulateRestart(3)
+        Opcode.RESTART_4 -> emulateRestart(4)
+        Opcode.RESTART_5 -> emulateRestart(5)
+        Opcode.RESTART_6 -> emulateRestart(6)
+        Opcode.RESTART_7 -> emulateRestart(7)
         Opcode.RETURN -> emulateReturnIf({ true }, 10)
         Opcode.RETURN_IF_CARRY -> emulateReturnIf(State::flagCarry)
         Opcode.RETURN_IF_MINUS -> emulateReturnIf(State::flagSignMinus)
@@ -1095,6 +1103,20 @@ fun emulatePush(highRegister: Register, lowRegister: Register) = { state: State 
             state.stackPointer sub 2 to lowRegister(state)
         ),
         programCounter = state.nextProgramCounter,
+        stackPointer = state.stackPointer sub 2
+    ) to 11
+}
+
+fun emulateRestart(index: Int) = { state: State ->
+    val address = (index * 8).toUShort()
+    val (high, low) = bytes(state.nextProgramCounter)
+
+    state.copy(
+        memory = state.memory.with(
+            state.stackPointer sub 1 to high,
+            state.stackPointer sub 2 to low
+        ),
+        programCounter = address,
         stackPointer = state.stackPointer sub 2
     ) to 11
 }
