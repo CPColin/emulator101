@@ -94,6 +94,7 @@ fun emulate(state: State): EmulationResult {
         Opcode.INCREMENT_PAIR_D -> ::emulateIncrementPairD
         Opcode.INCREMENT_PAIR_H -> ::emulateIncrementPairH
         Opcode.INCREMENT_PAIR_STACK_POINTER -> ::emulateIncrementPairStackPointer
+        Opcode.INPUT -> ::emulateInput
         Opcode.JUMP -> emulateJumpIf { true }
         Opcode.JUMP_IF_CARRY -> emulateJumpIf(State::flagCarry)
         Opcode.JUMP_IF_MINUS -> emulateJumpIf(State::flagSignMinus)
@@ -195,6 +196,7 @@ fun emulate(state: State): EmulationResult {
         Opcode.OR_IMMEDIATE -> ::emulateOrImmediate
         Opcode.OR_L -> emulateOrRegister(State::registerL)
         Opcode.OR_MEMORY -> ::emulateOrMemory
+        Opcode.OUTPUT -> ::emulateOutput
         Opcode.POP_B -> ::emulatePopB
         Opcode.POP_D -> ::emulatePopD
         Opcode.POP_H -> ::emulatePopH
@@ -796,6 +798,12 @@ fun emulateIncrementPairStackPointer(state: State) =
         stackPointer = state.stackPointer add 1
     ) to 5
 
+fun emulateInput(state: State) =
+    state.copy(
+        programCounter = state.nextProgramCounter,
+        registerA = state.inputOutput.input(state.dataByte)
+    ) to 10
+
 fun emulateJumpIf(predicate: (State) -> Boolean) = { state: State ->
     if (predicate(state)) {
         state.copy(programCounter = state.dataWord) to 10
@@ -1057,6 +1065,12 @@ fun emulateOrRegister(register: Register) = { state: State ->
         registerA = result
     ) to 4
 }
+
+fun emulateOutput(state: State) =
+    state.copy(
+        inputOutput = state.inputOutput.output(state.dataByte, state.registerA),
+        programCounter = state.nextProgramCounter
+    ) to 10
 
 fun emulatePopB(state: State) =
     state.copy(

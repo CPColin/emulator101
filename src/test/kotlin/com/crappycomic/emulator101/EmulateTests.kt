@@ -2,6 +2,11 @@ package com.crappycomic.emulator101
 
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -59,6 +64,72 @@ class EmulateTests {
             ),
             result
         )
+    }
+
+    @Test
+    fun input() {
+        val random = Random(0)
+
+        val data = random.nextInt().toUByte()
+        val device = random.nextInt().toUByte()
+
+        val inputOutput = mock<InputOutput> {
+            whenever(mock.input(device)).doReturn(data)
+        }
+
+        val state = testState(Opcode.INPUT).let {
+            it.copy(
+                inputOutput = inputOutput,
+                memory = it.memory.with(
+                    1.toUShort() to device
+                )
+            )
+        }
+
+        val (result, _) = emulate(state)
+
+        assertEquals(
+            state.copy(
+                programCounter = state.programCounter add 2,
+                registerA = data
+            ),
+            result
+        )
+
+        verify(inputOutput).input(device)
+    }
+
+    @Test
+    fun output() {
+        val random = Random(1)
+
+        val data = random.nextInt().toUByte()
+        val device = random.nextInt().toUByte()
+
+        val inputOutput = mock<InputOutput> {
+            whenever(mock.output(device, data)).doReturn(mock)
+        }
+
+        val state = testState(Opcode.OUTPUT).let {
+            it.copy(
+                inputOutput = inputOutput,
+                memory = it.memory.with(
+                    1.toUShort() to device
+                ),
+                registerA = data
+            )
+        }
+
+        val (result, _) = emulate(state)
+
+        assertEquals(
+            state.copy(
+                programCounter = state.programCounter add 2
+            ),
+            result
+        )
+
+        verify(inputOutput).output(device, data)
     }
 
     @ParameterizedTest

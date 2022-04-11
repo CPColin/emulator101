@@ -1,5 +1,8 @@
 package com.crappycomic.emulator101
 
+/**
+ * Represents the state of the 8080 CPU and its connected [InputOutput] hardware.
+ */
 data class State(
     val flagAuxiliaryCarry: Boolean = false,
 
@@ -10,6 +13,8 @@ data class State(
     val flagSign: Boolean = false,
 
     val flagZero: Boolean = false,
+
+    val inputOutput: InputOutput = InputOutput.noop,
 
     val interruptsEnabled: Boolean = false,
 
@@ -69,13 +74,11 @@ data class State(
 
     val nextProgramCounter = programCounter add opcode.size
 
-    val stackBytes = memory[stackPointer add 1] to memory[stackPointer]
-
     val stackPointerHigh = bytes(stackPointer).first
 
     val stackPointerLow = bytes(stackPointer).second
 
-    val stackWord = stackBytes.let { word(it.first, it.second) }
+    val stackWord = word(memory[stackPointer add 1], memory[stackPointer])
 
     fun withNextProgramCounter() = copy(programCounter = nextProgramCounter)
 

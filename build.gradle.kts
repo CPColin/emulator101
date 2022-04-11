@@ -15,6 +15,9 @@ dependencies {
     // Allow for parameterized tests.
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+
+    // Wrap Mockito for better syntax.
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
 }
 
 tasks.test {
