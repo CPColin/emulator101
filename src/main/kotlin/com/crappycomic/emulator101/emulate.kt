@@ -10,7 +10,7 @@ typealias Register = (State) -> UByte
  * Emulates the instruction pointed to by the given [state] and returns the new [State] along with
  * the number of cycles it took to execute the instruction.
  */
-fun emulate(state: State): EmulationResult {
+fun emulate(state: State, machine: Any? = null): EmulationResult {
     val emulator: Emulator = when (state.opcode) {
         Opcode.ADD_A -> emulateAddRegister(State::registerA, false)
         Opcode.ADD_A_WITH_CARRY -> emulateAddRegister(State::registerA, true)
@@ -94,7 +94,7 @@ fun emulate(state: State): EmulationResult {
         Opcode.INCREMENT_PAIR_D -> ::emulateIncrementPairD
         Opcode.INCREMENT_PAIR_H -> ::emulateIncrementPairH
         Opcode.INCREMENT_PAIR_STACK_POINTER -> ::emulateIncrementPairStackPointer
-        Opcode.INPUT -> ::emulateInput
+        Opcode.INPUT -> emulateInput(machine)
         Opcode.JUMP -> emulateJumpIf { true }
         Opcode.JUMP_IF_CARRY -> emulateJumpIf(State::flagCarry)
         Opcode.JUMP_IF_MINUS -> emulateJumpIf(State::flagSignMinus)
@@ -196,7 +196,7 @@ fun emulate(state: State): EmulationResult {
         Opcode.OR_IMMEDIATE -> ::emulateOrImmediate
         Opcode.OR_L -> emulateOrRegister(State::registerL)
         Opcode.OR_MEMORY -> ::emulateOrMemory
-        Opcode.OUTPUT -> ::emulateOutput
+        Opcode.OUTPUT -> emulateOutput(machine)
         Opcode.POP_B -> ::emulatePopB
         Opcode.POP_D -> ::emulatePopD
         Opcode.POP_H -> ::emulatePopH
@@ -798,11 +798,12 @@ fun emulateIncrementPairStackPointer(state: State) =
         stackPointer = state.stackPointer add 1
     ) to 5
 
-fun emulateInput(state: State) =
+fun emulateInput(machine: Any?) = { state: State ->
     state.copy(
         programCounter = state.nextProgramCounter,
-        registerA = state.inputOutput.input(state.dataByte)
+        registerA = state.inputOutput.input(machine, state.dataByte)
     ) to 10
+}
 
 fun emulateJumpIf(predicate: (State) -> Boolean) = { state: State ->
     if (predicate(state)) {
@@ -1066,11 +1067,12 @@ fun emulateOrRegister(register: Register) = { state: State ->
     ) to 4
 }
 
-fun emulateOutput(state: State) =
+fun emulateOutput(machine: Any?) = { state: State ->
     state.copy(
-        inputOutput = state.inputOutput.output(state.dataByte, state.registerA),
+        inputOutput = state.inputOutput.output(machine, state.dataByte, state.registerA),
         programCounter = state.nextProgramCounter
     ) to 10
+}
 
 fun emulatePopB(state: State) =
     state.copy(

@@ -16,6 +16,8 @@ data class State(
 
     val inputOutput: InputOutput = InputOutput.noop,
 
+    val interrupt: Opcode? = null,
+
     val interruptsEnabled: Boolean = false,
 
     val memory: Memory,
@@ -72,7 +74,8 @@ data class State(
                 ?: error("Unsupported opcode ${format(byte)} at address ${format(programCounter)}")
         }
 
-    val nextProgramCounter = programCounter add opcode.size
+    val nextProgramCounter =
+        if (interrupt is Opcode) programCounter else programCounter add opcode.size
 
     val stackPointerHigh = bytes(stackPointer).first
 

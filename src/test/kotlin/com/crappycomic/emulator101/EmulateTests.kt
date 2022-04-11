@@ -72,9 +72,10 @@ class EmulateTests {
 
         val data = random.nextInt().toUByte()
         val device = random.nextInt().toUByte()
+        val machine = random.nextDouble()
 
         val inputOutput = mock<InputOutput> {
-            whenever(mock.input(device)).doReturn(data)
+            whenever(mock.input(machine, device)).doReturn(data)
         }
 
         val state = testState(Opcode.INPUT).let {
@@ -86,7 +87,7 @@ class EmulateTests {
             )
         }
 
-        val (result, _) = emulate(state)
+        val (result, _) = emulate(state, machine)
 
         assertEquals(
             state.copy(
@@ -96,7 +97,7 @@ class EmulateTests {
             result
         )
 
-        verify(inputOutput).input(device)
+        verify(inputOutput).input(machine, device)
     }
 
     @Test
@@ -105,9 +106,10 @@ class EmulateTests {
 
         val data = random.nextInt().toUByte()
         val device = random.nextInt().toUByte()
+        val machine = random.nextDouble()
 
         val inputOutput = mock<InputOutput> {
-            whenever(mock.output(device, data)).doReturn(mock)
+            whenever(mock.output(machine, device, data)).doReturn(mock)
         }
 
         val state = testState(Opcode.OUTPUT).let {
@@ -120,7 +122,7 @@ class EmulateTests {
             )
         }
 
-        val (result, _) = emulate(state)
+        val (result, _) = emulate(state, machine)
 
         assertEquals(
             state.copy(
@@ -129,7 +131,7 @@ class EmulateTests {
             result
         )
 
-        verify(inputOutput).output(device, data)
+        verify(inputOutput).output(machine, device, data)
     }
 
     @ParameterizedTest

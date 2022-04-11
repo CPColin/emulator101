@@ -1,3 +1,4 @@
 /.gradle/
 /build/
 /src/test/resources/cpudiag.bin
+/src/main/resources/invaders.*
