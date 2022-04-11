@@ -17,7 +17,7 @@ class CpuDiagnostic {
             initialValues = rom.readBytes(),
             initialValuesOffset = initialProgramCounter.toInt(),
             size = 0x1000
-        ).with(0x0005 to Opcode.RETURN.byte)
+        ).with(0x0005.toUShort() to Opcode.RETURN.byte)
 
         var state = State(
             memory = memory,
@@ -53,11 +53,13 @@ class CpuDiagnostic {
 
                                     address++
                                 }
+
+                                println(output)
                             }
-                            else -> println("System call ${state.registerC} not implemented")
+                            else -> error("System call ${state.registerC} not implemented")
                         }
                     }
-                    else -> println("Jump to handler at ${state.programCounter} not implemented")
+                    else -> error("Jump to handler at ${state.programCounter} not implemented")
                 }
             }
         }

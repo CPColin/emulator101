@@ -25,6 +25,10 @@ data class State(
 
     val registerE: UByte = 0.toUByte(),
 
+    val registerH: UByte = 0.toUByte(),
+
+    val registerL: UByte = 0.toUByte(),
+
     val stackPointer: UShort = 0.toUShort()
 ) {
     val dataByte = memory[programCounter add 1]
@@ -53,7 +57,7 @@ data class State(
 
     val nextProgramCounter = programCounter add opcode.size
 
-    val stackBytes = memory[stackPointer + 2.toUShort()] to memory[stackPointer + 1.toUShort()]
+    val stackBytes = memory[stackPointer add 1] to memory[stackPointer]
 
     val stackWord = stackBytes.let { word(it.first, it.second) }
 

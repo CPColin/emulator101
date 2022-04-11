@@ -1,9 +1,9 @@
 package com.crappycomic.emulator101
 
 data class Memory(
-    private val memory: Map<Int, UByte>,
+    private val memory: Map<UShort, UByte>,
 
-    val size: Int
+    val size: UShort
 ) {
     constructor(
         initialValues: ByteArray,
@@ -11,19 +11,19 @@ data class Memory(
         size: Int
     ) : this(
         memory = initialValues
-            .mapIndexed { index, value -> (index + initialValuesOffset) to value.toUByte() }
-            .filter { it.first < size }
+            .mapIndexed { index, value -> (index + initialValuesOffset).toUShort() to value.toUByte() }
+            .filter { it.first < size.toUShort() }
             .toMap(),
-        size = size
+        size = size.toUShort()
     )
 
-    operator fun get(address: Int) = memory[address] ?: 0.toUByte()
+    operator fun get(address: Int) = get(address.toUShort())
 
-    operator fun get(address: UInt) = get(address.toInt())
+    operator fun get(address: UInt) = get(address.toUShort())
 
-    operator fun get(address: UShort) = get(address.toInt())
+    operator fun get(address: UShort) = memory[address] ?: 0.toUByte()
 
-    fun with(vararg updates: Pair<Int, UByte>): Memory {
+    fun with(vararg updates: Pair<UShort, UByte>): Memory {
         val newMemory = memory.toMutableMap()
 
         updates.forEach { (address, value) ->
