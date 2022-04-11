@@ -139,6 +139,7 @@ fun emulate(state: State, machine: Any? = null): EmulationResult {
         Opcode.MOVE_C_E -> emulateMoveC(State::registerE)
         Opcode.MOVE_C_H -> emulateMoveC(State::registerH)
         Opcode.MOVE_C_L -> emulateMoveC(State::registerL)
+        Opcode.MOVE_C_MEMORY -> ::emulateMoveCMemory
         Opcode.MOVE_D_A -> emulateMoveD(State::registerA)
         Opcode.MOVE_D_B -> emulateMoveD(State::registerB)
         Opcode.MOVE_D_C -> emulateMoveD(State::registerC)
@@ -272,13 +273,12 @@ fun emulateAddImmediate(withCarry: Boolean) = { state: State ->
     val result = left + right + (if (withCarry && state.flagCarry) 1 else 0).toUInt()
     val resultByte = result.toUByte()
 
-    state.copy(
+    state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
         flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter,
         registerA = resultByte
     ) to 7
 }
@@ -291,13 +291,12 @@ fun emulateAddMemory(withCarry: Boolean) = { state: State ->
     val result = left + right + (if (withCarry && state.flagCarry) 1 else 0).toUInt()
     val resultByte = result.toUByte()
 
-    state.copy(
+    state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
         flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter,
         registerA = resultByte
     ) to 7
 }
@@ -309,24 +308,22 @@ fun emulateAddRegister(register: Register, withCarry: Boolean) = { state: State 
     val result = left + right + (if (withCarry && state.flagCarry) 1 else 0).toUInt()
     val resultByte = result.toUByte()
 
-    state.copy(
+    state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
         flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter,
         registerA = resultByte
     ) to 4
 }
 
 fun emulateAndImmediate(state: State) = (state.registerA and state.dataByte).let { result ->
-    state.copy(
+    state.with(
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 7
 }
@@ -334,12 +331,11 @@ fun emulateAndImmediate(state: State) = (state.registerA and state.dataByte).let
 fun emulateAndMemory(state: State) = word(state.registerH, state.registerL).let { address ->
     val result = state.registerA and state.memory[address]
 
-    state.copy(
+    state.with(
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 7
 }
@@ -347,12 +343,11 @@ fun emulateAndMemory(state: State) = word(state.registerH, state.registerL).let 
 fun emulateAndRegister(register: Register) = { state: State ->
     val result = state.registerA and register(state)
 
-    state.copy(
+    state.with(
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 4
 }
@@ -361,7 +356,7 @@ fun emulateCallIf(predicate: (State) -> Boolean) = { state: State ->
     if (predicate(state)) {
         val (returnHigh, returnLow) = bytes(state.nextProgramCounter)
 
-        state.copy(
+        state.with(
             memory = state.memory.with(
                 state.stackPointer sub 1 to returnHigh,
                 state.stackPointer sub 2 to returnLow
@@ -370,7 +365,7 @@ fun emulateCallIf(predicate: (State) -> Boolean) = { state: State ->
             stackPointer = state.stackPointer sub 2
         ) to 17
     } else {
-        state.withNextProgramCounter() to 11
+        state.with() to 11
     }
 }
 
@@ -381,13 +376,12 @@ fun emulateCompareImmediate(state: State): EmulationResult {
     val result = left - right
     val resultByte = result.toUByte()
 
-    return state.copy(
+    return state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
-        flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter
+        flagZero = flagZero(resultByte)
     ) to 7
 }
 
@@ -399,13 +393,12 @@ fun emulateCompareMemory(state: State): EmulationResult {
     val result = left - right
     val resultByte = result.toUByte()
 
-    return state.copy(
+    return state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
-        flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter
+        flagZero = flagZero(resultByte)
     ) to 7
 }
 
@@ -416,26 +409,23 @@ fun emulateCompareRegister(register: Register) = { state: State ->
     val result = left - right
     val resultByte = result.toUByte()
 
-    state.copy(
+    state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
-        flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter
+        flagZero = flagZero(resultByte)
     ) to 4
 }
 
 fun emulateComplementAccumulator(state: State) =
-    state.copy(
-        registerA = state.registerA.inv(),
-        programCounter = state.nextProgramCounter
+    state.with(
+        registerA = state.registerA.inv()
     ) to 4
 
 fun emulateComplementCarry(state: State) =
-    state.copy(
-        flagCarry = !state.flagCarry,
-        programCounter = state.nextProgramCounter
+    state.with(
+        flagCarry = !state.flagCarry
     ) to 4
 
 fun emulateDecimalAdjust(state: State): EmulationResult {
@@ -456,97 +446,89 @@ fun emulateDecimalAdjust(state: State): EmulationResult {
 
     val resultByte = result.toUByte()
 
-    return state.copy(
+    return state.with(
         flagAuxiliaryCarry = auxiliaryCarry,
         flagCarry = carry,
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
         flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter,
         registerA = resultByte
     ) to 4
 }
 
 fun emulateDecrementA(state: State) =
     (state.registerA sub 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerA, (-1).toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerA = result
         ) to 5
     }
 
 fun emulateDecrementB(state: State) =
     (state.registerB sub 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerB, (-1).toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerB = result
         ) to 5
     }
 
 fun emulateDecrementC(state: State) =
     (state.registerC sub 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerC, (-1).toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerC = result
         ) to 5
     }
 
 fun emulateDecrementD(state: State) =
     (state.registerD sub 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerD, (-1).toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerD = result
         ) to 5
     }
 
 fun emulateDecrementE(state: State) =
     (state.registerE sub 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerE, (-1).toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerE = result
         ) to 5
     }
 
 fun emulateDecrementH(state: State) =
     (state.registerH sub 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerH, (-1).toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerH = result
         ) to 5
     }
 
 fun emulateDecrementL(state: State) =
     (state.registerL sub 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerL, (-1).toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerL = result
         ) to 5
     }
@@ -556,15 +538,14 @@ fun emulateDecrementMemory(state: State) =
         val initial = state.memory[address]
         val result = initial sub 1
 
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(initial, (-1).toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
             memory = state.memory.with(
                 address to result
-            ),
-            programCounter = state.nextProgramCounter
+            )
         ) to 10
     }
 
@@ -572,8 +553,7 @@ fun emulateDecrementPairB(state: State) =
     word(state.registerB, state.registerC).let { initial ->
         val (high, low) = bytes(initial sub 1)
 
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerB = high,
             registerC = low
         ) to 5
@@ -583,8 +563,7 @@ fun emulateDecrementPairD(state: State) =
     word(state.registerD, state.registerE).let { initial ->
         val (high, low) = bytes(initial sub 1)
 
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerD = high,
             registerE = low
         ) to 5
@@ -594,23 +573,20 @@ fun emulateDecrementPairH(state: State) =
     word(state.registerH, state.registerL).let { initial ->
         val (high, low) = bytes(initial sub 1)
 
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerH = high,
             registerL = low
         ) to 5
     }
 
 fun emulateDecrementPairStackPointer(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         stackPointer = state.stackPointer sub 1
     ) to 5
 
 fun emulateDisableInterrupts(state: State) =
-    state.copy(
-        interruptsEnabled = false,
-        programCounter = state.nextProgramCounter
+    state.with(
+        interruptsEnabled = false
     ) to 4
 
 fun emulateDoubleAdd(highRegister: Register, lowRegister: Register) = { state: State ->
@@ -618,23 +594,20 @@ fun emulateDoubleAdd(highRegister: Register, lowRegister: Register) = { state: S
         word(state.registerH, state.registerL) + word(highRegister(state), lowRegister(state))
     val (resultHigh, resultLow) = bytes(result.toUShort())
 
-    state.copy(
+    state.with(
         flagCarry = result[UShort.SIZE_BITS],
-        programCounter = state.nextProgramCounter,
         registerH = resultHigh,
         registerL = resultLow
     ) to 10
 }
 
 fun emulateEnableInterrupts(state: State) =
-    state.copy(
-        interruptsEnabled = true,
-        programCounter = state.nextProgramCounter
+    state.with(
+        interruptsEnabled = true
     ) to 4
 
 fun emulateExchangeRegisters(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerD = state.registerH,
         registerE = state.registerL,
         registerH = state.registerD,
@@ -642,102 +615,93 @@ fun emulateExchangeRegisters(state: State) =
     ) to 5
 
 fun emulateExchangeStack(state: State) =
-    state.copy(
+    state.with(
         memory = state.memory.with(
             state.stackPointer add 1 to state.registerH,
             state.stackPointer to state.registerL
         ),
-        programCounter = state.nextProgramCounter,
         registerH = state.memory[state.stackPointer add 1],
         registerL = state.memory[state.stackPointer],
     ) to 18
 
 fun emulateHalt(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         stopped = true
     ) to 7
 
 fun emulateIncrementA(state: State) =
     (state.registerA add 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerA, 1.toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerA = result
         ) to 5
     }
 
 fun emulateIncrementB(state: State) =
     (state.registerB add 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerB, 1.toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerB = result
         ) to 5
     }
 
 fun emulateIncrementC(state: State) =
     (state.registerC add 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerC, 1.toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerC = result
         ) to 5
     }
 
 fun emulateIncrementD(state: State) =
     (state.registerD add 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerD, 1.toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerD = result
         ) to 5
     }
 
 fun emulateIncrementE(state: State) =
     (state.registerE add 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerE, 1.toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerE = result
         ) to 5
     }
 
 fun emulateIncrementH(state: State) =
     (state.registerH add 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerH, 1.toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerH = result
         ) to 5
     }
 
 fun emulateIncrementL(state: State) =
     (state.registerL add 1).let { result ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(state.registerL, 1.toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
-            programCounter = state.nextProgramCounter,
             registerL = result
         ) to 5
     }
@@ -747,15 +711,14 @@ fun emulateIncrementMemory(state: State) =
         val initial = state.memory[address]
         val result = initial add 1
 
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flagAuxiliaryCarry(initial, 1.toUByte(), result),
             flagParity = flagParity(result),
             flagSign = flagSign(result),
             flagZero = flagZero(result),
             memory = state.memory.with(
                 address to result
-            ),
-            programCounter = state.nextProgramCounter
+            )
         ) to 10
     }
 
@@ -763,8 +726,7 @@ fun emulateIncrementPairB(state: State) =
     word(state.registerB, state.registerC).let { initial ->
         val (high, low) = bytes(initial add 1)
 
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerB = high,
             registerC = low
         ) to 5
@@ -774,8 +736,7 @@ fun emulateIncrementPairD(state: State) =
     word(state.registerD, state.registerE).let { initial ->
         val (high, low) = bytes(initial add 1)
 
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerD = high,
             registerE = low
         ) to 5
@@ -785,37 +746,33 @@ fun emulateIncrementPairH(state: State) =
     word(state.registerH, state.registerL).let { initial ->
         val (high, low) = bytes(initial add 1)
 
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerH = high,
             registerL = low
         ) to 5
     }
 
 fun emulateIncrementPairStackPointer(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         stackPointer = state.stackPointer add 1
     ) to 5
 
 fun emulateInput(machine: Any?) = { state: State ->
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerA = state.inputOutput.input(machine, state.dataByte)
     ) to 10
 }
 
 fun emulateJumpIf(predicate: (State) -> Boolean) = { state: State ->
     if (predicate(state)) {
-        state.copy(programCounter = state.dataWord) to 10
+        state.with(programCounter = state.dataWord) to 10
     } else {
-        state.withNextProgramCounter() to 10
+        state.with() to 10
     }
 }
 
 fun emulateLoadAccumulatorDirect(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerA = state.memory[state.dataWord]
     ) to 13
 
@@ -823,23 +780,20 @@ fun emulateLoadAccumulatorRegisters(highRegister: Register, lowRegister: Registe
     { state: State ->
         val address = word(highRegister(state), lowRegister(state))
 
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerA = state.memory[address]
         ) to 7
     }
 
 fun emulateLoadHLDirect(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerH = state.memory[state.dataWord add 1],
         registerL = state.memory[state.dataWord]
     ) to 16
 
 fun emulateLoadPairImmediateB(state: State) =
     state.dataBytes.let { (high, low) ->
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerB = high,
             registerC = low
         ) to 10
@@ -847,8 +801,7 @@ fun emulateLoadPairImmediateB(state: State) =
 
 fun emulateLoadPairImmediateD(state: State) =
     state.dataBytes.let { (high, low) ->
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerD = high,
             registerE = low
         ) to 10
@@ -856,187 +809,166 @@ fun emulateLoadPairImmediateD(state: State) =
 
 fun emulateLoadPairImmediateH(state: State) =
     state.dataBytes.let { (high, low) ->
-        state.copy(
-            programCounter = state.nextProgramCounter,
+        state.with(
             registerH = high,
             registerL = low
         ) to 10
     }
 
 fun emulateLoadPairImmediateStackPointer(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         stackPointer = state.dataWord
     ) to 10
 
 fun emulateLoadProgramCounter(state: State) =
-    state.copy(
+    state.with(
         programCounter = word(state.registerH, state.registerL)
     ) to 5
 
 fun emulateLoadStackPointer(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         stackPointer = word(state.registerH, state.registerL)
     ) to 5
 
 fun emulateMoveA(register: Register) = { state: State ->
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerA = register(state)
     ) to 5
 }
 
 fun emulateMoveAMemory(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerA = state.memory[word(state.registerH, state.registerL)]
     ) to 7
 
 fun emulateMoveB(register: Register) = { state: State ->
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerB = register(state)
     ) to 5
 }
 
 fun emulateMoveBMemory(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerB = state.memory[word(state.registerH, state.registerL)]
     ) to 7
 
 fun emulateMoveC(register: Register) = { state: State ->
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerC = register(state)
     ) to 5
 }
 
+fun emulateMoveCMemory(state: State) =
+    state.with(
+        registerC = state.memory[word(state.registerH, state.registerL)]
+    ) to 7
+
 fun emulateMoveD(register: Register) = { state: State ->
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerD = register(state)
     ) to 5
 }
 
 fun emulateMoveDMemory(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerD = state.memory[word(state.registerH, state.registerL)]
     ) to 7
 
 fun emulateMoveE(register: Register) = { state: State ->
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerE = register(state)
     ) to 5
 }
 
 fun emulateMoveEMemory(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerE = state.memory[word(state.registerH, state.registerL)]
     ) to 7
 
 fun emulateMoveH(register: Register) = { state: State ->
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerH = register(state)
     ) to 5
 }
 
 fun emulateMoveHMemory(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerH = state.memory[word(state.registerH, state.registerL)]
     ) to 7
 
 fun emulateMoveImmediateA(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerA = state.dataByte
     ) to 5
 
 fun emulateMoveImmediateB(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerB = state.dataByte
     ) to 5
 
 fun emulateMoveImmediateC(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerC = state.dataByte
     ) to 5
 
 fun emulateMoveImmediateD(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerD = state.dataByte
     ) to 5
 
 fun emulateMoveImmediateE(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerE = state.dataByte
     ) to 5
 
 fun emulateMoveImmediateH(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerH = state.dataByte
     ) to 5
 
 fun emulateMoveImmediateL(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerL = state.dataByte
     ) to 5
 
 fun emulateMoveImmediateMemory(state: State) =
     word(state.registerH, state.registerL).let { address ->
-        state.copy(
+        state.with(
             memory = state.memory.with(
                 address to state.dataByte
-            ),
-            programCounter = state.nextProgramCounter
+            )
         ) to 10
     }
 
 fun emulateMoveL(register: Register) = { state: State ->
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerL = register(state)
     ) to 5
 }
 
 fun emulateMoveLMemory(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerL = state.memory[word(state.registerH, state.registerL)]
     ) to 7
 
 fun emulateMoveMemoryRegister(register: Register) = { state: State ->
     val address = word(state.registerH, state.registerL)
 
-    state.copy(
+    state.with(
         memory = state.memory.with(
             address to register(state)
-        ),
-        programCounter = state.nextProgramCounter
+        )
     ) to 7
 }
 
-fun emulateNoop(state: State) = state.withNextProgramCounter() to 4
+fun emulateNoop(state: State) = state.with() to 4
 
 fun emulateOrImmediate(state: State) = (state.registerA or state.dataByte).let { result ->
-    state.copy(
+    state.with(
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 7
 }
@@ -1044,12 +976,11 @@ fun emulateOrImmediate(state: State) = (state.registerA or state.dataByte).let {
 fun emulateOrMemory(state: State) = word(state.registerH, state.registerL).let { address ->
     val result = state.registerA or state.memory[address]
 
-    state.copy(
+    state.with(
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 7
 }
@@ -1057,42 +988,37 @@ fun emulateOrMemory(state: State) = word(state.registerH, state.registerL).let {
 fun emulateOrRegister(register: Register) = { state: State ->
     val result = state.registerA or register(state)
 
-    state.copy(
+    state.with(
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 4
 }
 
 fun emulateOutput(machine: Any?) = { state: State ->
-    state.copy(
-        inputOutput = state.inputOutput.output(machine, state.dataByte, state.registerA),
-        programCounter = state.nextProgramCounter
+    state.with(
+        inputOutput = state.inputOutput.output(machine, state.dataByte, state.registerA)
     ) to 10
 }
 
 fun emulatePopB(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerB = state.memory[state.stackPointer add 1],
         registerC = state.memory[state.stackPointer],
         stackPointer = state.stackPointer add 2
     ) to 10
 
 fun emulatePopD(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerD = state.memory[state.stackPointer add 1],
         registerE = state.memory[state.stackPointer],
         stackPointer = state.stackPointer add 2
     ) to 10
 
 fun emulatePopH(state: State) =
-    state.copy(
-        programCounter = state.nextProgramCounter,
+    state.with(
         registerH = state.memory[state.stackPointer add 1],
         registerL = state.memory[state.stackPointer],
         stackPointer = state.stackPointer add 2
@@ -1100,25 +1026,23 @@ fun emulatePopH(state: State) =
 
 fun emulatePopStatus(state: State) =
     state.memory[state.stackPointer].let { flags ->
-        state.copy(
+        state.with(
             flagAuxiliaryCarry = flags[State.FLAG_BIT_AUXILIARY_CARRY],
             flagCarry = flags[State.FLAG_BIT_CARRY],
             flagParity = flags[State.FLAG_BIT_PARITY],
             flagSign = flags[State.FLAG_BIT_SIGN],
             flagZero = flags[State.FLAG_BIT_ZERO],
-            programCounter = state.nextProgramCounter,
             registerA = state.memory[state.stackPointer add 1],
             stackPointer = state.stackPointer add 2
         ) to 10
     }
 
 fun emulatePush(highRegister: Register, lowRegister: Register) = { state: State ->
-    state.copy(
+    state.with(
         memory = state.memory.with(
             state.stackPointer sub 1 to highRegister(state),
             state.stackPointer sub 2 to lowRegister(state)
         ),
-        programCounter = state.nextProgramCounter,
         stackPointer = state.stackPointer sub 2
     ) to 11
 }
@@ -1127,7 +1051,7 @@ fun emulateRestart(index: Int) = { state: State ->
     val address = (index * 8).toUShort()
     val (high, low) = bytes(state.nextProgramCounter)
 
-    state.copy(
+    state.with(
         memory = state.memory.with(
             state.stackPointer sub 1 to high,
             state.stackPointer sub 2 to low
@@ -1139,12 +1063,12 @@ fun emulateRestart(index: Int) = { state: State ->
 
 fun emulateReturnIf(predicate: (State) -> Boolean, cycles: Int = 11) = { state: State ->
     if (predicate(state)) {
-        state.copy(
+        state.with(
             programCounter = state.stackWord,
             stackPointer = state.stackPointer add 2
         ) to cycles
     } else {
-        state.withNextProgramCounter() to 5
+        state.with() to 5
     }
 }
 
@@ -1152,9 +1076,8 @@ fun emulateRotateLeft(state: State): EmulationResult {
     val carry = state.registerA[UByte.SIZE_BITS - 1]
     val result = (state.registerA shl 1).set(0, carry)
 
-    return state.copy(
+    return state.with(
         flagCarry = carry,
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 4
 }
@@ -1163,9 +1086,8 @@ fun emulateRotateLeftThroughCarry(state: State): EmulationResult {
     val carry = state.registerA[UByte.SIZE_BITS - 1]
     val result = (state.registerA shl 1).set(0, state.flagCarry)
 
-    return state.copy(
+    return state.with(
         flagCarry = carry,
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 4
 }
@@ -1174,9 +1096,8 @@ fun emulateRotateRight(state: State): EmulationResult {
     val carry = state.registerA[0]
     val result = (state.registerA shr 1).set(UByte.SIZE_BITS - 1, carry)
 
-    return state.copy(
+    return state.with(
         flagCarry = carry,
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 4
 }
@@ -1185,46 +1106,41 @@ fun emulateRotateRightThroughCarry(state: State): EmulationResult {
     val carry = state.registerA[0]
     val result = (state.registerA shr 1).set(UByte.SIZE_BITS - 1, state.flagCarry)
 
-    return state.copy(
+    return state.with(
         flagCarry = carry,
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 4
 }
 
 fun emulateSetCarry(state: State) =
-    state.copy(
-        flagCarry = true,
-        programCounter = state.nextProgramCounter
+    state.with(
+        flagCarry = true
     ) to 4
 
 fun emulateStoreAccumulatorDirect(state: State) =
-    state.copy(
+    state.with(
         memory = state.memory.with(
             state.dataWord to state.registerA
-        ),
-        programCounter = state.nextProgramCounter
+        )
     ) to 13
 
 fun emulateStoreAccumulatorRegisters(highRegister: Register, lowRegister: Register) =
     { state: State ->
         val address = word(highRegister(state), lowRegister(state))
 
-        state.copy(
+        state.with(
             memory = state.memory.with(
                 address to state.registerA
-            ),
-            programCounter = state.nextProgramCounter
+            )
         ) to 7
     }
 
 fun emulateStoreHLDirect(state: State) =
-    state.copy(
+    state.with(
         memory = state.memory.with(
             state.dataWord add 1 to state.registerH,
             state.dataWord to state.registerL
-        ),
-        programCounter = state.nextProgramCounter
+        )
     ) to 16
 
 fun emulateSubtractImmediate(withBorrow: Boolean) = { state: State ->
@@ -1234,13 +1150,12 @@ fun emulateSubtractImmediate(withBorrow: Boolean) = { state: State ->
     val result = left - right - (if (withBorrow && state.flagCarry) 1 else 0).toUInt()
     val resultByte = result.toUByte()
 
-    state.copy(
+    state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
         flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter,
         registerA = resultByte
     ) to 7
 }
@@ -1253,13 +1168,12 @@ fun emulateSubtractMemory(withBorrow: Boolean) = { state: State ->
     val result = left - right - (if (withBorrow && state.flagCarry) 1 else 0).toUInt()
     val resultByte = result.toUByte()
 
-    state.copy(
+    state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
         flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter,
         registerA = resultByte
     ) to 7
 }
@@ -1271,24 +1185,22 @@ fun emulateSubtractRegister(register: Register, withBorrow: Boolean) = { state: 
     val result = left - right - (if (withBorrow && state.flagCarry) 1 else 0).toUInt()
     val resultByte = result.toUByte()
 
-    state.copy(
+    state.with(
         flagAuxiliaryCarry = flagAuxiliaryCarry(left, right, resultByte),
         flagCarry = flagCarry(result),
         flagParity = flagParity(resultByte),
         flagSign = flagSign(resultByte),
         flagZero = flagZero(resultByte),
-        programCounter = state.nextProgramCounter,
         registerA = resultByte
     ) to 7
 }
 
 fun emulateXorImmediate(state: State) = (state.registerA xor state.dataByte).let { result ->
-    state.copy(
+    state.with(
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 7
 }
@@ -1296,12 +1208,11 @@ fun emulateXorImmediate(state: State) = (state.registerA xor state.dataByte).let
 fun emulateXorMemory(state: State) = word(state.registerH, state.registerL).let { address ->
     val result = state.registerA xor state.memory[address]
 
-    state.copy(
+    state.with(
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 7
 }
@@ -1309,13 +1220,12 @@ fun emulateXorMemory(state: State) = word(state.registerH, state.registerL).let 
 fun emulateXorRegister(register: Register) = { state: State ->
     val result = state.registerA xor register(state)
 
-    state.copy(
+    state.with(
         flagAuxiliaryCarry = false,
         flagCarry = false,
         flagParity = flagParity(result),
         flagSign = flagSign(result),
         flagZero = flagZero(result),
-        programCounter = state.nextProgramCounter,
         registerA = result
     ) to 4
 }

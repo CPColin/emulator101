@@ -3,6 +3,7 @@ package com.crappycomic.emulator101.invaders
 import com.crappycomic.emulator101.Memory
 import com.crappycomic.emulator101.Opcode
 import com.crappycomic.emulator101.State
+import com.crappycomic.emulator101.disassemble
 import com.crappycomic.emulator101.emulate
 import com.crappycomic.emulator101.interrupts
 import java.awt.event.KeyAdapter
@@ -11,7 +12,7 @@ import java.util.Timer
 import java.util.TimerTask
 import javax.swing.JFrame
 
-class Invaders() {
+class Invaders {
     private val cabinet = InvadersCabinet()
 
     private var state: State
@@ -76,7 +77,7 @@ class Invaders() {
                 }
 
                 if (interrupt is Opcode) {
-                    state = state.copy(interrupt = interrupt)
+                    state = state.withInterrupt(interrupt)
                 }
             } else {
                 if (state.stopped) {

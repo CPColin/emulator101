@@ -7,6 +7,6 @@ import java.util.concurrent.ArrayBlockingQueue
  *
  * The 8080 CPU supports up to two bytes of data, but Invaders doesn't use it, so we'll skip it.
  * If we support data bytes later, this queue should change to hold a class that encapsulates the
- * opcode plus the optional data.
+ * opcode plus the optional data. [State.dataBytes] will also need to be updated.
  */
 val interrupts = ArrayBlockingQueue<Opcode>(1)

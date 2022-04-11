@@ -28,7 +28,7 @@ class EmulateTests {
         val (result, _) = emulate(state)
 
         assertEquals(
-            state.copy(
+            state.with(
                 interruptsEnabled = false,
                 programCounter = state.programCounter add 1
             ),
@@ -38,12 +38,12 @@ class EmulateTests {
 
     @Test
     fun enableInterrupts() {
-        val state = testState(Opcode.ENABLE_INTERRUPTS).copy(interruptsEnabled = true)
+        val state = testState(Opcode.ENABLE_INTERRUPTS).with(interruptsEnabled = true)
 
         val (result, _) = emulate(state)
 
         assertEquals(
-            state.copy(
+            state.with(
                 interruptsEnabled = true,
                 programCounter = state.programCounter add 1
             ),
@@ -58,7 +58,7 @@ class EmulateTests {
         val (result, _) = emulate(state)
 
         assertEquals(
-            state.copy(
+            state.with(
                 programCounter = state.programCounter add 1,
                 stopped = true
             ),
@@ -79,18 +79,19 @@ class EmulateTests {
         }
 
         val state = testState(Opcode.INPUT).let {
-            it.copy(
+            it.with(
                 inputOutput = inputOutput,
                 memory = it.memory.with(
                     1.toUShort() to device
-                )
+                ),
+                programCounter = it.programCounter
             )
         }
 
         val (result, _) = emulate(state, machine)
 
         assertEquals(
-            state.copy(
+            state.with(
                 programCounter = state.programCounter add 2,
                 registerA = data
             ),
@@ -113,11 +114,12 @@ class EmulateTests {
         }
 
         val state = testState(Opcode.OUTPUT).let {
-            it.copy(
+            it.with(
                 inputOutput = inputOutput,
                 memory = it.memory.with(
                     1.toUShort() to device
                 ),
+                programCounter = it.programCounter,
                 registerA = data
             )
         }
@@ -125,7 +127,7 @@ class EmulateTests {
         val (result, _) = emulate(state, machine)
 
         assertEquals(
-            state.copy(
+            state.with(
                 programCounter = state.programCounter add 2
             ),
             result
@@ -145,7 +147,7 @@ class EmulateTests {
         val (result, _) = emulate(state)
 
         assertEquals(
-            state.copy(
+            state.with(
                 memory = state.memory.with(
                     state.stackPointer sub 1 to high,
                     state.stackPointer sub 2 to low

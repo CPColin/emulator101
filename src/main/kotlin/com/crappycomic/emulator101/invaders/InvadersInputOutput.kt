@@ -33,7 +33,7 @@ data class InvadersInputOutput(
             3 -> {
                 val shiftWord = word(shiftHigh, shiftLow)
 
-                (shiftWord shr 8 - shiftOffset).toUByte()
+                (shiftWord shr (8 - shiftOffset)).toUByte()
             }
             else -> 0.toUByte()
         }
