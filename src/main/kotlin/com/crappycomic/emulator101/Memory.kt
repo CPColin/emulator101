@@ -1,7 +1,7 @@
 package com.crappycomic.emulator101
 
 data class Memory(
-    private val memory: Map<UShort, UByte>,
+    private val memory: ByteArray,
 
     val size: Int
 ) {
@@ -10,37 +10,36 @@ data class Memory(
         initialValuesOffset: Int = 0,
         size: Int
     ) : this(
-        memory = initialValues
-            .mapIndexed { index, value -> (index + initialValuesOffset).toUShort() to value.toUByte() }
-            .filter { it.first.toInt() < size }
-            .toMap(),
+        memory = ByteArray(size).apply { initialValues.copyInto(this, initialValuesOffset) },
         size = size
     )
 
     fun copyTo(destination: ByteArray, sourceOffset: UShort) {
-        val addressRange = sourceOffset until (sourceOffset add destination.size)
+        val start = sourceOffset.toInt()
+        val end = start + destination.size
 
-        addressRange.forEachIndexed { index, address ->
-            destination[index] = get(address).toByte()
-        }
+        memory.copyInto(destination, 0, start, end)
     }
 
-    operator fun get(address: Int) = get(address.toUShort())
+    override fun equals(other: Any?) =
+        other is Memory &&
+            memory.contentEquals(other.memory) &&
+            size == other.size
 
-    operator fun get(address: UInt) = get(address.toUShort())
+    operator fun get(address: Int) = memory[address].toUByte()
 
-    operator fun get(address: UShort) = memory[address] ?: DEFAULT_VALUE
+    operator fun get(address: UInt) = get(address.toInt())
+
+    operator fun get(address: UShort) = get(address.toInt())
+
+    override fun hashCode() = memory.contentHashCode() * 31 + size
 
     fun with(vararg updates: Pair<UShort, UByte>): Memory {
-        val newMemory = memory.toMutableMap()
+        val newMemory = memory.copyOf()
 
         updates.forEach { (address, value) ->
             if (address.toInt() < size) {
-                if (value == DEFAULT_VALUE) {
-                    newMemory.remove(address)
-                } else {
-                    newMemory[address] = value
-                }
+                newMemory[address.toInt()] = value.toByte()
             }
         }
 
@@ -48,9 +47,5 @@ data class Memory(
             memory = newMemory,
             size = size
         )
-    }
-
-    companion object {
-        val DEFAULT_VALUE = 0.toUByte()
     }
 }
