@@ -19,6 +19,7 @@ class Invaders {
 
     init {
         state = State(
+            inputOutput = InvadersInputOutput(),
             memory = Memory(
                 initialValues = loadRom(),
                 size = 0x10000
