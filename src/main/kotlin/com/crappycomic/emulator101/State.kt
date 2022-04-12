@@ -1,7 +1,5 @@
 package com.crappycomic.emulator101
 
-import java.util.Objects
-
 /**
  * Represents the state of the 8080 CPU and its connected [InputOutput] hardware.
  */
