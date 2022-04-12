@@ -9,4 +9,4 @@ Obtain `cpudiag.bin` from its mirror [here](http://www.emulator101.com/files/cpu
 
 ## Running Invaders
 
-Obtain `invaders.e` through `invaders.h` from one of many sources, then run the `Main` class.
+Obtain `invaders.e` through `invaders.h` from one of many sources, place them in the `src/main/resources` directory, and run the `Main` class.
