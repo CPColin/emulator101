@@ -2,3 +2,4 @@
 /build/
 /src/test/resources/cpudiag.bin
 /src/main/resources/invaders.*
+/src/main/resources/*.wav
