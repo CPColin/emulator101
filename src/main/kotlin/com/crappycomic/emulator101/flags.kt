@@ -34,7 +34,7 @@ fun flagAuxiliaryCarry(left: UByte, right: UByte, result: UByte): Boolean {
     return if (leftBit == rightBit) resultBit else !resultBit
 }
 
-fun flagCarry(int: UInt) = int[8]
+fun flagCarry(int: UInt) = int[UByte.SIZE_BITS]
 
 fun flagParity(byte: UByte) = byte.countOneBits() % 2 == 0
 
